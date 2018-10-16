@@ -44,8 +44,8 @@ public class TestCaseOfCDCSource {
     private AtomicBoolean eventArrived = new AtomicBoolean(false);
     private int waitTime = 50;
     private int timeout = 10000;
-    private String username = "root";
-    private String password = "1234";
+    private String username = "";
+    private String password = "";
     private String jdbcDriverName = "com.mysql.jdbc.Driver";
     private String databaseURL = "jdbc:mysql://localhost:3306/SimpleDB";
     private String tableName = "login";
