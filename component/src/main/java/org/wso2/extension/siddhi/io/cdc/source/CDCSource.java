@@ -182,7 +182,7 @@ public class CDCSource extends Source {
         //initialize optional parameters
         int serverID;
         serverID = Integer.parseInt(optionHolder.validateAndGetStaticValue(CDCSourceConstants.DATABASE_SERVER_ID,
-                "-1"));
+                Integer.toString(CDCSourceConstants.DEFAULT_SERVER_ID)));
 
         String serverName;
         serverName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.DATABASE_SERVER_NAME,
@@ -217,8 +217,10 @@ public class CDCSource extends Source {
                     this.hashCode());
             changeDataCapture.setConfig(configMap);
         } catch (WrongConfigurationException ex) {
-            throw new SiddhiAppCreationException("The cdc source couldn't get started. Invalid" +
-                    " configuration parameters.", ex);
+            throw new SiddhiAppCreationException("The cdc source couldn't get started because of invalid" +
+                    " configurations. Found configurations: {username='" + username + "', password=******," +
+                    " url='" + url + "', tablename='" + tableName + "'," +
+                    " connetorProperties='" + connectorProperties + "'}", ex);
         }
     }
 
@@ -292,7 +294,7 @@ public class CDCSource extends Source {
     @Override
     public Map<String, Object> currentState() {
         Map<String, Object> currentState = new HashMap<>();
-        currentState.put("cacheObj", offsetData);
+        currentState.put(CDCSourceConstants.CACHE_OBJECT, offsetData);
         return currentState;
     }
 
@@ -305,7 +307,7 @@ public class CDCSource extends Source {
      */
     @Override
     public void restoreState(Map<String, Object> map) {
-        Object cacheObj = map.get("cacheObj");
+        Object cacheObj = map.get(CDCSourceConstants.CACHE_OBJECT);
         this.offsetData = (HashMap<byte[], byte[]>) cacheObj;
     }
 
@@ -313,7 +315,7 @@ public class CDCSource extends Source {
         try {
             Thread.sleep(50);
         } catch (InterruptedException e) {
-            log.error(e);
+            log.error("Offset data retrieval failed.", e);
         }
         return offsetData;
     }

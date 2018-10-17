@@ -122,11 +122,6 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.wso2.carbon.maven</groupId>
-                <artifactId>carbon-feature-plugin</artifactId>
-                <version>${carbon.feature.plugin.version}</version>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
                 <configuration>
@@ -154,7 +149,6 @@
         <carbon.transport.version>4.4.15</carbon.transport.version>
         <siddhi-map-keyvalue.version>1.0.13</siddhi-map-keyvalue.version>
         <jacoco.plugin.version>0.7.9</jacoco.plugin.version>
-        <carbon.feature.plugin.version>3.0.0</carbon.feature.plugin.version>
         <mysql-binlog-connector-java.version>0.13.0</mysql-binlog-connector-java.version>
         <debezium-connector-mysql.version>0.8.3.Final</debezium-connector-mysql.version>
         <debezium-embedded.version>0.8.3.Final</debezium-embedded.version>

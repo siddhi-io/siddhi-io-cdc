@@ -44,20 +44,17 @@ public class CDCSourceUtil {
             throws WrongConfigurationException {
 
         Map<String, Object> configMap = new HashMap<>();
-
         String host;
         int port;
         String database;
 
         //Add schema specific details to configMap
-
         String[] splittedURL = url.split(":");
         if (!splittedURL[0].equalsIgnoreCase("jdbc")) {
-            throw new WrongConfigurationException("Invalid JDBC url: " + url);
+            throw new WrongConfigurationException("Invalid JDBC url: " + url + " for cdc source");
         } else {
             switch (splittedURL[1]) {
                 case "mysql": {
-
                     //Extract url details
                     String regex = "jdbc:mysql://(\\w*|[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}):" +
                             "(\\d++)/(\\w*)";
@@ -69,7 +66,7 @@ public class CDCSourceUtil {
                         database = matcher.group(3);
 
                     } else {
-                        throw new WrongConfigurationException("Invalid JDBC url: " + url);
+                        throw new WrongConfigurationException("Invalid JDBC url: " + url + " for cdc source");
                     }
 
                     //Add extracted url details to configMap.
@@ -86,14 +83,13 @@ public class CDCSourceUtil {
                     throw new WrongConfigurationException("Unsupported schema. Expected schema: mysql, Found: "
                             + splittedURL[1]);
                 }
-
             }
 
             //Add general config details to configMap
             configMap.put(CDCSourceConstants.DATABASE_USER, username);
             configMap.put(CDCSourceConstants.DATABASE_PASSWORD, password);
 
-            if (serverID == -1) {
+            if (serverID == CDCSourceConstants.DEFAULT_SERVER_ID) {
                 Random random = new Random();
                 configMap.put(CDCSourceConstants.SERVER_ID, random.nextInt(1001) + 5400);
             } else {
@@ -111,8 +107,7 @@ public class CDCSourceUtil {
             configMap.put(CDCSourceConstants.CDC_SOURCE_OBJECT, cdcSourceHashCode);
 
             //set history file path.
-            configMap.put(CDCSourceConstants.DATABASE_HISTORY,
-                    CDCSourceConstants.DATABASE_HISTORY_FILEBASE_HISTORY);
+            configMap.put(CDCSourceConstants.DATABASE_HISTORY, CDCSourceConstants.DATABASE_HISTORY_FILEBASE_HISTORY);
             configMap.put(CDCSourceConstants.DATABASE_HISTORY_FILE_NAME,
                     historyFileDirectory + siddhiStreamName + ".dat");
 
@@ -123,7 +118,6 @@ public class CDCSourceUtil {
             for (Map.Entry<String, String> entry : getConnectorPropertiesMap(connectorProperties).entrySet()) {
                 configMap.put(entry.getKey(), entry.getValue());
             }
-
             return configMap;
         }
     }
@@ -136,15 +130,12 @@ public class CDCSourceUtil {
             String[] keyValuePairs = connectorProperties.split(",");
             for (String keyValuePair : keyValuePairs) {
                 String[] keyAndValue = keyValuePair.split("=");
-                try {
-                    connectorPropertiesMap.put(keyAndValue[0].trim(), keyAndValue[1].trim());
-                } catch (ArrayIndexOutOfBoundsException ex) {
+                if (keyAndValue.length != 2) {
                     throw new SiddhiAppValidationException("connector.properties input is invalid. Check near :" +
                             keyValuePair);
                 }
             }
         }
-
         return connectorPropertiesMap;
     }
 
@@ -217,7 +208,6 @@ public class CDCSourceUtil {
                     break;
             }
         }
-
         return detailsMap;
     }
 
@@ -231,7 +221,6 @@ public class CDCSourceUtil {
         if (path == null) {
             path = System.getProperty("user.dir");
         }
-
         return path;
     }
 }

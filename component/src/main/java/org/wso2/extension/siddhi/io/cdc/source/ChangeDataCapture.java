@@ -56,7 +56,6 @@ class ChangeDataCapture {
         for (Map.Entry<String, Object> entry : configMap.entrySet()) {
             config = config.edit().with(entry.getKey(), entry.getValue()).build();
         }
-
     }
 
     /**

@@ -49,4 +49,6 @@ public class CDCSourceConstants {
     public static final String DATABASE_HISTORY = "database.history";
     public static final String MYSQL_CONNECTOR_CLASS = "io.debezium.connector.mysql.MySqlConnector";
     public static final String BEFORE_PREFIX = "before_";
+    public static final String CACHE_OBJECT = "cacheObj";
+    public static final int DEFAULT_SERVER_ID = -1;
 }

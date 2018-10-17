@@ -44,8 +44,8 @@ public class TestCaseOfCDCSource {
     private AtomicBoolean eventArrived = new AtomicBoolean(false);
     private int waitTime = 50;
     private int timeout = 10000;
-    private String username = "";
-    private String password = "";
+    private String username = "root";
+    private String password = "1234";
     private String jdbcDriverName = "com.mysql.jdbc.Driver";
     private String databaseURL = "jdbc:mysql://localhost:3306/SimpleDB";
     private String tableName = "login";
@@ -85,7 +85,6 @@ public class TestCaseOfCDCSource {
                 "from istm#log() " +
                 "select *  " +
                 "insert into outputStream;");
-
 
         SiddhiAppRuntime cdcAppRuntime = siddhiManager.createSiddhiAppRuntime(cdcinStreamDefinition +
                 cdcquery);
@@ -130,7 +129,6 @@ public class TestCaseOfCDCSource {
         log.info("Siddhi app restarted. Waiting for events...");
 
         //starting RDBMS store.
-
         String rdbmsStoreDefinition = "define stream insertionStream (id string, name string);" +
                 "@Store(type='rdbms', jdbc.url='" + databaseURL + "'," +
                 " username='" + username + "', password='" + password + "' ," +
@@ -189,7 +187,6 @@ public class TestCaseOfCDCSource {
                 "from istm#log() " +
                 "select *  " +
                 "insert into outputStream;");
-
 
         SiddhiAppRuntime cdcAppRuntime = siddhiManager.createSiddhiAppRuntime(cdcinStreamDefinition +
                 cdcquery);
@@ -292,7 +289,6 @@ public class TestCaseOfCDCSource {
                 "select *  " +
                 "insert into outputStream;");
 
-
         SiddhiAppRuntime cdcAppRuntime = siddhiManager.createSiddhiAppRuntime(cdcinStreamDefinition +
                 cdcquery);
 
@@ -336,7 +332,6 @@ public class TestCaseOfCDCSource {
         log.info("Siddhi app restarted. Waiting for events...");
 
         //starting RDBMS store.
-
         String rdbmsStoreDefinition = "define stream UpdateStream (id string, name string);" +
                 "@Store(type='rdbms', jdbc.url='" + databaseURL + "'," +
                 " username='" + username + "', password='" + password + "' ," +
@@ -390,7 +385,6 @@ public class TestCaseOfCDCSource {
                 "select *  " +
                 "insert into outputStream;");
 
-
         try {
             SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
                     query);
@@ -411,7 +405,5 @@ public class TestCaseOfCDCSource {
                             " 'insert', 'update' or 'delete'",
                     valEx.getMessageWithOutContext());
         }
-
-
     }
 }
