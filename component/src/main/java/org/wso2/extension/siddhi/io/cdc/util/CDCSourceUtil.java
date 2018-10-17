@@ -165,43 +165,46 @@ public class CDCSourceUtil {
         }
 
         //match the change data's operation with user specifying operation and proceed.
-        if (operation.equalsIgnoreCase(CDCSourceConstants.INSERT) && op.equals("c")
-                || operation.equalsIgnoreCase(CDCSourceConstants.DELETE) && op.equals("d")
-                || operation.equalsIgnoreCase(CDCSourceConstants.UPDATE) && op.equals("u")) {
+        if (operation.equalsIgnoreCase(CDCSourceConstants.INSERT) &&
+                op.equals(CDCSourceConstants.CONNECT_RECORD_INSERT_OPERATION)
+                || operation.equalsIgnoreCase(CDCSourceConstants.DELETE) &&
+                op.equals(CDCSourceConstants.CONNECT_RECORD_DELETE_OPERATION)
+                || operation.equalsIgnoreCase(CDCSourceConstants.UPDATE) &&
+                op.equals(CDCSourceConstants.CONNECT_RECORD_UPDATE_OPERATION)) {
 
             Struct rawDetails;
             List<Field> fields;
             String fieldName;
 
             switch (op) {
-                case "c":
+                case CDCSourceConstants.CONNECT_RECORD_INSERT_OPERATION:
                     //append row details after insert.
-                    rawDetails = (Struct) record.get("after");
+                    rawDetails = (Struct) record.get(CDCSourceConstants.AFTER);
                     fields = rawDetails.schema().fields();
                     for (Field key : fields) {
                         fieldName = key.name();
                         detailsMap.put(fieldName, rawDetails.get(fieldName));
                     }
                     break;
-                case "d":
+                case CDCSourceConstants.CONNECT_RECORD_DELETE_OPERATION:
                     //append row details before delete.
-                    rawDetails = (Struct) record.get("before");
+                    rawDetails = (Struct) record.get(CDCSourceConstants.BEFORE);
                     fields = rawDetails.schema().fields();
                     for (Field key : fields) {
                         fieldName = key.name();
                         detailsMap.put(CDCSourceConstants.BEFORE_PREFIX + fieldName, rawDetails.get(fieldName));
                     }
                     break;
-                case "u":
+                case CDCSourceConstants.CONNECT_RECORD_UPDATE_OPERATION:
                     //append row details before update.
-                    rawDetails = (Struct) record.get("before");
+                    rawDetails = (Struct) record.get(CDCSourceConstants.BEFORE);
                     fields = rawDetails.schema().fields();
                     for (Field key : fields) {
                         fieldName = key.name();
                         detailsMap.put(CDCSourceConstants.BEFORE_PREFIX + fieldName, rawDetails.get(fieldName));
                     }
                     //append row details after update.
-                    rawDetails = (Struct) record.get("after");
+                    rawDetails = (Struct) record.get(CDCSourceConstants.AFTER);
                     fields = rawDetails.schema().fields();
                     for (Field key : fields) {
                         fieldName = key.name();
@@ -218,10 +221,10 @@ public class CDCSourceUtil {
      * if carbon.home is not set, return the current project path. (for test cases and for use as a java library)
      */
     public static String getCarbonHome() {
-        String path = System.getProperty("carbon.home");
+        String path = System.getProperty(CDCSourceConstants.CARBON_HOME);
 
         if (path == null) {
-            path = System.getProperty("user.dir");
+            path = System.getProperty(CDCSourceConstants.USER_DIRECTORY);
         }
         return path;
     }

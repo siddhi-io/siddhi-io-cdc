@@ -51,4 +51,11 @@ public class CDCSourceConstants {
     public static final String BEFORE_PREFIX = "before_";
     public static final String CACHE_OBJECT = "cacheObj";
     public static final int DEFAULT_SERVER_ID = -1;
+    public static final String CONNECT_RECORD_INSERT_OPERATION = "c";
+    public static final String CONNECT_RECORD_UPDATE_OPERATION = "u";
+    public static final String CONNECT_RECORD_DELETE_OPERATION = "d";
+    public static final String BEFORE = "before";
+    public static final String AFTER = "after";
+    public static final String CARBON_HOME = "carbon.home";
+    public static final String USER_DIRECTORY = "user.dir";
 }
