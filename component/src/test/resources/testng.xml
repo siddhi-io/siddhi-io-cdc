@@ -21,9 +21,11 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
 <suite name="Siddhi-Io-Cdc-Test-Suite">
-    <test name="Siddhi-io-cdc-tests" enabled="false" preserve-order="true" parallel="false">
+    <!--Removed the following test:"Siddhi-io-cdc-tests"; since it depends on the local MySQL instance.
+    Uncomment the following test to run with build.-->
+    <!--<test name="Siddhi-io-cdc-tests" enabled="true" preserve-order="true" parallel="false">
         <classes>
             <class name="org.wso2.extension.siddhi.io.cdc.source.TestCaseOfCDCSource"/>
         </classes>
-    </test>
+    </test>-->
 </suite>
