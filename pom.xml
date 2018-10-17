@@ -156,4 +156,10 @@
         <org.testng.version>6.11</org.testng.version>
         <siddhi-store-rdbms.version>4.0.39</siddhi-store-rdbms.version>
     </properties>
+    <scm>
+        <url>https://github.com/wso2-extensions/siddhi-io-cdc.git</url>
+        <developerConnection>scm:git:https://github.com/wso2-extensions/siddhi-io-cdc.git</developerConnection>
+        <connection>scm:git:https://github.com/wso2-extensions/siddhi-io-cdc.git</connection>
+        <tag>HEAD</tag>
+    </scm>
 </project>
