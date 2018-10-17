@@ -154,17 +154,6 @@ public class CDCSource extends Source {
     private CDCSourceObjectKeeper cdcSourceObjectKeeper = CDCSourceObjectKeeper.getCdcSourceObjectKeeper();
     private String carbonHome;
 
-    /**
-     * The initialization method for {@link Source}, will be called before other methods. It used to validate
-     * all configurations and to get initial values.
-     *
-     * @param sourceEventListener After receiving events, the source should trigger onEvent() of this listener.
-     *                            Listener will then pass on the events to the appropriate mappers for processing .
-     * @param optionHolder        Option holder containing static configuration related to the {@link Source}
-     * @param configReader        ConfigReader is used to read the {@link Source} related system configuration.
-     * @param siddhiAppContext    The context of the {@link org.wso2.siddhi.query.api.SiddhiApp} used to get Siddhi
-     *                            related utility functions.
-     */
     @Override
     public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
                      String[] requestedTransportPropertyNames, ConfigReader configReader,
@@ -224,20 +213,11 @@ public class CDCSource extends Source {
         }
     }
 
-    /**
-     * Returns the list of classes which this source can output.
-     *
-     * @return Array of classes that will be output by the source.
-     * Null or empty array if it can produce any type of class.
-     */
     @Override
     public Class[] getOutputEventClasses() {
         return new Class[]{Map.class};
     }
 
-    /**
-     * Initially Called to connect to the debezium embedded engine to receive change data events asynchronously.
-     */
     @Override
     public void connect(ConnectionCallback connectionCallback) throws ConnectionUnavailableException {
         //keep the object reference in Object keeper
@@ -250,16 +230,10 @@ public class CDCSource extends Source {
         }
     }
 
-    /**
-     * This method can be called when it is needed to disconnect from the end point.
-     */
     @Override
     public void disconnect() {
     }
 
-    /**
-     * Called at the end to clean all the resources consumed by the {@link Source}
-     */
     @Override
     public void destroy() {
         //Remove this CDCSource object from the CDCObjectKeeper.
@@ -269,28 +243,16 @@ public class CDCSource extends Source {
         executorService.shutdown();
     }
 
-    /**
-     * Called to pause event consumption
-     */
     @Override
     public void pause() {
         changeDataCapture.pause();
     }
 
-    /**
-     * Called to resume event consumption
-     */
     @Override
     public void resume() {
         changeDataCapture.resume();
     }
 
-    /**
-     * Used to collect the serializable state of the processing element, that need to be
-     * persisted for the reconstructing the element to the same state on a different point of time
-     *
-     * @return stateful objects of the processing element as a map
-     */
     @Override
     public Map<String, Object> currentState() {
         Map<String, Object> currentState = new HashMap<>();
@@ -298,13 +260,6 @@ public class CDCSource extends Source {
         return currentState;
     }
 
-    /**
-     * Used to restore serialized state of the processing element, for reconstructing
-     * the element to the same state as if was on a previous point of time.
-     *
-     * @param map the stateful objects of the processing element as a map.
-     *            This map will have the  same keys that is created upon calling currentState() method.
-     */
     @Override
     public void restoreState(Map<String, Object> map) {
         Object cacheObj = map.get(CDCSourceConstants.CACHE_OBJECT);
@@ -319,7 +274,6 @@ public class CDCSource extends Source {
         }
         return offsetData;
     }
-
 
     void setOffsetData(Map<byte[], byte[]> offsetData) {
         this.offsetData = offsetData;
