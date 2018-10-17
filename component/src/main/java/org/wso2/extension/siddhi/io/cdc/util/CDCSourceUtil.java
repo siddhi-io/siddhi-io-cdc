@@ -51,7 +51,8 @@ public class CDCSourceUtil {
         //Add schema specific details to configMap
         String[] splittedURL = url.split(":");
         if (!splittedURL[0].equalsIgnoreCase("jdbc")) {
-            throw new WrongConfigurationException("Invalid JDBC url: " + url + " for cdc source");
+            throw new WrongConfigurationException("Invalid JDBC url: " + url + " received for stream: " +
+                    siddhiStreamName + ". Expected url format: jdbc:mysql://<host>:<port>/<database_name>");
         } else {
             switch (splittedURL[1]) {
                 case "mysql": {
@@ -66,7 +67,8 @@ public class CDCSourceUtil {
                         database = matcher.group(3);
 
                     } else {
-                        throw new WrongConfigurationException("Invalid JDBC url: " + url + " for cdc source");
+                        throw new WrongConfigurationException("Invalid JDBC url: " + url + " received for stream: " +
+                                siddhiStreamName + ". Expected url format: jdbc:mysql://<host>:<port>/<database_name>");
                     }
 
                     //Add extracted url details to configMap.
