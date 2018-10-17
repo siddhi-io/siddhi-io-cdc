@@ -18,7 +18,6 @@
 
 package org.wso2.extension.siddhi.io.cdc.source;
 
-import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.kafka.connect.runtime.WorkerConfig;
 import org.apache.kafka.connect.storage.MemoryOffsetBackingStore;
 import org.slf4j.Logger;
@@ -67,7 +66,7 @@ public class InMemoryOffsetBackingStore extends MemoryOffsetBackingStore {
                 this.data.put(key, value);
             }
         } catch (Exception ex) {
-            log.error("error loading the in-memory offsets.", ex);
+            log.error("Error loading the in-memory offsets.", ex);
         }
     }
 
@@ -90,7 +89,7 @@ public class InMemoryOffsetBackingStore extends MemoryOffsetBackingStore {
             }
             cdcSource.setOffsetData(inMemoryOffsetCache);
         } catch (Exception ex) {
-            throw new ConnectException(ex);
+            log.error("Error loading the in-memory offsets.", ex);
         }
     }
 }
