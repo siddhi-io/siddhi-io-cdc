@@ -23,6 +23,7 @@ import io.debezium.embedded.EmbeddedEngine;
 import io.debezium.embedded.spi.OffsetCommitPolicy;
 import org.apache.kafka.connect.connector.ConnectRecord;
 import org.wso2.extension.siddhi.io.cdc.util.CDCSourceUtil;
+import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 
 import java.util.Map;
@@ -63,15 +64,17 @@ class ChangeDataCapture {
      *
      * @return engine.
      */
-    EmbeddedEngine getEngine() throws NullPointerException {
-        // Create an engine with above set configuration ...
-        EmbeddedEngine engine = EmbeddedEngine.create()
+    EmbeddedEngine getEngine() {
+        // Create and return Engine with above set configuration ...
+        EmbeddedEngine.Builder builder = EmbeddedEngine.create()
                 .using(OffsetCommitPolicy.always())
-                .using(config)
-                .notifying(this::handleEvent)
-                .build();
-
-        return engine;
+                .using(config);
+        if (builder == null) {
+            throw new SiddhiAppRuntimeException("CDC Engine create failed. Check parameters.");
+        } else {
+            EmbeddedEngine engine = builder.notifying(this::handleEvent).build();
+            return engine;
+        }
     }
 
     void pause() {

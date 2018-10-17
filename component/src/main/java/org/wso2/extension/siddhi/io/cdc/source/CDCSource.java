@@ -18,6 +18,7 @@
 
 package org.wso2.extension.siddhi.io.cdc.source;
 
+import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.log4j.Logger;
 import org.wso2.extension.siddhi.io.cdc.util.CDCSourceConstants;
 import org.wso2.extension.siddhi.io.cdc.util.CDCSourceUtil;
@@ -225,7 +226,7 @@ public class CDCSource extends Source {
 
         try {
             executorService.execute(changeDataCapture.getEngine());
-        } catch (NullPointerException ex) {
+        } catch (ConnectException ex) {
             throw new ConnectionUnavailableException("Connection is unavailable. Check parameters.", ex);
         }
     }
