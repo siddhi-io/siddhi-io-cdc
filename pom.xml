@@ -71,6 +71,11 @@
                 <version>${debezium-connector-oracle.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.zaxxer</groupId>
+                <artifactId>HikariCP</artifactId>
+                <version>${hikari.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.wso2.extension.siddhi.map.keyvalue</groupId>
                 <artifactId>siddhi-map-keyvalue</artifactId>
                 <version>${siddhi-map-keyvalue.version}</version>
@@ -153,6 +158,7 @@
         <debezium-connector-mysql.version>0.8.3.Final</debezium-connector-mysql.version>
         <debezium-embedded.version>0.8.3.Final</debezium-embedded.version>
         <debezium-connector-oracle.version>0.8.3.Final</debezium-connector-oracle.version>
+        <hikari.version>2.6.1</hikari.version>
         <org.testng.version>6.11</org.testng.version>
         <siddhi-store-rdbms.version>4.0.39</siddhi-store-rdbms.version>
     </properties>

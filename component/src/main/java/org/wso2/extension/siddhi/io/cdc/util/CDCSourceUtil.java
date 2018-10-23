@@ -228,4 +228,14 @@ public class CDCSourceUtil {
         }
         return path;
     }
+
+    /**
+     * Utility method which can be used to check if a given string instance is null or empty.
+     *
+     * @param field the string instance to be checked.
+     * @return true if the field is null or empty.
+     */
+    public static boolean isEmpty(String field) {
+        return (field == null || field.trim().length() == 0);
+    }
 }
