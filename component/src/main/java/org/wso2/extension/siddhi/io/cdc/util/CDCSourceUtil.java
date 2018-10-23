@@ -26,6 +26,9 @@ import org.wso2.extension.siddhi.io.cdc.source.InMemoryOffsetBackingStore;
 import org.wso2.extension.siddhi.io.cdc.source.WrongConfigurationException;
 import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -237,5 +240,26 @@ public class CDCSourceUtil {
      */
     public static boolean isEmpty(String field) {
         return (field == null || field.trim().length() == 0);
+    }
+
+    /**
+     * Create Hash map using the connect record and operation,
+     *
+     * @param resultSet is the resultset obtained by the cdcpollar.
+     **/
+
+    public static Map<String, Object> createMap(ResultSet resultSet) throws SQLException {
+        Map<String, Object> detailsMap = new HashMap<>();
+        ResultSetMetaData metadata = resultSet.getMetaData();
+
+        if (resultSet.next()) {
+            for (int i = 1; i <= metadata.getColumnCount(); i++) {
+                String key = metadata.getColumnName(i);
+                String value = resultSet.getString(key);
+                detailsMap.put(key, value);
+            }
+        }
+
+        return detailsMap;
     }
 }

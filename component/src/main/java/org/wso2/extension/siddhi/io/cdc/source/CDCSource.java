@@ -148,69 +148,90 @@ import java.util.concurrent.Executors;
 public class CDCSource extends Source {
     private static final Logger log = Logger.getLogger(CDCSource.class);
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private String mode;
     private Map<byte[], byte[]> offsetData = new HashMap<>();
     private String operation;
     private ChangeDataCapture changeDataCapture;
     private String historyFileDirectory;
     private CDCSourceObjectKeeper cdcSourceObjectKeeper = CDCSourceObjectKeeper.getCdcSourceObjectKeeper();
     private String carbonHome;
+    private CDCPollar cdcPollar;
 
     @Override
     public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
                      String[] requestedTransportPropertyNames, ConfigReader configReader,
                      SiddhiAppContext siddhiAppContext) {
-        String siddhiAppName = siddhiAppContext.getName();
-        String streamName = sourceEventListener.getStreamDefinition().getId();
+// TODO: 10/23/18 define driverclass name in docs
+        //initialize mode
+        mode = optionHolder.validateAndGetStaticValue("mode", "streaming");
 
-        //initialize mandatory parameters
+        //initialize common mandatory parameters
         String url = optionHolder.validateAndGetOption(CDCSourceConstants.DATABASE_CONNECTION_URL).getValue();
         String tableName = optionHolder.validateAndGetOption(CDCSourceConstants.TABLE_NAME).getValue();
         String username = optionHolder.validateAndGetOption(CDCSourceConstants.USERNAME).getValue();
         String password = optionHolder.validateAndGetOption(CDCSourceConstants.PASSWORD).getValue();
-        operation = optionHolder.validateAndGetOption(CDCSourceConstants.OPERATION).getValue();
 
-        //initialize optional parameters
-        int serverID;
-        serverID = Integer.parseInt(optionHolder.validateAndGetStaticValue(CDCSourceConstants.DATABASE_SERVER_ID,
-                Integer.toString(CDCSourceConstants.DEFAULT_SERVER_ID)));
+        switch (mode) {
+            case "streaming":
 
-        String serverName;
-        serverName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.DATABASE_SERVER_NAME,
-                CDCSourceConstants.EMPTY_STRING);
+                String siddhiAppName = siddhiAppContext.getName();
+                String streamName = sourceEventListener.getStreamDefinition().getId();
 
-        //initialize parameters from connector.properties
-        String connectorProperties = optionHolder.validateAndGetStaticValue(CDCSourceConstants.CONNECTOR_PROPERTIES,
-                CDCSourceConstants.EMPTY_STRING);
+                //initialize mandatory parameters
+                operation = optionHolder.validateAndGetOption(CDCSourceConstants.OPERATION).getValue();
 
-        //initialize history file directory
-        carbonHome = CDCSourceUtil.getCarbonHome();
-        historyFileDirectory = carbonHome + File.separator + "cdc" + File.separator + "history"
-                + File.separator + siddhiAppName + File.separator;
+                //initialize optional parameters
+                int serverID;
+                serverID = Integer.parseInt(optionHolder.validateAndGetStaticValue(CDCSourceConstants.DATABASE_SERVER_ID,
+                        Integer.toString(CDCSourceConstants.DEFAULT_SERVER_ID)));
 
-        validateParameter();
+                String serverName;
+                serverName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.DATABASE_SERVER_NAME,
+                        CDCSourceConstants.EMPTY_STRING);
 
-        //send this object reference and preferred operation to changeDataCapture object
-        changeDataCapture = new ChangeDataCapture(operation, sourceEventListener);
+                //initialize parameters from connector.properties
+                String connectorProperties = optionHolder.validateAndGetStaticValue(CDCSourceConstants.CONNECTOR_PROPERTIES,
+                        CDCSourceConstants.EMPTY_STRING);
 
-        //create the folder for history file if not exists
-        File directory = new File(historyFileDirectory);
-        if (!directory.exists()) {
-            boolean isDirectoryCreated = directory.mkdirs();
-            if (isDirectoryCreated && log.isDebugEnabled()) {
-                log.debug("Directory created for history file.");
-            }
-        }
+                //initialize history file directory
+                carbonHome = CDCSourceUtil.getCarbonHome();
+                historyFileDirectory = carbonHome + File.separator + "cdc" + File.separator + "history"
+                        + File.separator + siddhiAppName + File.separator;
 
-        try {
-            Map<String, Object> configMap = CDCSourceUtil.getConfigMap(username, password, url, tableName,
-                    historyFileDirectory, siddhiAppName, streamName, serverID, serverName, connectorProperties,
-                    this.hashCode());
-            changeDataCapture.setConfig(configMap);
-        } catch (WrongConfigurationException ex) {
-            throw new SiddhiAppCreationException("The cdc source couldn't get started because of invalid" +
-                    " configurations. Found configurations: {username='" + username + "', password=******," +
-                    " url='" + url + "', tablename='" + tableName + "'," +
-                    " connetorProperties='" + connectorProperties + "'}", ex);
+                validateParameter();
+
+                //send this object reference and preferred operation to changeDataCapture object
+                changeDataCapture = new ChangeDataCapture(operation, sourceEventListener);
+
+                //create the folder for history file if not exists
+                File directory = new File(historyFileDirectory);
+                if (!directory.exists()) {
+                    boolean isDirectoryCreated = directory.mkdirs();
+                    if (isDirectoryCreated && log.isDebugEnabled()) {
+                        log.debug("Directory created for history file.");
+                    }
+                }
+
+                try {
+                    Map<String, Object> configMap = CDCSourceUtil.getConfigMap(username, password, url, tableName,
+                            historyFileDirectory, siddhiAppName, streamName, serverID, serverName, connectorProperties,
+                            this.hashCode());
+                    changeDataCapture.setConfig(configMap);
+                } catch (WrongConfigurationException ex) {
+                    throw new SiddhiAppCreationException("The cdc source couldn't get started because of invalid" +
+                            " configurations. Found configurations: {username='" + username + "', password=******," +
+                            " url='" + url + "', tablename='" + tableName + "'," +
+                            " connetorProperties='" + connectorProperties + "'}", ex);
+                }
+                break;
+            case "polling":
+                String driverClassName = optionHolder.validateAndGetStaticValue("driver.class");
+                String lastOffset = "2018-10-19 11:16:42.044"; // TODO: 10/23/18 get rid of the hardcoded value
+                cdcPollar = new CDCPollar(url, username, password, tableName, driverClassName, lastOffset,
+                        sourceEventListener);
+                break;
+            default:
+                throw new SiddhiAppValidationException("unsupported mode: " + mode);
         }
     }
 
@@ -221,19 +242,30 @@ public class CDCSource extends Source {
 
     @Override
     public void connect(ConnectionCallback connectionCallback) throws ConnectionUnavailableException {
-        //keep the object reference in Object keeper
-        cdcSourceObjectKeeper.addCdcObject(this);
 
-        //create completion callback to handle the exceptions from debezium engine.
-        EmbeddedEngine.CompletionCallback completionCallback = (success, message, error) -> {
-            if (!success) {
-                connectionCallback.onError(new ConnectionUnavailableException("Connection to the database lost.",
-                        error));
-            }
-        };
+        switch (mode) {
+            case "streaming":
+                //keep the object reference in Object keeper
+                cdcSourceObjectKeeper.addCdcObject(this);
 
-        EmbeddedEngine engine = changeDataCapture.getEngine(completionCallback);
-        executorService.execute(engine);
+                //create completion callback to handle the exceptions from debezium engine.
+                EmbeddedEngine.CompletionCallback completionCallback = (success, message, error) -> {
+                    if (!success) {
+                        connectionCallback.onError(new ConnectionUnavailableException("Connection to the database lost.",
+                                error));
+                    }
+                };
+
+                EmbeddedEngine engine = changeDataCapture.getEngine(completionCallback);
+                executorService.execute(engine);
+                break;
+            case "polling":
+                executorService.execute(cdcPollar);
+                break;
+            default:
+                break;
+        }
+
     }
 
     @Override

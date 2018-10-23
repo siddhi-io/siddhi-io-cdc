@@ -22,15 +22,14 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.log4j.Logger;
 import org.wso2.extension.siddhi.io.cdc.util.CDCSourceUtil;
+import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Observable;
+import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
-public class CDCPollar extends Observable implements Runnable {
+public class CDCPollar implements Runnable {
 
     private static final Logger log = Logger.getLogger(CDCPollar.class);
 
@@ -41,15 +40,17 @@ public class CDCPollar extends Observable implements Runnable {
     private String driverClassName;
     private HikariDataSource dataSource;
     private String lastOffset;
+    private SourceEventListener sourceEventListener;
 
     public CDCPollar(String url, String username, String password, String tableName,
-                     String driverClassName, String lastOffset) {
+                     String driverClassName, String lastOffset, SourceEventListener sourceEventListener) {
         this.url = url;
         this.tableName = tableName;
         this.username = username;
         this.password = password;
         this.driverClassName = driverClassName;
         this.lastOffset = lastOffset;
+        this.sourceEventListener = sourceEventListener;
     }
 
     private void initializeDatasource() {
@@ -92,10 +93,21 @@ public class CDCPollar extends Observable implements Runnable {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("select * from " + tableName + " where `last_updated` > " +
                     "'" + lastOffset + "';");
+
+
+            Map<String, Object> detailsMap;
+            ResultSetMetaData metadata = resultSet.getMetaData();
+
             while (resultSet.next()) {
+                detailsMap = new HashMap<>();
+                for (int i = 1; i <= metadata.getColumnCount(); i++) {
+                    String key = metadata.getColumnName(i);
+                    String value = resultSet.getString(key);
+                    detailsMap.put(key, value);
+                }
+
                 lastOffset = resultSet.getString("last_updated");
-                setChanged();
-                notifyObservers(resultSet.getString("last_updated") + "  " + resultSet.getString("name"));
+                sourceEventListener.onEvent(detailsMap, null);
             }
 
             try {
