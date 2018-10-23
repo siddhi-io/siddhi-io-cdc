@@ -43,9 +43,9 @@ public class TestCaseOfCDCSource {
     private AtomicInteger eventCount = new AtomicInteger(0);
     private AtomicBoolean eventArrived = new AtomicBoolean(false);
     private int waitTime = 50;
-    private int timeout = 10000;
-    private String username = "";
-    private String password = "";
+    private int timeout = 1000000;
+    private String username = "root";
+    private String password = "1234";
     private String jdbcDriverName = "com.mysql.jdbc.Driver";
     private String databaseURL = "jdbc:mysql://localhost:3306/SimpleDB";
     private String tableName = "login";
@@ -54,6 +54,59 @@ public class TestCaseOfCDCSource {
     public void init() {
         eventCount.set(0);
         eventArrived.set(false);
+    }
+
+    @Test
+    public void testInsertCDCPollingMode() throws InterruptedException {
+        log.info("------------------------------------------------------------------------------------------------");
+        log.info("CDC TestCase-4: Capturing Insert change data from MySQL for polling mode");
+        log.info("------------------------------------------------------------------------------------------------");
+
+        PersistenceStore persistenceStore = new InMemoryPersistenceStore();
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setPersistenceStore(persistenceStore);
+
+        // TODO: 10/23/18 get rid of the hardcodes
+
+        String cdcinStreamDefinition = "@app:name('cdcTesting')" +
+                "@source(type = 'cdc'," +
+                " mode='polling'," +
+                " driver.class='com.mysql.jdbc.Driver'," +
+                " url = '" + "jdbc:mysql://localhost:3306/PollingDB" + "'," +
+                " username = '" + username + "'," +
+                " password = '" + password + "'," +
+                " table.name = '" + "people" + "', " +
+                " @map(type='keyvalue'))" +
+                "define stream istm (last_updated string, name string);";
+
+        String cdcquery = ("@info(name = 'query1') " +
+                "from istm#log() " +
+                "select *  " +
+                "insert into outputStream;");
+
+        SiddhiAppRuntime cdcAppRuntime = siddhiManager.createSiddhiAppRuntime(cdcinStreamDefinition +
+                cdcquery);
+
+        siddhiManager.setConfigManager(new InMemoryConfigManager());
+
+        QueryCallback queryCallback = new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                for (Event event : inEvents) {
+                    eventCount.getAndIncrement();
+                    log.info(eventCount + ". " + event);
+                    eventArrived.set(true);
+                }
+            }
+        };
+
+        cdcAppRuntime.addCallback("query1", queryCallback);
+        cdcAppRuntime.start();
+
+        SiddhiTestHelper.waitForEvents(waitTime, 10, eventCount, timeout);
+        cdcAppRuntime.shutdown();
+        siddhiManager.shutdown();
     }
 
     /**
