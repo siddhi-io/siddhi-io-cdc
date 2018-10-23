@@ -18,7 +18,7 @@
 
 package org.wso2.extension.siddhi.io.cdc.source;
 
-import org.apache.kafka.connect.errors.ConnectException;
+import io.debezium.embedded.EmbeddedEngine;
 import org.apache.log4j.Logger;
 import org.wso2.extension.siddhi.io.cdc.util.CDCSourceConstants;
 import org.wso2.extension.siddhi.io.cdc.util.CDCSourceUtil;
@@ -224,11 +224,16 @@ public class CDCSource extends Source {
         //keep the object reference in Object keeper
         cdcSourceObjectKeeper.addCdcObject(this);
 
-        try {
-            executorService.execute(changeDataCapture.getEngine());
-        } catch (ConnectException ex) {
-            throw new ConnectionUnavailableException("Connection is unavailable. Check parameters.", ex);
-        }
+        //create completion callback to handle the exceptions from debezium engine.
+        EmbeddedEngine.CompletionCallback completionCallback = (success, message, error) -> {
+            if (!success) {
+                connectionCallback.onError(new ConnectionUnavailableException("Connection to the database lost.",
+                        error));
+            }
+        };
+
+        EmbeddedEngine engine = changeDataCapture.getEngine(completionCallback);
+        executorService.execute(engine);
     }
 
     @Override

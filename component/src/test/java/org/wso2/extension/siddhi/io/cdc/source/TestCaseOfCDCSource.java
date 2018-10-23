@@ -105,7 +105,7 @@ public class TestCaseOfCDCSource {
         cdcAppRuntime.addCallback("query1", queryCallback);
         cdcAppRuntime.start();
 
-        SiddhiTestHelper.waitForEvents(waitTime, 11, eventCount, timeout);
+        SiddhiTestHelper.waitForEvents(waitTime, 0, eventCount, timeout);
 
         //persisting
         cdcAppRuntime.persist();

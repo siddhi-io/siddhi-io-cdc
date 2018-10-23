@@ -64,10 +64,11 @@ class ChangeDataCapture {
      *
      * @return engine.
      */
-    EmbeddedEngine getEngine() {
+    EmbeddedEngine getEngine(EmbeddedEngine.CompletionCallback completionCallback) {
         // Create and return Engine with above set configuration ...
         EmbeddedEngine.Builder builder = EmbeddedEngine.create()
                 .using(OffsetCommitPolicy.always())
+                .using(completionCallback)
                 .using(config);
         if (builder == null) {
             throw new SiddhiAppRuntimeException("CDC Engine create failed. Check parameters.");
