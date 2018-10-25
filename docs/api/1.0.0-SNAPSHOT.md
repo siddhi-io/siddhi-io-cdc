@@ -8,7 +8,7 @@
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
-@source(type="cdc", url="<STRING>", username="<STRING>", password="<STRING>", table.name="<STRING>", operation="<STRING>", connector.properties="<STRING>", database.server.id="<STRING>", database.server.name="<STRING>", @map(...)))
+@source(type="cdc", url="<STRING>", mode="<STRING>", jdbc.driver.name="<STRING>", username="<STRING>", password="<STRING>", table.name="<STRING>", polling.column="<STRING>", operation="<STRING>", connector.properties="<STRING>", database.server.id="<STRING>", database.server.name="<STRING>", @map(...)))
 ```
 
 <span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -27,6 +27,22 @@
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">mode</td>
+        <td style="vertical-align: top; word-wrap: break-word">Mode to capture the change data. Mode ‘polling’ uses a polling.column to monitor the given table. Mode 'streaming' uses logs to monitor the given table.<br>The required parameters are different for each modes.</td>
+        <td style="vertical-align: top">streaming</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">jdbc.driver.name</td>
+        <td style="vertical-align: top; word-wrap: break-word">The driver class name for connecting the database. Mandatory when mode is ‘polling’.</td>
+        <td style="vertical-align: top"><Empty_String></td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
     </tr>
     <tr>
@@ -51,6 +67,14 @@
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">polling.column</td>
+        <td style="vertical-align: top; word-wrap: break-word">Column name on which the polling is done to capture the change data. Mandatory when mode is ‘polling’.</td>
+        <td style="vertical-align: top"><Empty_String></td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
     </tr>
     <tr>

@@ -24,7 +24,11 @@ import org.apache.log4j.Logger;
 import org.wso2.extension.siddhi.io.cdc.util.CDCSourceUtil;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -35,7 +39,7 @@ import java.util.Properties;
 public class CDCPollar implements Runnable {
 
     private static final Logger log = Logger.getLogger(CDCPollar.class);
-
+    private Connection connection;
     private String url;
     private String tableName;
     private String username;
@@ -90,6 +94,7 @@ public class CDCPollar implements Runnable {
      *                      could be lost in this case.
      * @param pollingColumn is the column name to poll the table.
      */
+    @SuppressWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     private void pollForChanges(String tableName, String lastOffset, String pollingColumn) throws SQLException {
 
         initializeDatasource();
@@ -128,7 +133,9 @@ public class CDCPollar implements Runnable {
         try {
             pollForChanges(tableName, lastOffset, pollingColumn);
         } catch (SQLException e) {
-            log.error("error", e); // TODO: 10/25/18 add meaningful error messages
+            log.error("error", e);
         }
+        // TODO: 10/25/18 add meaningful error messages
+
     }
 }

@@ -252,7 +252,7 @@ public class CDCSource extends Source {
                 }
                 break;
             case "polling":
-                String driverClassName = optionHolder.validateAndGetStaticValue("driver.class");
+                String driverClassName = optionHolder.validateAndGetStaticValue("jdbc.driver.name");
                 pollingColumn = optionHolder.validateAndGetStaticValue("polling.column");
                 String lastOffset = "2018-10-19 11:16:42.044"; // TODO: 10/23/18 get rid of the hardcoded value
                 cdcPollar = new CDCPollar(url, username, password, tableName, driverClassName, lastOffset,

@@ -72,7 +72,7 @@ public class TestCaseOfCDCSource {
         String cdcinStreamDefinition = "@app:name('cdcTesting')" +
                 "@source(type = 'cdc'," +
                 " mode='polling', polling.column='last_updated'," +
-                " driver.class='com.mysql.jdbc.Driver'," +
+                " jdbc.driver.name='com.mysql.jdbc.Driver'," +
                 " url = '" + "jdbc:mysql://localhost:3306/PollingDB" + "'," +
                 " username = '" + username + "'," +
                 " password = '" + password + "'," +
