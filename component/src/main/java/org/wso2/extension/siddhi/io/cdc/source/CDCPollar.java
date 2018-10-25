@@ -24,11 +24,7 @@ import org.apache.log4j.Logger;
 import org.wso2.extension.siddhi.io.cdc.util.CDCSourceUtil;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -88,25 +84,25 @@ public class CDCPollar implements Runnable {
     /**
      * Poll for inserts and updates.
      *
-     * @param tableName  is the table to be monitored.
-     * @param lastOffset is the last captured row's timestamp value. If @param lastOffset is -1,
-     *                   the table will be polled from the last existing record. i.e. change data capturing
-     *                   could be lost in this case.
+     * @param tableName     is the table to be monitored.
+     * @param lastOffset    is the last captured row's timestamp value. If @param lastOffset is -1,
+     *                      the table will be polled from the last existing record. i.e. change data capturing
+     *                      could be lost in this case.
      * @param pollingColumn is the column name to poll the table.
      */
     private void pollForChanges(String tableName, String lastOffset, String pollingColumn) throws SQLException {
 
         initializeDatasource();
         Connection connection = getConnection();
+        String selectQuery = "select * from `" + tableName + "` where `" + pollingColumn + "` > ?;";
+        PreparedStatement statement = connection.prepareStatement(selectQuery);
+        Map<String, Object> detailsMap;
+        ResultSetMetaData metadata;
 
         while (true) {
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("select * from " + tableName + " where `" + pollingColumn
-                    + "` > " + "'" + lastOffset + "';");
-
-            Map<String, Object> detailsMap;
-            ResultSetMetaData metadata = resultSet.getMetaData();
-
+            statement.setString(1, lastOffset);
+            ResultSet resultSet = statement.executeQuery();
+            metadata = resultSet.getMetaData();
             while (resultSet.next()) {
                 detailsMap = new HashMap<>();
                 for (int i = 1; i <= metadata.getColumnCount(); i++) {
@@ -114,8 +110,7 @@ public class CDCPollar implements Runnable {
                     String value = resultSet.getString(key);
                     detailsMap.put(key, value);
                 }
-
-                lastOffset = resultSet.getString("last_updated");
+                lastOffset = resultSet.getString(pollingColumn);
                 sourceEventListener.onEvent(detailsMap, null);
             }
 
@@ -133,7 +128,7 @@ public class CDCPollar implements Runnable {
         try {
             pollForChanges(tableName, lastOffset, pollingColumn);
         } catch (SQLException e) {
-            log.error(e); // TODO: 10/25/18 add meaningful error messages
+            log.error("error", e); // TODO: 10/25/18 add meaningful error messages
         }
     }
 }

@@ -71,7 +71,7 @@ public class TestCaseOfCDCSource {
 
         String cdcinStreamDefinition = "@app:name('cdcTesting')" +
                 "@source(type = 'cdc'," +
-                " mode='polling'," +
+                " mode='polling', polling.column='last_updated'," +
                 " driver.class='com.mysql.jdbc.Driver'," +
                 " url = '" + "jdbc:mysql://localhost:3306/PollingDB" + "'," +
                 " username = '" + username + "'," +
@@ -104,7 +104,7 @@ public class TestCaseOfCDCSource {
         cdcAppRuntime.addCallback("query1", queryCallback);
         cdcAppRuntime.start();
 
-        SiddhiTestHelper.waitForEvents(waitTime, 10, eventCount, timeout);
+        SiddhiTestHelper.waitForEvents(waitTime, 200, eventCount, timeout);
         cdcAppRuntime.shutdown();
         siddhiManager.shutdown();
     }

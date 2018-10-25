@@ -62,7 +62,7 @@ class ChangeDataCapture {
     /**
      * Create a new Debezium embedded engine with the configuration {@code config} and,
      *
-     * @return engine.
+     * @return {@code engine}.
      */
     EmbeddedEngine getEngine(EmbeddedEngine.CompletionCallback completionCallback) {
         // Create and return Engine with above set configuration ...
