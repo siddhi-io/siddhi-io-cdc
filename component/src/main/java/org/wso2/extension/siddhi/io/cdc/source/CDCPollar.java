@@ -24,11 +24,18 @@ import org.apache.log4j.Logger;
 import org.wso2.extension.siddhi.io.cdc.util.CDCSourceUtil;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+/**
+ * Polls a given table for changes. Use {@code pollingColumn} to poll on.
+ */
 public class CDCPollar implements Runnable {
 
     private static final Logger log = Logger.getLogger(CDCPollar.class);
@@ -41,9 +48,10 @@ public class CDCPollar implements Runnable {
     private HikariDataSource dataSource;
     private String lastOffset;
     private SourceEventListener sourceEventListener;
+    private String pollingColumn;
 
-    public CDCPollar(String url, String username, String password, String tableName,
-                     String driverClassName, String lastOffset, SourceEventListener sourceEventListener) {
+    public CDCPollar(String url, String username, String password, String tableName, String driverClassName,
+                     String lastOffset, String pollingColumn, SourceEventListener sourceEventListener) {
         this.url = url;
         this.tableName = tableName;
         this.username = username;
@@ -51,6 +59,7 @@ public class CDCPollar implements Runnable {
         this.driverClassName = driverClassName;
         this.lastOffset = lastOffset;
         this.sourceEventListener = sourceEventListener;
+        this.pollingColumn = pollingColumn;
     }
 
     private void initializeDatasource() {
@@ -83,17 +92,17 @@ public class CDCPollar implements Runnable {
      * @param lastOffset is the last captured row's timestamp value. If @param lastOffset is -1,
      *                   the table will be polled from the last existing record. i.e. change data capturing
      *                   could be lost in this case.
+     * @param pollingColumn is the column name to poll the table.
      */
-    private void pollForChanges(String tableName, String lastOffset) throws SQLException {
+    private void pollForChanges(String tableName, String lastOffset, String pollingColumn) throws SQLException {
 
         initializeDatasource();
         Connection connection = getConnection();
 
         while (true) {
             Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("select * from " + tableName + " where `last_updated` > " +
-                    "'" + lastOffset + "';");
-
+            ResultSet resultSet = statement.executeQuery("select * from " + tableName + " where `" + pollingColumn
+                    + "` > " + "'" + lastOffset + "';");
 
             Map<String, Object> detailsMap;
             ResultSetMetaData metadata = resultSet.getMetaData();
@@ -113,7 +122,7 @@ public class CDCPollar implements Runnable {
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                log.error(e);
             }
         }
     }
@@ -122,9 +131,9 @@ public class CDCPollar implements Runnable {
     @Override
     public void run() {
         try {
-            pollForChanges(tableName, lastOffset);
+            pollForChanges(tableName, lastOffset, pollingColumn);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error(e); // TODO: 10/25/18 add meaningful error messages
         }
     }
 }

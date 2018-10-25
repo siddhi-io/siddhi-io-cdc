@@ -62,6 +62,23 @@ import java.util.concurrent.Executors;
                         type = DataType.STRING
                 ),
                 @Parameter(
+                        name = "mode",
+                        description = "Mode to capture the change data. Mode ‘polling’ uses a polling.column to" +
+                                " monitor the given table. Mode 'streaming' uses logs to monitor the given table." +
+                                "\nThe required parameters are different for each modes.",
+                        type = DataType.STRING,
+                        defaultValue = "streaming",
+                        optional = true
+                ),
+                @Parameter(
+                        name = "jdbc.driver.name",
+                        description = "The driver class name for connecting the database." +
+                                " Mandatory when mode is ‘polling’.",
+                        type = DataType.STRING,
+                        defaultValue = "<Empty_String>",
+                        optional = true
+                ),
+                @Parameter(
                         name = "username",
                         description = "Username of a user with SELECT, RELOAD, SHOW DATABASES," +
                                 " REPLICATION SLAVE, REPLICATION CLIENT privileges on Change Data Capturing table.",
@@ -76,6 +93,15 @@ import java.util.concurrent.Executors;
                         name = "table.name",
                         description = "Name of the table which needs to be monitored for data changes.",
                         type = DataType.STRING
+                ),
+                @Parameter(
+                        name = "polling.column",
+                        description = "Column name on which the polling is done to capture the change data. " +
+                                "Mandatory when mode is ‘polling’."
+                        ,
+                        type = DataType.STRING,
+                        defaultValue = "<Empty_String>",
+                        optional = true
                 ),
                 @Parameter(
                         name = "operation",
@@ -156,6 +182,7 @@ public class CDCSource extends Source {
     private CDCSourceObjectKeeper cdcSourceObjectKeeper = CDCSourceObjectKeeper.getCdcSourceObjectKeeper();
     private String carbonHome;
     private CDCPollar cdcPollar;
+    private String pollingColumn;
 
     @Override
     public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
@@ -182,16 +209,16 @@ public class CDCSource extends Source {
 
                 //initialize optional parameters
                 int serverID;
-                serverID = Integer.parseInt(optionHolder.validateAndGetStaticValue(CDCSourceConstants.DATABASE_SERVER_ID,
-                        Integer.toString(CDCSourceConstants.DEFAULT_SERVER_ID)));
+                serverID = Integer.parseInt(optionHolder.validateAndGetStaticValue(
+                        CDCSourceConstants.DATABASE_SERVER_ID, Integer.toString(CDCSourceConstants.DEFAULT_SERVER_ID)));
 
                 String serverName;
                 serverName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.DATABASE_SERVER_NAME,
                         CDCSourceConstants.EMPTY_STRING);
 
                 //initialize parameters from connector.properties
-                String connectorProperties = optionHolder.validateAndGetStaticValue(CDCSourceConstants.CONNECTOR_PROPERTIES,
-                        CDCSourceConstants.EMPTY_STRING);
+                String connectorProperties = optionHolder.validateAndGetStaticValue(
+                        CDCSourceConstants.CONNECTOR_PROPERTIES, CDCSourceConstants.EMPTY_STRING);
 
                 //initialize history file directory
                 carbonHome = CDCSourceUtil.getCarbonHome();
@@ -226,9 +253,10 @@ public class CDCSource extends Source {
                 break;
             case "polling":
                 String driverClassName = optionHolder.validateAndGetStaticValue("driver.class");
+                pollingColumn = optionHolder.validateAndGetStaticValue("polling.column");
                 String lastOffset = "2018-10-19 11:16:42.044"; // TODO: 10/23/18 get rid of the hardcoded value
                 cdcPollar = new CDCPollar(url, username, password, tableName, driverClassName, lastOffset,
-                        sourceEventListener);
+                        pollingColumn, sourceEventListener);
                 break;
             default:
                 throw new SiddhiAppValidationException("unsupported mode: " + mode);
@@ -251,8 +279,8 @@ public class CDCSource extends Source {
                 //create completion callback to handle the exceptions from debezium engine.
                 EmbeddedEngine.CompletionCallback completionCallback = (success, message, error) -> {
                     if (!success) {
-                        connectionCallback.onError(new ConnectionUnavailableException("Connection to the database lost.",
-                                error));
+                        connectionCallback.onError(new ConnectionUnavailableException(
+                                "Connection to the database lost.", error));
                     }
                 };
 
