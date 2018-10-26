@@ -182,13 +182,12 @@ public class CDCSource extends Source {
     private CDCSourceObjectKeeper cdcSourceObjectKeeper = CDCSourceObjectKeeper.getCdcSourceObjectKeeper();
     private String carbonHome;
     private CDCPollar cdcPollar;
-    private String pollingColumn;
+    private String lastOffset;
 
     @Override
     public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
                      String[] requestedTransportPropertyNames, ConfigReader configReader,
                      SiddhiAppContext siddhiAppContext) {
-// TODO: 10/23/18 define driverclass name in docs
         //initialize mode
         mode = optionHolder.validateAndGetStaticValue("mode", "streaming");
 
@@ -253,10 +252,9 @@ public class CDCSource extends Source {
                 break;
             case "polling":
                 String driverClassName = optionHolder.validateAndGetStaticValue("jdbc.driver.name");
-                pollingColumn = optionHolder.validateAndGetStaticValue("polling.column");
-                String lastOffset = "2018-10-19 11:16:42.044"; // TODO: 10/23/18 get rid of the hardcoded value
+                String pollingColumn = optionHolder.validateAndGetStaticValue("polling.column");
                 cdcPollar = new CDCPollar(url, username, password, tableName, driverClassName, lastOffset,
-                        pollingColumn, sourceEventListener);
+                        pollingColumn, sourceEventListener, this);
                 break;
             default:
                 throw new SiddhiAppValidationException("unsupported mode: " + mode);
@@ -322,14 +320,37 @@ public class CDCSource extends Source {
     @Override
     public Map<String, Object> currentState() {
         Map<String, Object> currentState = new HashMap<>();
-        currentState.put(CDCSourceConstants.CACHE_OBJECT, offsetData);
+        switch (mode) {
+            case "polling":
+                currentState.put("last.offset", lastOffset);
+                break;
+            case "streaming":
+                currentState.put(CDCSourceConstants.CACHE_OBJECT, offsetData);
+                break;
+            default:
+                break;
+        }
         return currentState;
     }
 
     @Override
     public void restoreState(Map<String, Object> map) {
-        Object cacheObj = map.get(CDCSourceConstants.CACHE_OBJECT);
-        this.offsetData = (HashMap<byte[], byte[]>) cacheObj;
+        switch (mode) {
+            case "polling":
+                Object lastOffsetObj = map.get("last.offset");
+                this.lastOffset = (String) lastOffsetObj;
+                break;
+            case "streaming":
+                Object cacheObj = map.get(CDCSourceConstants.CACHE_OBJECT);
+                this.offsetData = (HashMap<byte[], byte[]>) cacheObj;
+                break;
+            default:
+                break;
+        }
+    }
+
+    void setLastOffset(String lastOffset) {
+        this.lastOffset = lastOffset;
     }
 
     Map<byte[], byte[]> getOffsetData() {

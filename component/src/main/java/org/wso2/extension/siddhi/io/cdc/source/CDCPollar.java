@@ -24,11 +24,7 @@ import org.apache.log4j.Logger;
 import org.wso2.extension.siddhi.io.cdc.util.CDCSourceUtil;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -39,7 +35,6 @@ import java.util.Properties;
 public class CDCPollar implements Runnable {
 
     private static final Logger log = Logger.getLogger(CDCPollar.class);
-    private Connection connection;
     private String url;
     private String tableName;
     private String username;
@@ -49,9 +44,11 @@ public class CDCPollar implements Runnable {
     private String lastOffset;
     private SourceEventListener sourceEventListener;
     private String pollingColumn;
+    private CDCSource cdcSource;
 
     public CDCPollar(String url, String username, String password, String tableName, String driverClassName,
-                     String lastOffset, String pollingColumn, SourceEventListener sourceEventListener) {
+                     String lastOffset, String pollingColumn, SourceEventListener sourceEventListener,
+                     CDCSource cdcSource) {
         this.url = url;
         this.tableName = tableName;
         this.username = username;
@@ -60,6 +57,7 @@ public class CDCPollar implements Runnable {
         this.lastOffset = lastOffset;
         this.sourceEventListener = sourceEventListener;
         this.pollingColumn = pollingColumn;
+        this.cdcSource = cdcSource;
     }
 
     private void initializeDatasource() {
@@ -116,6 +114,7 @@ public class CDCPollar implements Runnable {
                     detailsMap.put(key, value);
                 }
                 lastOffset = resultSet.getString(pollingColumn);
+                cdcSource.setLastOffset(lastOffset);
                 sourceEventListener.onEvent(detailsMap, null);
             }
 
@@ -136,6 +135,7 @@ public class CDCPollar implements Runnable {
             log.error("error", e);
         }
         // TODO: 10/25/18 add meaningful error messages
-
+// TODO: 10/26/18 when lastoffset is empty, get the last record's pollingColumn value
+// to avoid producing a lot of old data as captured change data.
     }
 }
