@@ -58,4 +58,9 @@ public class CDCSourceConstants {
     public static final String AFTER = "after";
     public static final String CARBON_HOME = "carbon.home";
     public static final String USER_DIRECTORY = "user.dir";
+    public static final String MODE = "mode";
+    public static final String MODE_STREAMING = "streaming";
+    public static final String MODE_POLLING = "polling";
+    public static final String JDBC_DRIVER_NAME = "jdbc.driver.name";
+    public static final String POLLING_COLUMN = "polling.column";
 }

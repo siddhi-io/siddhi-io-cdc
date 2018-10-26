@@ -189,7 +189,7 @@ public class CDCSource extends Source {
                      String[] requestedTransportPropertyNames, ConfigReader configReader,
                      SiddhiAppContext siddhiAppContext) {
         //initialize mode
-        mode = optionHolder.validateAndGetStaticValue("mode", "streaming");
+        mode = optionHolder.validateAndGetStaticValue(CDCSourceConstants.MODE, CDCSourceConstants.MODE_STREAMING);
 
         //initialize common mandatory parameters
         String url = optionHolder.validateAndGetOption(CDCSourceConstants.DATABASE_CONNECTION_URL).getValue();
@@ -198,7 +198,7 @@ public class CDCSource extends Source {
         String password = optionHolder.validateAndGetOption(CDCSourceConstants.PASSWORD).getValue();
 
         switch (mode) {
-            case "streaming":
+            case CDCSourceConstants.MODE_STREAMING:
 
                 String siddhiAppName = siddhiAppContext.getName();
                 String streamName = sourceEventListener.getStreamDefinition().getId();
@@ -250,9 +250,9 @@ public class CDCSource extends Source {
                             " connetorProperties='" + connectorProperties + "'}", ex);
                 }
                 break;
-            case "polling":
-                String driverClassName = optionHolder.validateAndGetStaticValue("jdbc.driver.name");
-                String pollingColumn = optionHolder.validateAndGetStaticValue("polling.column");
+            case CDCSourceConstants.MODE_POLLING:
+                String driverClassName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.JDBC_DRIVER_NAME);
+                String pollingColumn = optionHolder.validateAndGetStaticValue(CDCSourceConstants.POLLING_COLUMN);
                 cdcPollar = new CDCPollar(url, username, password, tableName, driverClassName, lastOffset,
                         pollingColumn, sourceEventListener, this);
                 break;
@@ -270,7 +270,7 @@ public class CDCSource extends Source {
     public void connect(ConnectionCallback connectionCallback) throws ConnectionUnavailableException {
 
         switch (mode) {
-            case "streaming":
+            case CDCSourceConstants.MODE_STREAMING:
                 //keep the object reference in Object keeper
                 cdcSourceObjectKeeper.addCdcObject(this);
 
@@ -285,7 +285,7 @@ public class CDCSource extends Source {
                 EmbeddedEngine engine = changeDataCapture.getEngine(completionCallback);
                 executorService.execute(engine);
                 break;
-            case "polling":
+            case CDCSourceConstants.MODE_POLLING:
                 executorService.execute(cdcPollar);
                 break;
             default:
@@ -321,10 +321,10 @@ public class CDCSource extends Source {
     public Map<String, Object> currentState() {
         Map<String, Object> currentState = new HashMap<>();
         switch (mode) {
-            case "polling":
+            case CDCSourceConstants.MODE_POLLING:
                 currentState.put("last.offset", lastOffset);
                 break;
-            case "streaming":
+            case CDCSourceConstants.MODE_STREAMING:
                 currentState.put(CDCSourceConstants.CACHE_OBJECT, offsetData);
                 break;
             default:
@@ -336,11 +336,11 @@ public class CDCSource extends Source {
     @Override
     public void restoreState(Map<String, Object> map) {
         switch (mode) {
-            case "polling":
+            case CDCSourceConstants.MODE_POLLING:
                 Object lastOffsetObj = map.get("last.offset");
                 this.lastOffset = (String) lastOffsetObj;
                 break;
-            case "streaming":
+            case CDCSourceConstants.MODE_STREAMING:
                 Object cacheObj = map.get(CDCSourceConstants.CACHE_OBJECT);
                 this.offsetData = (HashMap<byte[], byte[]>) cacheObj;
                 break;
