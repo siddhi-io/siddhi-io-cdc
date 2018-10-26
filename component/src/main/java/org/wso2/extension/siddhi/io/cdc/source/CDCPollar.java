@@ -46,6 +46,11 @@ public class CDCPollar implements Runnable {
     private String pollingColumn;
     private CDCSource cdcSource;
 
+    private String CONNECTION_PROPERTY_JDBC_URL = "jdbcUrl";
+    private String CONNECTION_PROPERTY_DATASOURCE_USER = "dataSource.user";
+    private String CONNECTION_PROPERTY_DATASOURCE_PASSWORD = "dataSource.password";
+    private String CONNECTION_PROPERTY_DRIVER_CLASSNAME = "driverClassName";
+
     public CDCPollar(String url, String username, String password, String tableName, String driverClassName,
                      String lastOffset, String pollingColumn, SourceEventListener sourceEventListener,
                      CDCSource cdcSource) {
@@ -63,20 +68,15 @@ public class CDCPollar implements Runnable {
     private void initializeDatasource() {
         Properties connectionProperties = new Properties();
 
-        connectionProperties.setProperty("jdbcUrl", url);
-        connectionProperties.setProperty("dataSource.user", username);
+        connectionProperties.setProperty(CONNECTION_PROPERTY_JDBC_URL, url);
+        connectionProperties.setProperty(CONNECTION_PROPERTY_DATASOURCE_USER, username);
         if (!CDCSourceUtil.isEmpty(password)) {
-            connectionProperties.setProperty("dataSource.password", password);
+            connectionProperties.setProperty(CONNECTION_PROPERTY_DATASOURCE_PASSWORD, password);
         }
-        connectionProperties.setProperty("driverClassName", driverClassName);
+        connectionProperties.setProperty(CONNECTION_PROPERTY_DRIVER_CLASSNAME, driverClassName);
 
         HikariConfig config = new HikariConfig(connectionProperties);
         this.dataSource = new HikariDataSource(config);
-
-        if (log.isDebugEnabled()) {
-            log.debug("Database connection for '" + this.tableName + "' created through connection" +
-                    " parameters specified in the query.");
-        }
     }
 
     private Connection getConnection() throws SQLException {
