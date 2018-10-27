@@ -2,7 +2,7 @@
 Siddhi-io-cdc
 ======================================
 
-The **siddhi-io-cdc extension** is an extension to <a target="_blank" href="https://wso2.github.io/siddhi">Siddhi</a>. It publishes change data of MySQL database in the key-value format.
+The **siddhi-io-cdc extension** is an extension to <a target="_blank" href="https://wso2.github.io/siddhi">Siddhi</a>. It receives change data of MySQL database in the key-value format.
 
 ## Prerequisites
 
