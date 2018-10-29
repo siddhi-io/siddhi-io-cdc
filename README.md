@@ -7,7 +7,6 @@ The **siddhi-io-cdc extension** is an extension to <a target="_blank" href="http
 ## Prerequisites
 
 * The MySQL server should be configured to use a row-level binary log.
-* MySQL jdbc driver should be added to the `<STREAM_PROCESSOR_HOME>/lib` directory.
 * WSO2 SP State persistence should be enabled.
 * A MySQL user should be created with SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT privileges on the tables he wants to capture changes.
 
