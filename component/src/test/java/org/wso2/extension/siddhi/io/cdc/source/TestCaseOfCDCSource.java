@@ -40,6 +40,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class TestCaseOfCDCSource {
 
     private static final Logger log = Logger.getLogger(TestCaseOfCDCSource.class);
+    private Event currentEvent;
     private AtomicInteger eventCount = new AtomicInteger(0);
     private AtomicBoolean eventArrived = new AtomicBoolean(false);
     private int waitTime = 50;
@@ -54,6 +55,7 @@ public class TestCaseOfCDCSource {
     public void init() {
         eventCount.set(0);
         eventArrived.set(false);
+        currentEvent = new Event();
     }
 
     /**
@@ -95,6 +97,7 @@ public class TestCaseOfCDCSource {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
                 for (Event event : inEvents) {
+                    currentEvent = event;
                     eventCount.getAndIncrement();
                     log.info(eventCount + ". " + event);
                     eventArrived.set(true);
@@ -153,9 +156,15 @@ public class TestCaseOfCDCSource {
 
         //Do an insert and wait for cdc app to capture.
         InputHandler rdbmsInputHandler = rdbmsAppRuntime.getInputHandler("insertionStream");
-        Object[] insertingObject = new Object[]{"e077", "testEmployer"};
+        Object[] insertingObject = new Object[]{"e001", "testEmployer"};
         rdbmsInputHandler.send(insertingObject);
         SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
+
+        //Assert event arrival.
+        Assert.assertTrue(eventArrived.get());
+
+        //Assert event data.
+        Assert.assertEquals(insertingObject, currentEvent.getData());
 
         cdcAppRuntime.shutdown();
         rdbmsAppRuntime.shutdown();
@@ -165,10 +174,10 @@ public class TestCaseOfCDCSource {
     /**
      * Test case to Capture Delete operations from a MySQL table.
      */
-    @Test
+    @Test(dependsOnMethods = {"testInsertCDC", "testUpdateCDC"})
     public void testDeleteCDC() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
-        log.info("CDC TestCase-2: Capturing Delete change data from MySQL.");
+        log.info("CDC TestCase-3: Capturing Delete change data from MySQL.");
         log.info("------------------------------------------------------------------------------------------------");
 
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
@@ -270,10 +279,10 @@ public class TestCaseOfCDCSource {
     /**
      * Test case to Capture Update operations from a MySQL table.
      */
-    @Test
+    @Test(dependsOnMethods = {"testInsertCDC"})
     public void testUpdateCDC() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
-        log.info("CDC TestCase-3: Capturing Update change data from MySQL.");
+        log.info("CDC TestCase-2: Capturing Update change data from MySQL.");
         log.info("------------------------------------------------------------------------------------------------");
 
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
