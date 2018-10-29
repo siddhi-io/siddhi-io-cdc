@@ -97,7 +97,6 @@
                         <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
                     </suiteXmlFiles>
                     <argLine>${surefireArgLine} -ea -Xmx512m</argLine>
-
                 </configuration>
             </plugin>
             <plugin>
@@ -113,7 +112,6 @@
                         <configuration>
                             <destFile>${basedir}/target/coverage-reports/jacoco.exec</destFile>
                             <propertyName>surefireArgLine</propertyName>
-
                         </configuration>
                     </execution>
                     <execution>
@@ -153,7 +151,6 @@
                             META-INF=target/classes/META-INF
                         </Include-Resource>
                     </instructions>
-
                 </configuration>
             </plugin>
             <plugin>
