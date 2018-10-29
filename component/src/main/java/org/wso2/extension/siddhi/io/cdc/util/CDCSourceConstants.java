@@ -63,4 +63,5 @@ public class CDCSourceConstants {
     public static final String MODE_POLLING = "polling";
     public static final String JDBC_DRIVER_NAME = "jdbc.driver.name";
     public static final String POLLING_COLUMN = "polling.column";
+    public static final String DATASOURCE_NAME = "datasource.name";
 }

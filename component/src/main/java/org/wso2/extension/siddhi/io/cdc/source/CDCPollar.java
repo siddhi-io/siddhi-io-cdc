@@ -21,10 +21,20 @@ package org.wso2.extension.siddhi.io.cdc.source;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.log4j.Logger;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceReference;
+import org.wso2.carbon.datasource.core.api.DataSourceService;
+import org.wso2.carbon.datasource.core.exception.DataSourceException;
 import org.wso2.extension.siddhi.io.cdc.util.CDCSourceUtil;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -35,6 +45,10 @@ import java.util.Properties;
 public class CDCPollar implements Runnable {
 
     private static final Logger log = Logger.getLogger(CDCPollar.class);
+    private static final String CONNECTION_PROPERTY_JDBC_URL = "jdbcUrl";
+    private static final String CONNECTION_PROPERTY_DATASOURCE_USER = "dataSource.user";
+    private static final String CONNECTION_PROPERTY_DATASOURCE_PASSWORD = "dataSource.password";
+    private static final String CONNECTION_PROPERTY_DRIVER_CLASSNAME = "driverClassName";
     private String url;
     private String tableName;
     private String username;
@@ -45,11 +59,7 @@ public class CDCPollar implements Runnable {
     private SourceEventListener sourceEventListener;
     private String pollingColumn;
     private CDCSource cdcSource;
-
-    private String CONNECTION_PROPERTY_JDBC_URL = "jdbcUrl";
-    private String CONNECTION_PROPERTY_DATASOURCE_USER = "dataSource.user";
-    private String CONNECTION_PROPERTY_DATASOURCE_PASSWORD = "dataSource.password";
-    private String CONNECTION_PROPERTY_DRIVER_CLASSNAME = "driverClassName";
+    private String datasourceName;
 
     public CDCPollar(String url, String username, String password, String tableName, String driverClassName,
                      String lastOffset, String pollingColumn, SourceEventListener sourceEventListener,
@@ -63,20 +73,55 @@ public class CDCPollar implements Runnable {
         this.sourceEventListener = sourceEventListener;
         this.pollingColumn = pollingColumn;
         this.cdcSource = cdcSource;
+        this.datasourceName = "";
+    }
+
+    public CDCPollar(String datasourceName, String tableName, String driverClassName,
+                     String lastOffset, String pollingColumn, SourceEventListener sourceEventListener,
+                     CDCSource cdcSource) {
+        this.datasourceName = datasourceName;
+        this.tableName = tableName;
+        this.driverClassName = driverClassName;
+        this.lastOffset = lastOffset;
+        this.sourceEventListener = sourceEventListener;
+        this.pollingColumn = pollingColumn;
+        this.cdcSource = cdcSource;
     }
 
     private void initializeDatasource() {
-        Properties connectionProperties = new Properties();
+        if (datasourceName.isEmpty()) {
+            Properties connectionProperties = new Properties();
 
-        connectionProperties.setProperty(CONNECTION_PROPERTY_JDBC_URL, url);
-        connectionProperties.setProperty(CONNECTION_PROPERTY_DATASOURCE_USER, username);
-        if (!CDCSourceUtil.isEmpty(password)) {
-            connectionProperties.setProperty(CONNECTION_PROPERTY_DATASOURCE_PASSWORD, password);
+            connectionProperties.setProperty(CONNECTION_PROPERTY_JDBC_URL, url);
+            connectionProperties.setProperty(CONNECTION_PROPERTY_DATASOURCE_USER, username);
+            if (!CDCSourceUtil.isEmpty(password)) {
+                connectionProperties.setProperty(CONNECTION_PROPERTY_DATASOURCE_PASSWORD, password);
+            }
+            connectionProperties.setProperty(CONNECTION_PROPERTY_DRIVER_CLASSNAME, driverClassName);
+
+            HikariConfig config = new HikariConfig(connectionProperties);
+            this.dataSource = new HikariDataSource(config);
+        } else {
+            // TODO: 10/29/18 check for the proper exception types, check pom, check for logging msgs
+            try {
+                BundleContext bundleContext = FrameworkUtil.getBundle(DataSourceService.class).getBundleContext();
+                ServiceReference serviceRef = bundleContext.getServiceReference(DataSourceService.class.getName());
+                if (serviceRef == null) {
+                    throw new SiddhiAppCreationException("DatasourceService : '" +
+                            DataSourceService.class.getCanonicalName() + "' cannot be found.");
+                } else {
+                    DataSourceService dataSourceService = (DataSourceService) bundleContext.getService(serviceRef);
+                    this.dataSource = (HikariDataSource) dataSourceService.getDataSource(datasourceName);
+
+                    if (log.isDebugEnabled()) {
+                        log.debug("Lookup for datasource '" + datasourceName + "' completed through " +
+                                "DataSource Service lookup.");
+                    }
+                }
+            } catch (DataSourceException e) {
+                throw new SiddhiAppCreationException("Datasource '" + datasourceName + "' cannot be connected.", e);
+            }
         }
-        connectionProperties.setProperty(CONNECTION_PROPERTY_DRIVER_CLASSNAME, driverClassName);
-
-        HikariConfig config = new HikariConfig(connectionProperties);
-        this.dataSource = new HikariDataSource(config);
     }
 
     private Connection getConnection() throws SQLException {
@@ -129,6 +174,9 @@ public class CDCPollar implements Runnable {
 
     @Override
     public void run() {
+        if (lastOffset == null) {
+            lastOffset = "";
+        }
         try {
             pollForChanges(tableName, lastOffset, pollingColumn);
         } catch (SQLException e) {

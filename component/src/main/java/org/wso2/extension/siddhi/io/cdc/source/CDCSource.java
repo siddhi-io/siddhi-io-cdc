@@ -90,6 +90,14 @@ import java.util.concurrent.Executors;
                         type = DataType.STRING
                 ),
                 @Parameter(
+                        name = "datasource.name",
+                        description = "Name of the wso2 datasource to connect to the database." +
+                                " When datasource.name is provided, the url, username and password are not needed.",
+                        type = DataType.STRING,
+                        defaultValue = "<Empty_String>",
+                        optional = true
+                ),
+                @Parameter(
                         name = "table.name",
                         description = "Name of the table which needs to be monitored for data changes.",
                         type = DataType.STRING
@@ -183,6 +191,7 @@ public class CDCSource extends Source {
     private String carbonHome;
     private CDCPollar cdcPollar;
     private String lastOffset;
+    private String datasourceName;
 
     @Override
     public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
@@ -253,8 +262,15 @@ public class CDCSource extends Source {
             case CDCSourceConstants.MODE_POLLING:
                 String driverClassName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.JDBC_DRIVER_NAME);
                 String pollingColumn = optionHolder.validateAndGetStaticValue(CDCSourceConstants.POLLING_COLUMN);
-                cdcPollar = new CDCPollar(url, username, password, tableName, driverClassName, lastOffset,
-                        pollingColumn, sourceEventListener, this);
+                datasourceName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.DATASOURCE_NAME,
+                        CDCSourceConstants.EMPTY_STRING);
+                if (datasourceName.equals(CDCSourceConstants.EMPTY_STRING)) {
+                    cdcPollar = new CDCPollar(url, username, password, tableName, driverClassName, lastOffset,
+                            pollingColumn, sourceEventListener, this);
+                } else {
+                    cdcPollar = new CDCPollar(datasourceName, tableName, driverClassName, lastOffset,
+                            pollingColumn, sourceEventListener, this);
+                }
                 break;
             default:
                 throw new SiddhiAppValidationException("unsupported mode: " + mode);
@@ -370,6 +386,7 @@ public class CDCSource extends Source {
      * Used to Validate the parameters.
      */
     private void validateParameter() {
+        // TODO: 10/26/18 validate for the mode polling
         if (!(operation.equalsIgnoreCase(CDCSourceConstants.INSERT)
                 || operation.equalsIgnoreCase(CDCSourceConstants.UPDATE)
                 || operation.equalsIgnoreCase(CDCSourceConstants.DELETE))) {
