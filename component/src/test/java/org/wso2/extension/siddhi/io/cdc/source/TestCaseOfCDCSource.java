@@ -279,7 +279,7 @@ public class TestCaseOfCDCSource {
     /**
      * Test case to Capture Update operations from a MySQL table.
      */
-    @Test(dependsOnMethods = {"testInsertCDC"})
+    @Test
     public void testUpdateCDC() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
         log.info("CDC TestCase-2: Capturing Update change data from MySQL.");
@@ -314,6 +314,7 @@ public class TestCaseOfCDCSource {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
                 for (Event event : inEvents) {
+                    currentEvent = event;
                     eventCount.getAndIncrement();
                     log.info(eventCount + ". " + event);
                     eventArrived.set(true);
@@ -324,7 +325,7 @@ public class TestCaseOfCDCSource {
         cdcAppRuntime.addCallback("query1", queryCallback);
         cdcAppRuntime.start();
 
-        SiddhiTestHelper.waitForEvents(waitTime, 11, eventCount, timeout);
+        SiddhiTestHelper.waitForEvents(waitTime, 0, eventCount, timeout);
 
         //persisting
         cdcAppRuntime.persist();
@@ -348,13 +349,18 @@ public class TestCaseOfCDCSource {
         log.info("Siddhi app restarted. Waiting for events...");
 
         //starting RDBMS store.
-        String rdbmsStoreDefinition = "define stream UpdateStream (id string, name string);" +
+        String rdbmsStoreDefinition = "define stream UpdateStream(id string, name string);" +
+                "define stream InsertStream(id string, name string);" +
                 "@Store(type='rdbms', jdbc.url='" + databaseURL + "'," +
                 " username='" + username + "', password='" + password + "' ," +
                 " jdbc.driver.name='" + jdbcDriverName + "')" +
                 "define table login (id string, name string);";
 
-        String rdbmsQuery = "@info(name='query2') " +
+        String insertQuery = "@info(name='query3') " +
+                "from InsertStream " +
+                "insert into login;";
+
+        String updateQuery = "@info(name='query2') " +
                 "from UpdateStream " +
                 "update login on login.id==id;";
 
@@ -366,15 +372,32 @@ public class TestCaseOfCDCSource {
                 }
             }
         };
-        SiddhiAppRuntime rdbmsAppRuntime = siddhiManager.createSiddhiAppRuntime(rdbmsStoreDefinition + rdbmsQuery);
+        SiddhiAppRuntime rdbmsAppRuntime = siddhiManager.createSiddhiAppRuntime(rdbmsStoreDefinition + insertQuery
+                + updateQuery);
         rdbmsAppRuntime.addCallback("query2", queryCallback2);
         rdbmsAppRuntime.start();
 
-        //Do an insert and wait for cdc app to capture.
-        InputHandler rdbmsInputHandler = rdbmsAppRuntime.getInputHandler("UpdateStream");
-        Object[] insertingObject = new Object[]{"e077", "newEmpName"};
+        //Do an insert first.
+        InputHandler rdbmsInputHandler = rdbmsAppRuntime.getInputHandler("InsertStream");
+        Object[] insertingObject = new Object[]{"e001", "empName"};
         rdbmsInputHandler.send(insertingObject);
+
+        Thread.sleep(100);
+
+        //Update inserted row.
+        rdbmsInputHandler = rdbmsAppRuntime.getInputHandler("UpdateStream");
+        Object[] updatingObject = new Object[]{"e001", "newName"};
+        rdbmsInputHandler.send(updatingObject);
+
+        //wait to capture the update event.
         SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
+
+        //Assert event arrival.
+        Assert.assertTrue(eventArrived.get());
+
+        //Assert event data.
+        Object[] expectedEventObject = new Object[]{"e001", "e001", "empName", "newName"};
+        Assert.assertEquals(expectedEventObject, currentEvent.getData());
 
         cdcAppRuntime.shutdown();
         rdbmsAppRuntime.shutdown();
