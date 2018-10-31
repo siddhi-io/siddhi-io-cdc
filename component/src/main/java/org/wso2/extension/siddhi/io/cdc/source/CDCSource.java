@@ -233,7 +233,7 @@ public class CDCSource extends Source {
                 historyFileDirectory = carbonHome + File.separator + "cdc" + File.separator + "history"
                         + File.separator + siddhiAppName + File.separator;
 
-                validateParameter();
+                validateStreamingModeParameters(optionHolder);
 
                 //send sourceEventListener and preferred operation to changeDataCapture object
                 changeDataCapture = new ChangeDataCapture(operation, sourceEventListener);
@@ -385,7 +385,7 @@ public class CDCSource extends Source {
     /**
      * Used to Validate the parameters.
      */
-    private void validateParameter() {
+    private void validateStreamingModeParameters(OptionHolder optionHolder) {
         // TODO: 10/26/18 validate for the mode polling
         if (!(operation.equalsIgnoreCase(CDCSourceConstants.INSERT)
                 || operation.equalsIgnoreCase(CDCSourceConstants.UPDATE)
@@ -397,6 +397,26 @@ public class CDCSource extends Source {
             throw new SiddhiAppValidationException("Couldn't initialize Carbon Home.");
         } else if (!historyFileDirectory.endsWith(File.separator)) {
             historyFileDirectory = historyFileDirectory + File.separator;
+        }
+
+        if (optionHolder.isOptionExists(CDCSourceConstants.JDBC_DRIVER_NAME)) {
+            throw new SiddhiAppValidationException(CDCSourceConstants.JDBC_DRIVER_NAME + " is not an accepted " +
+                    "parameter for the mode: " + CDCSourceConstants.MODE_STREAMING);
+        }
+
+        if (optionHolder.isOptionExists(CDCSourceConstants.POLLING_COLUMN)) {
+            throw new SiddhiAppValidationException(CDCSourceConstants.POLLING_COLUMN + " is not an accepted " +
+                    "parameter for the mode: " + CDCSourceConstants.MODE_STREAMING);
+        }
+
+        if (optionHolder.isOptionExists(CDCSourceConstants.POLLING_INTERVAL)) {
+            throw new SiddhiAppValidationException(CDCSourceConstants.POLLING_INTERVAL + " is not an accepted " +
+                    "parameter for the mode: " + CDCSourceConstants.MODE_STREAMING);
+        }
+
+        if (optionHolder.isOptionExists(CDCSourceConstants.DATASOURCE_NAME)) {
+            throw new SiddhiAppValidationException(CDCSourceConstants.DATASOURCE_NAME + " is not an accepted " +
+                    "parameter for the mode: " + CDCSourceConstants.MODE_STREAMING);
         }
     }
 }
