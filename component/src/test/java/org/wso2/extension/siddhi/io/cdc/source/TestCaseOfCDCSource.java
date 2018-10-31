@@ -508,12 +508,56 @@ public class TestCaseOfCDCSource {
                 }
             });
             siddhiAppRuntime.start();
-            SiddhiTestHelper.waitForEvents(500, 2, new AtomicInteger(1), 10000);
+            SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
             siddhiAppRuntime.shutdown();
         } catch (SiddhiAppCreationException valEx) {
             Assert.assertEquals("The cdc source couldn't get started because of invalid configurations." +
                             " Found configurations: {username='" + username + "', password=******," +
                             " url='" + wrongURL + "', tablename='" + tableName + "', connetorProperties=''}",
+                    valEx.getMessageWithOutContext());
+        }
+    }
+
+    /**
+     * Test case to validate connector.properties.
+     */
+    @Test
+    public void cdcConnectorPropertiesValidation() throws InterruptedException {
+        log.info("------------------------------------------------------------------------------------------------");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String invalidConnectorProperties = "username=";
+
+        //stream definition with invalid operation.
+        String inStreamDefinition = "" +
+                "@app:name('cdcTesting')" +
+                "@source(type = 'cdc' , url = '" + databaseURL + "',  username = '" + username + "'," +
+                " password = '" + password + "', table.name = '" + tableName + "', " +
+                " operation = 'insert', connector.properties='" + invalidConnectorProperties + "'," +
+                " @map(type='keyvalue'))" +
+                "define stream istm (id string, name string);";
+        String query = ("@info(name = 'query1') " +
+                "from istm " +
+                "select *  " +
+                "insert into outputStream;");
+
+        try {
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
+                    query);
+
+            siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+                @Override
+                public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                    for (Event event : inEvents) {
+                        log.info("Received event: " + event);
+                    }
+                }
+            });
+            siddhiAppRuntime.start();
+            SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+            siddhiAppRuntime.shutdown();
+        } catch (SiddhiAppValidationException valEx) {
+            Assert.assertEquals("connector.properties input is invalid. Check near :" + invalidConnectorProperties,
                     valEx.getMessageWithOutContext());
         }
     }
