@@ -235,7 +235,7 @@ public class CDCSource extends Source {
 
                 validateParameter();
 
-                //send this object reference and preferred operation to changeDataCapture object
+                //send sourceEventListener and preferred operation to changeDataCapture object
                 changeDataCapture = new ChangeDataCapture(operation, sourceEventListener);
 
                 //create the folder for history file if not exists
