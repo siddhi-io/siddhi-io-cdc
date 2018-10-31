@@ -26,6 +26,7 @@ import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.exception.CannotRestoreSiddhiAppStateException;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.SiddhiTestHelper;
@@ -274,14 +275,14 @@ public class TestCaseOfCDCSource {
 
         //Do an insert first.
         InputHandler rdbmsInputHandler = rdbmsAppRuntime.getInputHandler("InsertStream");
-        Object[] insertingObject = new Object[]{"e001","tobeDeletedName"};
+        Object[] insertingObject = new Object[]{"e001", "tobeDeletedName"};
         rdbmsInputHandler.send(insertingObject);
 
         Thread.sleep(100);
 
         //Delete inserted row
         rdbmsInputHandler = rdbmsAppRuntime.getInputHandler("DeletionStream");
-        Object[] deletingObject = new Object[]{"e001","tobeDeletedName"};
+        Object[] deletingObject = new Object[]{"e001", "tobeDeletedName"};
         rdbmsInputHandler.send(deletingObject);
 
         //wait to capture the delete event.
@@ -439,8 +440,8 @@ public class TestCaseOfCDCSource {
         //stream definition with invalid operation.
         String inStreamDefinition = "" +
                 "@app:name('cdcTesting')" +
-                "@source(type = 'cdc' , url = 'jdbc:mysql://localhost:3306/SimpleDB',  username = 'root'," +
-                " password = '1234', table.name = 'login', " +
+                "@source(type = 'cdc' , url = '" + databaseURL + "',  username = '" + username + "'," +
+                " password = '" + password + "', table.name = '" + tableName + "', " +
                 " operation = '" + invalidOperation + "'," +
                 " @map(type='keyvalue'))" +
                 "define stream istm (id string, name string);";
@@ -467,6 +468,52 @@ public class TestCaseOfCDCSource {
         } catch (SiddhiAppValidationException valEx) {
             Assert.assertEquals("Unsupported operation: '" + invalidOperation + "'. operation should be one of" +
                             " 'insert', 'update' or 'delete'",
+                    valEx.getMessageWithOutContext());
+        }
+    }
+
+    /**
+     * Test case to validate url.
+     */
+    @Test
+    public void cdcUrlValidation() throws InterruptedException {
+        log.info("------------------------------------------------------------------------------------------------");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String wrongURL = "jdbc:mysql://0.0.0.0.0:3306/SimpleDB";
+
+        //stream definition with invalid operation.
+        String inStreamDefinition = "" +
+                "@app:name('cdcTesting')" +
+                "@source(type = 'cdc' , url = '" + wrongURL + "',  username = '" + username + "'," +
+                " password = '" + password + "', table.name = '" + tableName + "', " +
+                " operation = 'insert'," +
+                " @map(type='keyvalue'))" +
+                "define stream istm (id string, name string);";
+        String query = ("@info(name = 'query1') " +
+                "from istm " +
+                "select *  " +
+                "insert into outputStream;");
+
+        try {
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
+                    query);
+
+            siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+                @Override
+                public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                    for (Event event : inEvents) {
+                        log.info("Received event: " + event);
+                    }
+                }
+            });
+            siddhiAppRuntime.start();
+            SiddhiTestHelper.waitForEvents(500, 2, new AtomicInteger(1), 10000);
+            siddhiAppRuntime.shutdown();
+        } catch (SiddhiAppCreationException valEx) {
+            Assert.assertEquals("The cdc source couldn't get started because of invalid configurations." +
+                            " Found configurations: {username='" + username + "', password=******," +
+                            " url='" + wrongURL + "', tablename='" + tableName + "', connetorProperties=''}",
                     valEx.getMessageWithOutContext());
         }
     }
