@@ -174,7 +174,7 @@ public class TestCaseOfCDCSource {
     /**
      * Test case to Capture Delete operations from a MySQL table.
      */
-    @Test(dependsOnMethods = {"testInsertCDC", "testUpdateCDC"})
+    @Test
     public void testDeleteCDC() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
         log.info("CDC TestCase-3: Capturing Delete change data from MySQL.");
@@ -209,6 +209,7 @@ public class TestCaseOfCDCSource {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
                 for (Event event : inEvents) {
+                    currentEvent = event;
                     eventCount.getAndIncrement();
                     log.info(eventCount + ". " + event);
                     eventArrived.set(true);
@@ -243,15 +244,20 @@ public class TestCaseOfCDCSource {
         log.info("Siddhi app restarted. Waiting for events...");
 
         //starting RDBMS store.
-        String rdbmsStoreDefinition = "define stream DeletionStream (id string);" +
+        String rdbmsStoreDefinition = "define stream DeletionStream (id string, name string);" +
+                "define stream InsertStream(id string, name string);" +
                 "@Store(type='rdbms', jdbc.url='" + databaseURL + "'," +
                 " username='" + username + "', password='" + password + "' ," +
                 " jdbc.driver.name='" + jdbcDriverName + "')" +
                 "define table login (id string, name string);";
 
-        String rdbmsQuery = "@info(name='query2') " +
+        String insertQuery = "@info(name='query3') " +
+                "from InsertStream " +
+                "insert into login;";
+
+        String deleteQuery = "@info(name='query2') " +
                 "from DeletionStream " +
-                "delete login on login.id==id;";
+                "delete login on login.id==id and login.name==name;";
 
         QueryCallback queryCallback2 = new QueryCallback() {
             @Override
@@ -261,15 +267,31 @@ public class TestCaseOfCDCSource {
                 }
             }
         };
-        SiddhiAppRuntime rdbmsAppRuntime = siddhiManager.createSiddhiAppRuntime(rdbmsStoreDefinition + rdbmsQuery);
+        SiddhiAppRuntime rdbmsAppRuntime = siddhiManager.createSiddhiAppRuntime(rdbmsStoreDefinition + insertQuery
+                + deleteQuery);
         rdbmsAppRuntime.addCallback("query2", queryCallback2);
         rdbmsAppRuntime.start();
 
-        //Do an insert and wait for cdc app to capture.
-        InputHandler rdbmsInputHandler = rdbmsAppRuntime.getInputHandler("DeletionStream");
-        Object[] insertingObject = new Object[]{"e077"};
+        //Do an insert first.
+        InputHandler rdbmsInputHandler = rdbmsAppRuntime.getInputHandler("InsertStream");
+        Object[] insertingObject = new Object[]{"e001","tobeDeletedName"};
         rdbmsInputHandler.send(insertingObject);
+
+        Thread.sleep(100);
+
+        //Delete inserted row
+        rdbmsInputHandler = rdbmsAppRuntime.getInputHandler("DeletionStream");
+        Object[] deletingObject = new Object[]{"e001","tobeDeletedName"};
+        rdbmsInputHandler.send(deletingObject);
+
+        //wait to capture the delete event.
         SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
+
+        //Assert event arrival.
+        Assert.assertTrue(eventArrived.get());
+
+        //Assert event data.
+        Assert.assertEquals(deletingObject, currentEvent.getData());
 
         cdcAppRuntime.shutdown();
         rdbmsAppRuntime.shutdown();
