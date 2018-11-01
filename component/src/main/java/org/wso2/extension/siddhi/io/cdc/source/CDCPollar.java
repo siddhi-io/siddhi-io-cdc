@@ -60,6 +60,7 @@ public class CDCPollar implements Runnable {
     private String pollingColumn;
     private CDCSource cdcSource;
     private String datasourceName;
+    private int pollingInterval;
 
     public CDCPollar(String url, String username, String password, String tableName, String driverClassName,
                      String lastOffset, String pollingColumn, int pollingInterval,
@@ -74,17 +75,18 @@ public class CDCPollar implements Runnable {
         this.pollingColumn = pollingColumn;
         this.cdcSource = cdcSource;
         this.datasourceName = "";
+        this.pollingInterval = pollingInterval;
     }
 
     public CDCPollar(String datasourceName, String tableName, String lastOffset, String pollingColumn,
                      int pollingInterval, SourceEventListener sourceEventListener, CDCSource cdcSource) {
         this.datasourceName = datasourceName;
         this.tableName = tableName;
-        this.driverClassName = driverClassName;
         this.lastOffset = lastOffset;
         this.sourceEventListener = sourceEventListener;
         this.pollingColumn = pollingColumn;
         this.cdcSource = cdcSource;
+        this.pollingInterval = pollingInterval;
     }
 
     private void initializeDatasource() {
@@ -130,14 +132,16 @@ public class CDCPollar implements Runnable {
     /**
      * Poll for inserts and updates.
      *
-     * @param tableName     is the table to be monitored.
-     * @param lastOffset    is the last captured row's timestamp value. If @param lastOffset is -1,
-     *                      the table will be polled from the last existing record. i.e. change data capturing
-     *                      could be lost in this case.
-     * @param pollingColumn is the column name to poll the table.
+     * @param tableName       The table to be monitored.
+     * @param lastOffset      The last captured row's timestamp value. If @param lastOffset is -1,
+     *                        the table will be polled from the last existing record. i.e. change data capturing
+     *                        could be lost in this case.
+     * @param pollingColumn   The column name to poll the table.
+     * @param pollingInterval The interval in milliseconds to poll the given table for changes.
      */
     @SuppressWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    private void pollForChanges(String tableName, String lastOffset, String pollingColumn) throws SQLException {
+    private void pollForChanges(String tableName, String lastOffset, String pollingColumn, int pollingInterval)
+            throws SQLException {
 
         initializeDatasource();
         Connection connection = getConnection();
@@ -163,7 +167,7 @@ public class CDCPollar implements Runnable {
             }
 
             try {
-                Thread.sleep(500);
+                Thread.sleep(pollingInterval);
             } catch (InterruptedException e) {
                 log.error(e);
             }
@@ -177,7 +181,7 @@ public class CDCPollar implements Runnable {
             lastOffset = "";
         }
         try {
-            pollForChanges(tableName, lastOffset, pollingColumn);
+            pollForChanges(tableName, lastOffset, pollingColumn, pollingInterval);
         } catch (SQLException e) {
             log.error("error", e);
         }
