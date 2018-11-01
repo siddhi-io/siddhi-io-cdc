@@ -61,6 +61,7 @@ public class CDCPollar implements Runnable {
     private CDCSource cdcSource;
     private String datasourceName;
     private int pollingInterval;
+    private boolean usingDatasourceName;
 
     public CDCPollar(String url, String username, String password, String tableName, String driverClassName,
                      String lastOffset, String pollingColumn, int pollingInterval,
@@ -74,8 +75,8 @@ public class CDCPollar implements Runnable {
         this.sourceEventListener = sourceEventListener;
         this.pollingColumn = pollingColumn;
         this.cdcSource = cdcSource;
-        this.datasourceName = "";
         this.pollingInterval = pollingInterval;
+        this.usingDatasourceName = false;
     }
 
     public CDCPollar(String datasourceName, String tableName, String lastOffset, String pollingColumn,
@@ -87,10 +88,11 @@ public class CDCPollar implements Runnable {
         this.pollingColumn = pollingColumn;
         this.cdcSource = cdcSource;
         this.pollingInterval = pollingInterval;
+        this.usingDatasourceName = true;
     }
 
     private void initializeDatasource() {
-        if (datasourceName.isEmpty()) {
+        if (!usingDatasourceName) {
             Properties connectionProperties = new Properties();
 
             connectionProperties.setProperty(CONNECTION_PROPERTY_JDBC_URL, url);
@@ -133,7 +135,7 @@ public class CDCPollar implements Runnable {
      * Poll for inserts and updates.
      *
      * @param tableName       The table to be monitored.
-     * @param lastOffset      The last captured row's timestamp value. If @param lastOffset is -1,
+     * @param lastOffset      The last captured row's timestamp value. If {@code lastOffset} is null,
      *                        the table will be polled from the last existing record. i.e. change data capturing
      *                        could be lost in this case.
      * @param pollingColumn   The column name to poll the table.
@@ -144,15 +146,30 @@ public class CDCPollar implements Runnable {
             throws SQLException {
 
         initializeDatasource();
+
+        String selectQuery;
         Connection connection = getConnection();
-        String selectQuery = "select * from `" + tableName + "` where `" + pollingColumn + "` > ?;";
-        PreparedStatement statement = connection.prepareStatement(selectQuery);
+        PreparedStatement statement;
         Map<String, Object> detailsMap;
+        ResultSet resultSet;
         ResultSetMetaData metadata;
+
+        //If lastOffset is null, assign it with last record of the table.
+        if (lastOffset == null) {
+            selectQuery = "select " + pollingColumn + " from " + tableName;
+            statement = connection.prepareStatement(selectQuery);
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                lastOffset = resultSet.getString(pollingColumn);
+            }
+        }
+
+        selectQuery = "select * from `" + tableName + "` where `" + pollingColumn + "` > ?;";
+        statement = connection.prepareStatement(selectQuery);
 
         while (true) {
             statement.setString(1, lastOffset);
-            ResultSet resultSet = statement.executeQuery();
+            resultSet = statement.executeQuery();
             metadata = resultSet.getMetaData();
             while (resultSet.next()) {
                 detailsMap = new HashMap<>();
@@ -177,9 +194,6 @@ public class CDCPollar implements Runnable {
 
     @Override
     public void run() {
-        if (lastOffset == null) {
-            lastOffset = "";
-        }
         try {
             pollForChanges(tableName, lastOffset, pollingColumn, pollingInterval);
         } catch (SQLException e) {
@@ -187,7 +201,5 @@ public class CDCPollar implements Runnable {
         }
         // TODO: 10/31/18 find a way to throw the errors to siddhi, suggestion: add callback
         // TODO: 10/25/18 add meaningful error messages
-// TODO: 10/26/18 when lastoffset is empty, get the last record's pollingColumn value
-// to avoid producing a lot of old data as captured change data.
     }
 }
