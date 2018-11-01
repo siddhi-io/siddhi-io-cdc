@@ -63,7 +63,7 @@
     </tr>
     <tr>
         <td style="vertical-align: top">datasource.name</td>
-        <td style="vertical-align: top; word-wrap: break-word">Name of the wso2 datasource to connect to the database. When datasource.name is provided, the url, username and password are not needed.</td>
+        <td style="vertical-align: top; word-wrap: break-word">Name of the wso2 datasource to connect to the database. When datasource.name is provided, the url, username and password are not needed.<br>Accepted only when mode is set to 'polling'.</td>
         <td style="vertical-align: top"><Empty_String></td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
@@ -87,8 +87,8 @@
     </tr>
     <tr>
         <td style="vertical-align: top">polling.interval</td>
-        <td style="vertical-align: top; word-wrap: break-word">The interval in milliseconds to poll the given table for changes.</td>
-        <td style="vertical-align: top"><Empty_String></td>
+        <td style="vertical-align: top; word-wrap: break-word">The interval in milliseconds to poll the given table for changes.<br>Accepted only when mode is set to 'polling'.</td>
+        <td style="vertical-align: top">1000</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>

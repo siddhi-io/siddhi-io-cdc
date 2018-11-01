@@ -156,7 +156,7 @@ public class CDCPollar implements Runnable {
 
         //If lastOffset is null, assign it with last record of the table.
         if (lastOffset == null) {
-            selectQuery = "select " + pollingColumn + " from " + tableName;
+            selectQuery = "select " + pollingColumn + " from " + tableName+";";
             statement = connection.prepareStatement(selectQuery);
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
@@ -190,7 +190,6 @@ public class CDCPollar implements Runnable {
             }
         }
     }
-
 
     @Override
     public void run() {
