@@ -337,12 +337,17 @@ public class CDCSource extends Source {
                 executorService.execute(engine);
                 break;
             case CDCSourceConstants.MODE_POLLING:
+                //create a completion callback to handle exceptions from CDCPollar
+                CDCPollar.CompletionCallback cdcCompletionCallback = error ->
+                        connectionCallback.onError(new ConnectionUnavailableException(
+                                "Connection to the database lost.", error));
+
+                cdcPollar.addCompletionCallback(cdcCompletionCallback);
                 executorService.execute(cdcPollar);
                 break;
             default:
                 break;
         }
-
     }
 
     @Override

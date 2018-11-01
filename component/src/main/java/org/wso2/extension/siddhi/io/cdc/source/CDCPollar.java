@@ -62,6 +62,7 @@ public class CDCPollar implements Runnable {
     private String datasourceName;
     private int pollingInterval;
     private boolean usingDatasourceName;
+    private CompletionCallback completionCallback;
 
     public CDCPollar(String url, String username, String password, String tableName, String driverClassName,
                      String lastOffset, String pollingColumn, int pollingInterval,
@@ -89,6 +90,10 @@ public class CDCPollar implements Runnable {
         this.cdcSource = cdcSource;
         this.pollingInterval = pollingInterval;
         this.usingDatasourceName = true;
+    }
+
+    public void addCompletionCallback(CompletionCallback completionCallback){
+        this.completionCallback = completionCallback;
     }
 
     private void initializeDatasource() {
@@ -156,7 +161,7 @@ public class CDCPollar implements Runnable {
 
         //If lastOffset is null, assign it with last record of the table.
         if (lastOffset == null) {
-            selectQuery = "select " + pollingColumn + " from " + tableName+";";
+            selectQuery = "select " + pollingColumn + " from " + tableName + ";";
             statement = connection.prepareStatement(selectQuery);
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
@@ -197,8 +202,17 @@ public class CDCPollar implements Runnable {
             pollForChanges(tableName, lastOffset, pollingColumn, pollingInterval);
         } catch (SQLException e) {
             log.error("error", e);
+            completionCallback.handle(e);
         }
-        // TODO: 10/31/18 find a way to throw the errors to siddhi, suggestion: add callback
         // TODO: 10/25/18 add meaningful error messages
+    }
+
+    public interface CompletionCallback {
+        /**
+         * Handle the completion of the CDCPollar.
+         *
+         * @param error the error.
+         */
+        void handle(Throwable error);
     }
 }
