@@ -112,6 +112,14 @@ import java.util.concurrent.Executors;
                         optional = true
                 ),
                 @Parameter(
+                        name = "polling.interval",
+                        description = "The interval in milliseconds to poll the given table for changes."
+                        ,
+                        type = DataType.STRING,
+                        defaultValue = "<Empty_String>",
+                        optional = true
+                ),
+                @Parameter(
                         name = "operation",
                         description = "Interested change event operation. 'insert', 'update' or 'delete'. " +
                                 "\nNot case sensitive.",
@@ -182,6 +190,7 @@ import java.util.concurrent.Executors;
 public class CDCSource extends Source {
     private static final Logger log = Logger.getLogger(CDCSource.class);
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private int pollingInterval;
     private String mode;
     private Map<byte[], byte[]> offsetData = new HashMap<>();
     private String operation;
@@ -191,7 +200,6 @@ public class CDCSource extends Source {
     private String carbonHome;
     private CDCPollar cdcPollar;
     private String lastOffset;
-    private String datasourceName;
 
     @Override
     public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
@@ -201,13 +209,14 @@ public class CDCSource extends Source {
         mode = optionHolder.validateAndGetStaticValue(CDCSourceConstants.MODE, CDCSourceConstants.MODE_STREAMING);
 
         //initialize common mandatory parameters
-        String url = optionHolder.validateAndGetOption(CDCSourceConstants.DATABASE_CONNECTION_URL).getValue();
         String tableName = optionHolder.validateAndGetOption(CDCSourceConstants.TABLE_NAME).getValue();
-        String username = optionHolder.validateAndGetOption(CDCSourceConstants.USERNAME).getValue();
-        String password = optionHolder.validateAndGetOption(CDCSourceConstants.PASSWORD).getValue();
 
         switch (mode) {
             case CDCSourceConstants.MODE_STREAMING:
+
+                String url = optionHolder.validateAndGetOption(CDCSourceConstants.DATABASE_CONNECTION_URL).getValue();
+                String username = optionHolder.validateAndGetOption(CDCSourceConstants.USERNAME).getValue();
+                String password = optionHolder.validateAndGetOption(CDCSourceConstants.PASSWORD).getValue();
 
                 String siddhiAppName = siddhiAppContext.getName();
                 String streamName = sourceEventListener.getStreamDefinition().getId();
@@ -260,20 +269,44 @@ public class CDCSource extends Source {
                 }
                 break;
             case CDCSourceConstants.MODE_POLLING:
-                String driverClassName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.JDBC_DRIVER_NAME);
+
                 String pollingColumn = optionHolder.validateAndGetStaticValue(CDCSourceConstants.POLLING_COLUMN);
-                datasourceName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.DATASOURCE_NAME,
-                        CDCSourceConstants.EMPTY_STRING);
-                if (datasourceName.equals(CDCSourceConstants.EMPTY_STRING)) {
+                boolean isDatasourceNameAvailable = optionHolder.isOptionExists(CDCSourceConstants.DATASOURCE_NAME);
+                String datasourceName = "";
+                if (isDatasourceNameAvailable) {
+                    datasourceName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.DATASOURCE_NAME);
+                }
+
+                try {
+                    pollingInterval = Integer.parseInt(
+                            optionHolder.validateAndGetStaticValue(CDCSourceConstants.POLLING_INTERVAL,
+                                    Integer.toString(CDCSourceConstants.DEFAULT_POLLING_INTERVAL_MS)));
+                } catch (NumberFormatException ex) {
+                    throw new SiddhiAppValidationException(CDCSourceConstants.POLLING_INTERVAL + " should be a " +
+                            "non negative integer.");
+                }
+
+                validatePollingModeParameters(optionHolder, isDatasourceNameAvailable);
+                if (!isDatasourceNameAvailable) {
+                    String driverClassName;
+                    try {
+                        driverClassName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.JDBC_DRIVER_NAME);
+                        url = optionHolder.validateAndGetOption(CDCSourceConstants.DATABASE_CONNECTION_URL).getValue();
+                        username = optionHolder.validateAndGetOption(CDCSourceConstants.USERNAME).getValue();
+                        password = optionHolder.validateAndGetOption(CDCSourceConstants.PASSWORD).getValue();
+                    } catch (SiddhiAppValidationException ex) {
+                        throw new SiddhiAppValidationException(ex.getMessage() + " Alternatively, define "
+                                + CDCSourceConstants.DATASOURCE_NAME + ".");
+                    }
                     cdcPollar = new CDCPollar(url, username, password, tableName, driverClassName, lastOffset,
-                            pollingColumn, sourceEventListener, this);
+                            pollingColumn, pollingInterval, sourceEventListener, this);
                 } else {
-                    cdcPollar = new CDCPollar(datasourceName, tableName, driverClassName, lastOffset,
-                            pollingColumn, sourceEventListener, this);
+                    cdcPollar = new CDCPollar(datasourceName, tableName, lastOffset, pollingColumn, pollingInterval,
+                            sourceEventListener, this);
                 }
                 break;
             default:
-                throw new SiddhiAppValidationException("unsupported mode: " + mode);
+                throw new SiddhiAppValidationException("unsupported " + CDCSourceConstants.MODE + ": " + mode);
         }
     }
 
@@ -383,16 +416,16 @@ public class CDCSource extends Source {
     }
 
     /**
-     * Used to Validate the parameters.
+     * Used to Validate the parameters for the mode: streaming.
      */
     private void validateStreamingModeParameters(OptionHolder optionHolder) {
-        // TODO: 10/26/18 validate for the mode polling
         if (!(operation.equalsIgnoreCase(CDCSourceConstants.INSERT)
                 || operation.equalsIgnoreCase(CDCSourceConstants.UPDATE)
                 || operation.equalsIgnoreCase(CDCSourceConstants.DELETE))) {
             throw new SiddhiAppValidationException("Unsupported operation: '" + operation + "'." +
                     " operation should be one of 'insert', 'update' or 'delete'");
         }
+
         if (carbonHome.isEmpty()) {
             throw new SiddhiAppValidationException("Couldn't initialize Carbon Home.");
         } else if (!historyFileDirectory.endsWith(File.separator)) {
@@ -417,6 +450,59 @@ public class CDCSource extends Source {
         if (optionHolder.isOptionExists(CDCSourceConstants.DATASOURCE_NAME)) {
             throw new SiddhiAppValidationException(CDCSourceConstants.DATASOURCE_NAME + " is not an accepted " +
                     "parameter for the mode: " + CDCSourceConstants.MODE_STREAMING);
+        }
+    }
+
+    /**
+     * Used to Validate the parameters for the mode: polling.
+     */
+    private void validatePollingModeParameters(OptionHolder optionHolder, boolean isDatasourceNameAvailable) {
+        if (pollingInterval < 0) {
+            throw new SiddhiAppValidationException(CDCSourceConstants.POLLING_INTERVAL + " should be a " +
+                    "non negative integer.");
+        }
+
+        if (optionHolder.isOptionExists(CDCSourceConstants.OPERATION)) {
+            throw new SiddhiAppValidationException(CDCSourceConstants.OPERATION + " is not an accepted " +
+                    "parameter for the mode: " + CDCSourceConstants.MODE_POLLING);
+        }
+
+        if (optionHolder.isOptionExists(CDCSourceConstants.DATABASE_SERVER_NAME)) {
+            throw new SiddhiAppValidationException(CDCSourceConstants.DATABASE_SERVER_NAME + " is not an accepted " +
+                    "parameter for the mode: " + CDCSourceConstants.MODE_POLLING);
+        }
+
+        if (optionHolder.isOptionExists(CDCSourceConstants.SERVER_ID)) {
+            throw new SiddhiAppValidationException(CDCSourceConstants.SERVER_ID + " is not an accepted " +
+                    "parameter for the mode: " + CDCSourceConstants.MODE_POLLING);
+        }
+
+        if (optionHolder.isOptionExists(CDCSourceConstants.CONNECTOR_PROPERTIES)) {
+            throw new SiddhiAppValidationException(CDCSourceConstants.CONNECTOR_PROPERTIES + " is not an accepted " +
+                    "parameter for the mode: " + CDCSourceConstants.MODE_POLLING);
+        }
+
+        if (isDatasourceNameAvailable) {
+            if (optionHolder.isOptionExists(CDCSourceConstants.DATABASE_CONNECTION_URL)) {
+                throw new SiddhiAppValidationException(CDCSourceConstants.DATABASE_CONNECTION_URL +
+                        " is not an accepted parameter for the mode: " + CDCSourceConstants.MODE_POLLING + " when " +
+                        CDCSourceConstants.DATASOURCE_NAME + " is specified");
+            }
+            if (optionHolder.isOptionExists(CDCSourceConstants.USERNAME)) {
+                throw new SiddhiAppValidationException(CDCSourceConstants.USERNAME +
+                        " is not an accepted parameter for the mode: " + CDCSourceConstants.MODE_POLLING + " when " +
+                        CDCSourceConstants.DATASOURCE_NAME + " is specified");
+            }
+            if (optionHolder.isOptionExists(CDCSourceConstants.PASSWORD)) {
+                throw new SiddhiAppValidationException(CDCSourceConstants.PASSWORD +
+                        " is not an accepted parameter for the mode: " + CDCSourceConstants.MODE_POLLING + " when " +
+                        CDCSourceConstants.DATASOURCE_NAME + " is specified");
+            }
+            if (optionHolder.isOptionExists(CDCSourceConstants.JDBC_DRIVER_NAME)) {
+                throw new SiddhiAppValidationException(CDCSourceConstants.JDBC_DRIVER_NAME +
+                        " is not an accepted parameter for the mode: " + CDCSourceConstants.MODE_POLLING + " when " +
+                        CDCSourceConstants.DATASOURCE_NAME + " is specified");
+            }
         }
     }
 }

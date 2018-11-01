@@ -62,8 +62,8 @@ public class CDCPollar implements Runnable {
     private String datasourceName;
 
     public CDCPollar(String url, String username, String password, String tableName, String driverClassName,
-                     String lastOffset, String pollingColumn, SourceEventListener sourceEventListener,
-                     CDCSource cdcSource) {
+                     String lastOffset, String pollingColumn, int pollingInterval,
+                     SourceEventListener sourceEventListener, CDCSource cdcSource) {
         this.url = url;
         this.tableName = tableName;
         this.username = username;
@@ -76,9 +76,8 @@ public class CDCPollar implements Runnable {
         this.datasourceName = "";
     }
 
-    public CDCPollar(String datasourceName, String tableName, String driverClassName,
-                     String lastOffset, String pollingColumn, SourceEventListener sourceEventListener,
-                     CDCSource cdcSource) {
+    public CDCPollar(String datasourceName, String tableName, String lastOffset, String pollingColumn,
+                     int pollingInterval, SourceEventListener sourceEventListener, CDCSource cdcSource) {
         this.datasourceName = datasourceName;
         this.tableName = tableName;
         this.driverClassName = driverClassName;
@@ -182,6 +181,7 @@ public class CDCPollar implements Runnable {
         } catch (SQLException e) {
             log.error("error", e);
         }
+        // TODO: 10/31/18 find a way to throw the errors to siddhi, suggestion: add callback
         // TODO: 10/25/18 add meaningful error messages
 // TODO: 10/26/18 when lastoffset is empty, get the last record's pollingColumn value
 // to avoid producing a lot of old data as captured change data.
