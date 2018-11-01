@@ -561,4 +561,218 @@ public class TestCaseOfCDCSource {
                     valEx.getMessageWithOutContext());
         }
     }
+
+    /**
+     * Test case to check for the missing mandatory parameter: url.
+     */
+    @Test
+    public void checkForParameterURL() throws InterruptedException {
+        log.info("------------------------------------------------------------------------------------------------");
+
+        SiddhiAppRuntime siddhiAppRuntime;
+        String streamDefinition;
+        SiddhiManager siddhiManager = new SiddhiManager();
+        QueryCallback queryCallback = new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                for (Event event : inEvents) {
+                    log.info("Received event: " + event);
+                }
+            }
+        };
+        String query = ("@info(name = 'query1') " +
+                "from istm " +
+                "select *  " +
+                "insert into outputStream;");
+
+        //stream definition with missing parameter: url
+        streamDefinition = "@app:name('cdcTesting')" +
+                "@source(type = 'cdc' ,  username = '" + username + "'," +
+                " password = '" + password + "', table.name = '" + tableName + "', " +
+                " operation = 'insert'," +
+                " @map(type='keyvalue'))" +
+                "define stream istm (id string, name string);";
+
+        try {
+            siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streamDefinition + query);
+            siddhiAppRuntime.addCallback("query1", queryCallback);
+            siddhiAppRuntime.start();
+            SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+            siddhiAppRuntime.shutdown();
+        } catch (SiddhiAppValidationException valEx) {
+            Assert.assertEquals("Option 'url' does not exist in the configuration of 'source:cdc'.",
+                    valEx.getMessageWithOutContext());
+        }
+    }
+
+    /**
+     * Test case to check for the missing mandatory parameter: username.
+     */
+    @Test
+    public void checkForParameterUsername() throws InterruptedException {
+        log.info("------------------------------------------------------------------------------------------------");
+
+        SiddhiAppRuntime siddhiAppRuntime;
+        String streamDefinition;
+        SiddhiManager siddhiManager = new SiddhiManager();
+        QueryCallback queryCallback = new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                for (Event event : inEvents) {
+                    log.info("Received event: " + event);
+                }
+            }
+        };
+        String query = ("@info(name = 'query1') " +
+                "from istm " +
+                "select *  " +
+                "insert into outputStream;");
+
+        //stream definition with missing parameter: username
+        streamDefinition = "@app:name('cdcTesting')" +
+                "@source(type = 'cdc' , url = '" + databaseURL + "'," +
+                " password = '" + password + "', table.name = '" + tableName + "', " +
+                " operation = 'insert'," +
+                " @map(type='keyvalue'))" +
+                "define stream istm (id string, name string);";
+
+        try {
+            siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streamDefinition + query);
+            siddhiAppRuntime.addCallback("query1", queryCallback);
+            siddhiAppRuntime.start();
+            SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+            siddhiAppRuntime.shutdown();
+        } catch (SiddhiAppValidationException valEx) {
+            Assert.assertEquals("Option 'username' does not exist in the configuration of 'source:cdc'.",
+                    valEx.getMessageWithOutContext());
+        }
+    }
+
+    /**
+     * Test case to check for the missing mandatory parameter: password.
+     */
+    @Test
+    public void checkForParameterPassword() throws InterruptedException {
+        log.info("------------------------------------------------------------------------------------------------");
+
+        SiddhiAppRuntime siddhiAppRuntime;
+        String streamDefinition;
+        SiddhiManager siddhiManager = new SiddhiManager();
+        QueryCallback queryCallback = new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                for (Event event : inEvents) {
+                    log.info("Received event: " + event);
+                }
+            }
+        };
+        String query = ("@info(name = 'query1') " +
+                "from istm " +
+                "select *  " +
+                "insert into outputStream;");
+
+        //stream definition with missing parameter: password
+        streamDefinition = "@app:name('cdcTesting')" +
+                "@source(type = 'cdc' , url = '" + databaseURL + "',  username = '" + username + "'," +
+                " table.name = '" + tableName + "', " +
+                " operation = 'insert'," +
+                " @map(type='keyvalue'))" +
+                "define stream istm (id string, name string);";
+
+        try {
+            siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streamDefinition + query);
+            siddhiAppRuntime.addCallback("query1", queryCallback);
+            siddhiAppRuntime.start();
+            SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+            siddhiAppRuntime.shutdown();
+        } catch (SiddhiAppValidationException valEx) {
+            Assert.assertEquals("Option 'password' does not exist in the configuration of 'source:cdc'.",
+                    valEx.getMessageWithOutContext());
+        }
+    }
+
+    /**
+     * Test case to check for the missing mandatory parameter: operation.
+     */
+    @Test
+    public void checkForParameterOperation() throws InterruptedException {
+        log.info("------------------------------------------------------------------------------------------------");
+
+        SiddhiAppRuntime siddhiAppRuntime;
+        String streamDefinition;
+        SiddhiManager siddhiManager = new SiddhiManager();
+        QueryCallback queryCallback = new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                for (Event event : inEvents) {
+                    log.info("Received event: " + event);
+                }
+            }
+        };
+        String query = ("@info(name = 'query1') " +
+                "from istm " +
+                "select *  " +
+                "insert into outputStream;");
+
+        //stream definition with missing parameter: operation
+        streamDefinition = "@app:name('cdcTesting')" +
+                "@source(type = 'cdc' , url = '" + databaseURL + "',  username = '" + username + "'," +
+                " password = '" + password + "', table.name = '" + tableName + "', " +
+                " @map(type='keyvalue'))" +
+                "define stream istm (id string, name string);";
+
+        try {
+            siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streamDefinition + query);
+            siddhiAppRuntime.addCallback("query1", queryCallback);
+            siddhiAppRuntime.start();
+            SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+            siddhiAppRuntime.shutdown();
+        } catch (SiddhiAppValidationException valEx) {
+            Assert.assertEquals("Option 'operation' does not exist in the configuration of 'source:cdc'.",
+                    valEx.getMessageWithOutContext());
+        }
+    }
+
+    /**
+     * Test case to check for the missing mandatory parameter: table.name.
+     */
+    @Test
+    public void checkForParameterTableName() throws InterruptedException {
+        log.info("------------------------------------------------------------------------------------------------");
+
+        SiddhiAppRuntime siddhiAppRuntime;
+        String streamDefinition;
+        SiddhiManager siddhiManager = new SiddhiManager();
+        QueryCallback queryCallback = new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                for (Event event : inEvents) {
+                    log.info("Received event: " + event);
+                }
+            }
+        };
+        String query = ("@info(name = 'query1') " +
+                "from istm " +
+                "select *  " +
+                "insert into outputStream;");
+
+        //stream definition with missing parameter: table.name
+        streamDefinition = "@app:name('cdcTesting')" +
+                "@source(type = 'cdc' , url = '" + databaseURL + "',  username = '" + username + "'," +
+                " password = '" + password + "'," +
+                " operation = 'insert'," +
+                " @map(type='keyvalue'))" +
+                "define stream istm (id string, name string);";
+
+        try {
+            siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streamDefinition + query);
+            siddhiAppRuntime.addCallback("query1", queryCallback);
+            siddhiAppRuntime.start();
+            SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+            siddhiAppRuntime.shutdown();
+        } catch (SiddhiAppValidationException valEx) {
+            Assert.assertEquals("Option 'table.name' does not exist in the configuration of 'source:cdc'.",
+                    valEx.getMessageWithOutContext());
+        }
+    }
 }
