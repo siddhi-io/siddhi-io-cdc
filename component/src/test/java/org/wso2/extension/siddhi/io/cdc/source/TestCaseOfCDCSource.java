@@ -25,15 +25,11 @@ import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
-import org.wso2.siddhi.core.exception.CannotRestoreSiddhiAppStateException;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.SiddhiTestHelper;
-import org.wso2.siddhi.core.util.config.InMemoryConfigManager;
-import org.wso2.siddhi.core.util.persistence.InMemoryPersistenceStore;
-import org.wso2.siddhi.core.util.persistence.PersistenceStore;
 import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -106,7 +102,7 @@ public class TestCaseOfCDCSource {
             }
         };
 
-        cdcAppRuntime.addCallback("istm",insertionStreamCallback);
+        cdcAppRuntime.addCallback("istm", insertionStreamCallback);
         cdcAppRuntime.start();
 
         QueryCallback rdbmsQueryCallback = new QueryCallback() {
@@ -190,7 +186,7 @@ public class TestCaseOfCDCSource {
             }
         };
 
-        cdcAppRuntime.addCallback("delstm",deletionStreamCallback);
+        cdcAppRuntime.addCallback("delstm", deletionStreamCallback);
         cdcAppRuntime.start();
 
         QueryCallback rdbmsQuerycallback = new QueryCallback() {
@@ -294,7 +290,7 @@ public class TestCaseOfCDCSource {
             }
         };
 
-        cdcAppRuntime.addCallback("updatestm",updatingStreamCallback);
+        cdcAppRuntime.addCallback("updatestm", updatingStreamCallback);
         cdcAppRuntime.start();
 
         QueryCallback queryCallback2 = new QueryCallback() {
