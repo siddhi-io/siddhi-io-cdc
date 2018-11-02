@@ -117,7 +117,7 @@ import java.util.concurrent.Executors;
                         description = "The interval in milliseconds to poll the given table for changes." +
                                 "\nAccepted only when mode is set to 'polling'."
                         ,
-                        type = DataType.STRING,
+                        type = DataType.INT,
                         defaultValue = "1000",
                         optional = true
                 ),
@@ -279,14 +279,9 @@ public class CDCSource extends Source {
                     datasourceName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.DATASOURCE_NAME);
                 }
 
-                try {
-                    pollingInterval = Integer.parseInt(
+                pollingInterval = Integer.parseInt(
                             optionHolder.validateAndGetStaticValue(CDCSourceConstants.POLLING_INTERVAL,
                                     Integer.toString(CDCSourceConstants.DEFAULT_POLLING_INTERVAL_MS)));
-                } catch (NumberFormatException ex) {
-                    throw new SiddhiAppValidationException(CDCSourceConstants.POLLING_INTERVAL + " should be a " +
-                            "non negative integer.");
-                }
 
                 validatePollingModeParameters();
                 if (!isDatasourceNameAvailable) {
