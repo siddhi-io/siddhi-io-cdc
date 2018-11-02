@@ -43,23 +43,27 @@ public class TestCaseOfCDCSource {
     private AtomicInteger eventCount = new AtomicInteger(0);
     private AtomicBoolean eventArrived = new AtomicBoolean(false);
     private int waitTime = 50;
-    private int timeout = 1000000;
+    private int timeout = 10000;
     private String username = "";
     private String password = "";
-    private String jdbcDriverName = "com.mysql.jdbc.Driver";
+    private String mysqlJdbcDriverName = "com.mysql.jdbc.Driver";
     private String databaseURL = "jdbc:mysql://localhost:3306/SimpleDB";
     private String tableName = "login";
+    private String pollingColumn = "last_updated";
+    private String pollingTableName = "people";
+    private Event currentEvent;
 
     @BeforeMethod
     public void init() {
         eventCount.set(0);
         eventArrived.set(false);
+        currentEvent = new Event();
     }
 
     @Test
     public void testInsertCDCPollingMode() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
-        log.info("CDC TestCase-4: Capturing Insert change data from MySQL for polling mode");
+        log.info("CDC TestCase-4: Capturing change data from MySQL for polling mode");
         log.info("------------------------------------------------------------------------------------------------");
 
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
@@ -67,18 +71,16 @@ public class TestCaseOfCDCSource {
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setPersistenceStore(persistenceStore);
 
-        // TODO: 10/23/18 get rid of the hardcodes
-
         String cdcinStreamDefinition = "@app:name('cdcTesting')" +
-                "@source(type = 'cdc'," +
-                " mode='polling', polling.column='last_updated'," +
-                " jdbc.driver.name='com.mysql.jdbc.Driver'," +
-                " url = '" + "jdbc:mysql://localhost:3306/PollingDB" + "'," +
+                "@source(type = 'cdc', mode='polling'," +
+                " polling.column='" + pollingColumn + "'," +
+                " jdbc.driver.name='" + mysqlJdbcDriverName + "'," +
+                " url = '" + databaseURL + "'," +
                 " username = '" + username + "'," +
                 " password = '" + password + "'," +
-                " table.name = '" + "people" + "', " +
+                " table.name = '" + pollingTableName + "', " +
                 " @map(type='keyvalue'))" +
-                "define stream istm (last_updated string, name string);";
+                "define stream istm (name string);";
 
         String cdcquery = ("@info(name = 'query1') " +
                 "from istm#log() " +
@@ -94,6 +96,7 @@ public class TestCaseOfCDCSource {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
                 for (Event event : inEvents) {
+                    currentEvent = event;
                     eventCount.getAndIncrement();
                     log.info(eventCount + ". " + event);
                     eventArrived.set(true);
@@ -104,8 +107,66 @@ public class TestCaseOfCDCSource {
         cdcAppRuntime.addCallback("query1", queryCallback);
         cdcAppRuntime.start();
 
-        SiddhiTestHelper.waitForEvents(waitTime, 200, eventCount, timeout);
+        SiddhiTestHelper.waitForEvents(waitTime, 0, eventCount, timeout);
+
+        //persisting
+        cdcAppRuntime.persist();
+
+        //restarting siddhi app
         cdcAppRuntime.shutdown();
+        eventArrived.set(false);
+        eventCount.set(0);
+
+        cdcAppRuntime = siddhiManager.createSiddhiAppRuntime(cdcinStreamDefinition + cdcquery);
+        cdcAppRuntime.addCallback("query1", queryCallback);
+        cdcAppRuntime.start();
+
+        //loading
+        try {
+            cdcAppRuntime.restoreLastRevision();
+        } catch (CannotRestoreSiddhiAppStateException e) {
+            Assert.fail("Restoring of Siddhi app " + cdcAppRuntime.getName() + " failed");
+        }
+
+        log.info("Siddhi app restarted. Waiting for events...");
+
+        //starting RDBMS store.
+        String rdbmsStoreDefinition = "define stream insertionStream (name string);" +
+                "@Store(type='rdbms', jdbc.url='" + databaseURL + "'," +
+                " username='" + username + "', password='" + password + "' ," +
+                " jdbc.driver.name='" + mysqlJdbcDriverName + "')" +
+                "define table people (name string);";
+
+        String rdbmsQuery = "@info(name='query2') " +
+                "from insertionStream " +
+                "insert into people;";
+
+        QueryCallback queryCallback2 = new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                for (Event event : inEvents) {
+                    log.info("insert done: " + event);
+                }
+            }
+        };
+        SiddhiAppRuntime rdbmsAppRuntime = siddhiManager.createSiddhiAppRuntime(rdbmsStoreDefinition + rdbmsQuery);
+        rdbmsAppRuntime.addCallback("query2", queryCallback2);
+        rdbmsAppRuntime.start();
+
+        //Do an insert and wait for cdc app to capture.
+        InputHandler rdbmsInputHandler = rdbmsAppRuntime.getInputHandler("insertionStream");
+        Object[] insertingObject = new Object[]{"testEmployer"};
+        rdbmsInputHandler.send(insertingObject);
+        SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
+
+        //Assert event arrival.
+        Assert.assertTrue(eventArrived.get());
+
+        //Assert event data.
+        Assert.assertEquals(insertingObject, currentEvent.getData());
+
+        cdcAppRuntime.shutdown();
+        rdbmsAppRuntime.shutdown();
         siddhiManager.shutdown();
     }
 
@@ -185,7 +246,7 @@ public class TestCaseOfCDCSource {
         String rdbmsStoreDefinition = "define stream insertionStream (id string, name string);" +
                 "@Store(type='rdbms', jdbc.url='" + databaseURL + "'," +
                 " username='" + username + "', password='" + password + "' ," +
-                " jdbc.driver.name='" + jdbcDriverName + "')" +
+                " jdbc.driver.name='" + mysqlJdbcDriverName + "')" +
                 "define table login (id string, name string);";
 
         String rdbmsQuery = "@info(name='query2') " +
@@ -290,7 +351,7 @@ public class TestCaseOfCDCSource {
         String rdbmsStoreDefinition = "define stream DeletionStream (id string);" +
                 "@Store(type='rdbms', jdbc.url='" + databaseURL + "'," +
                 " username='" + username + "', password='" + password + "' ," +
-                " jdbc.driver.name='" + jdbcDriverName + "')" +
+                " jdbc.driver.name='" + mysqlJdbcDriverName + "')" +
                 "define table login (id string, name string);";
 
         String rdbmsQuery = "@info(name='query2') " +
@@ -395,7 +456,7 @@ public class TestCaseOfCDCSource {
         String rdbmsStoreDefinition = "define stream UpdateStream (id string, name string);" +
                 "@Store(type='rdbms', jdbc.url='" + databaseURL + "'," +
                 " username='" + username + "', password='" + password + "' ," +
-                " jdbc.driver.name='" + jdbcDriverName + "')" +
+                " jdbc.driver.name='" + mysqlJdbcDriverName + "')" +
                 "define table login (id string, name string);";
 
         String rdbmsQuery = "@info(name='query2') " +

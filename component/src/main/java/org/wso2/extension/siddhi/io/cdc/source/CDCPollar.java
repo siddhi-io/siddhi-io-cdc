@@ -189,7 +189,7 @@ public class CDCPollar implements Runnable {
                 }
                 lastOffset = resultSet.getString(pollingColumn);
                 cdcSource.setLastOffset(lastOffset);
-                hanleEvent(detailsMap);
+                handleEvent(detailsMap);
             }
 
             try {
@@ -200,7 +200,7 @@ public class CDCPollar implements Runnable {
         }
     }
 
-    private void hanleEvent(Map detailsMap) {
+    private void handleEvent(Map detailsMap) {
         if (paused) {
             lock.lock();
             try {
