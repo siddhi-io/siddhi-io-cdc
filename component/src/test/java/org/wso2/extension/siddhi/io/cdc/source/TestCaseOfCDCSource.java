@@ -29,6 +29,7 @@ import org.wso2.siddhi.core.exception.CannotRestoreSiddhiAppStateException;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
+import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.SiddhiTestHelper;
 import org.wso2.siddhi.core.util.config.InMemoryConfigManager;
 import org.wso2.siddhi.core.util.persistence.InMemoryPersistenceStore;
@@ -46,8 +47,8 @@ public class TestCaseOfCDCSource {
     private AtomicBoolean eventArrived = new AtomicBoolean(false);
     private int waitTime = 50;
     private int timeout = 10000;
-    private String username = "";
-    private String password = "";
+    private String username = "root";
+    private String password = "1234";
     private String jdbcDriverName = "com.mysql.jdbc.Driver";
     private String databaseURL = "jdbc:mysql://localhost:3306/SimpleDB";
     private String tableName = "login";
@@ -81,31 +82,6 @@ public class TestCaseOfCDCSource {
                 " @map(type='keyvalue'))" +
                 "define stream istm (id string, name string);";
 
-        String cdcquery = ("@info(name = 'query1') " +
-                "from istm#log() " +
-                "select *  " +
-                "insert into outputStream;");
-
-        SiddhiAppRuntime cdcAppRuntime = siddhiManager.createSiddhiAppRuntime(cdcinStreamDefinition +
-                cdcquery);
-
-        siddhiManager.setConfigManager(new InMemoryConfigManager());
-
-        QueryCallback queryCallback = new QueryCallback() {
-            @Override
-            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-                for (Event event : inEvents) {
-                    currentEvent = event;
-                    eventCount.getAndIncrement();
-                    log.info(eventCount + ". " + event);
-                    eventArrived.set(true);
-                }
-            }
-        };
-
-        cdcAppRuntime.addCallback("query1", queryCallback);
-        cdcAppRuntime.start();
-
         String rdbmsStoreDefinition = "define stream insertionStream (id string, name string);" +
                 "@Store(type='rdbms', jdbc.url='" + databaseURL + "'," +
                 " username='" + username + "', password='" + password + "' ," +
@@ -116,7 +92,24 @@ public class TestCaseOfCDCSource {
                 "from insertionStream " +
                 "insert into login;";
 
-        QueryCallback queryCallback2 = new QueryCallback() {
+        SiddhiAppRuntime cdcAppRuntime = siddhiManager.createSiddhiAppRuntime(cdcinStreamDefinition);
+
+        StreamCallback insertionStreamCallback = new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                for (Event event : events) {
+                    currentEvent = event;
+                    eventCount.getAndIncrement();
+                    log.info(eventCount + ". " + event);
+                    eventArrived.set(true);
+                }
+            }
+        };
+
+        cdcAppRuntime.addCallback("istm",insertionStreamCallback);
+        cdcAppRuntime.start();
+
+        QueryCallback rdbmsQueryCallback = new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
                 for (Event event : inEvents) {
@@ -124,8 +117,9 @@ public class TestCaseOfCDCSource {
                 }
             }
         };
+
         SiddhiAppRuntime rdbmsAppRuntime = siddhiManager.createSiddhiAppRuntime(rdbmsStoreDefinition + rdbmsQuery);
-        rdbmsAppRuntime.addCallback("query2", queryCallback2);
+        rdbmsAppRuntime.addCallback("query2", rdbmsQueryCallback);
         rdbmsAppRuntime.start();
 
         //Do an insert and wait for cdc app to capture.
