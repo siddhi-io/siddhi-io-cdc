@@ -38,6 +38,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Polls a given table for changes. Use {@code pollingColumn} to poll on.
@@ -63,6 +65,9 @@ public class CDCPollar implements Runnable {
     private int pollingInterval;
     private boolean usingDatasourceName;
     private CompletionCallback completionCallback;
+    private boolean paused = false;
+    private ReentrantLock lock = new ReentrantLock();
+    private Condition condition = lock.newCondition();
 
     public CDCPollar(String url, String username, String password, String tableName, String driverClassName,
                      String lastOffset, String pollingColumn, int pollingInterval,
@@ -184,7 +189,7 @@ public class CDCPollar implements Runnable {
                 }
                 lastOffset = resultSet.getString(pollingColumn);
                 cdcSource.setLastOffset(lastOffset);
-                sourceEventListener.onEvent(detailsMap, null);
+                hanleEvent(detailsMap);
             }
 
             try {
@@ -192,6 +197,36 @@ public class CDCPollar implements Runnable {
             } catch (InterruptedException e) {
                 log.error("Error while polling.", e);
             }
+        }
+    }
+
+    private void hanleEvent(Map detailsMap) {
+        if (paused) {
+            lock.lock();
+            try {
+                while (paused) {
+                    condition.await();
+                }
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+            } finally {
+                lock.unlock();
+            }
+        }
+        sourceEventListener.onEvent(detailsMap, null);
+    }
+
+    void pause() {
+        paused = true;
+    }
+
+    void resume() {
+        paused = false;
+        try {
+            lock.lock();
+            condition.signal();
+        } finally {
+            lock.unlock();
         }
     }
 

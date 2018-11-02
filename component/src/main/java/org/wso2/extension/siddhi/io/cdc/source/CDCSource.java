@@ -365,12 +365,30 @@ public class CDCSource extends Source {
 
     @Override
     public void pause() {
-        changeDataCapture.pause();
+        switch (mode) {
+            case CDCSourceConstants.MODE_POLLING:
+                cdcPollar.pause();
+                break;
+            case CDCSourceConstants.MODE_STREAMING:
+                changeDataCapture.pause();
+                break;
+            default:
+                break;
+        }
     }
 
     @Override
     public void resume() {
-        changeDataCapture.resume();
+        switch (mode) {
+            case CDCSourceConstants.MODE_POLLING:
+                cdcPollar.resume();
+                break;
+            case CDCSourceConstants.MODE_STREAMING:
+                changeDataCapture.resume();
+                break;
+            default:
+                break;
+        }
     }
 
     @Override
