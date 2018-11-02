@@ -92,7 +92,7 @@ public class CDCPollar implements Runnable {
         this.usingDatasourceName = true;
     }
 
-    public void addCompletionCallback(CompletionCallback completionCallback){
+    public void addCompletionCallback(CompletionCallback completionCallback) {
         this.completionCallback = completionCallback;
     }
 
@@ -110,7 +110,6 @@ public class CDCPollar implements Runnable {
             HikariConfig config = new HikariConfig(connectionProperties);
             this.dataSource = new HikariDataSource(config);
         } else {
-            // TODO: 10/29/18 check for the proper exception types, check pom, check for logging msgs
             try {
                 BundleContext bundleContext = FrameworkUtil.getBundle(DataSourceService.class).getBundleContext();
                 ServiceReference serviceRef = bundleContext.getServiceReference(DataSourceService.class.getName());
@@ -191,7 +190,7 @@ public class CDCPollar implements Runnable {
             try {
                 Thread.sleep(pollingInterval);
             } catch (InterruptedException e) {
-                log.error(e);
+                log.error("Error while polling.", e);
             }
         }
     }
@@ -201,10 +200,8 @@ public class CDCPollar implements Runnable {
         try {
             pollForChanges(tableName, lastOffset, pollingColumn, pollingInterval);
         } catch (SQLException e) {
-            log.error("error", e);
             completionCallback.handle(e);
         }
-        // TODO: 10/25/18 add meaningful error messages
     }
 
     public interface CompletionCallback {
