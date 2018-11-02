@@ -46,7 +46,7 @@ public class TestCaseOfCDCSource {
     private AtomicInteger eventCount = new AtomicInteger(0);
     private AtomicBoolean eventArrived = new AtomicBoolean(false);
     private int waitTime = 50;
-    private int timeout = 10000;
+    private int timeout = 1000000;
     private String username = "root";
     private String password = "1234";
     private String jdbcDriverName = "com.mysql.jdbc.Driver";
@@ -148,10 +148,7 @@ public class TestCaseOfCDCSource {
         log.info("CDC TestCase-3: Capturing Delete change data from MySQL.");
         log.info("------------------------------------------------------------------------------------------------");
 
-        PersistenceStore persistenceStore = new InMemoryPersistenceStore();
-
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.setPersistenceStore(persistenceStore);
 
         String cdcinStreamDefinition = "@app:name('cdcTesting')" +
                 "@source(type = 'cdc'," +
@@ -161,57 +158,9 @@ public class TestCaseOfCDCSource {
                 " table.name = '" + tableName + "', " +
                 " operation = 'delete', " +
                 " @map(type='keyvalue'))" +
-                "define stream istm (before_id string, before_name string);";
+                "define stream delstm (before_id string, before_name string);";
 
-        String cdcquery = ("@info(name = 'query1') " +
-                "from istm#log() " +
-                "select *  " +
-                "insert into outputStream;");
 
-        SiddhiAppRuntime cdcAppRuntime = siddhiManager.createSiddhiAppRuntime(cdcinStreamDefinition +
-                cdcquery);
-
-        siddhiManager.setConfigManager(new InMemoryConfigManager());
-
-        QueryCallback queryCallback = new QueryCallback() {
-            @Override
-            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-                for (Event event : inEvents) {
-                    currentEvent = event;
-                    eventCount.getAndIncrement();
-                    log.info(eventCount + ". " + event);
-                    eventArrived.set(true);
-                }
-            }
-        };
-
-        cdcAppRuntime.addCallback("query1", queryCallback);
-        cdcAppRuntime.start();
-
-        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
-
-        //persisting
-        cdcAppRuntime.persist();
-
-        //restarting siddhi app
-        cdcAppRuntime.shutdown();
-        eventArrived.set(false);
-        eventCount.set(0);
-
-        cdcAppRuntime = siddhiManager.createSiddhiAppRuntime(cdcinStreamDefinition + cdcquery);
-        cdcAppRuntime.addCallback("query1", queryCallback);
-        cdcAppRuntime.start();
-
-        //loading
-        try {
-            cdcAppRuntime.restoreLastRevision();
-        } catch (CannotRestoreSiddhiAppStateException e) {
-            Assert.fail("Restoring of Siddhi app " + cdcAppRuntime.getName() + " failed");
-        }
-
-        log.info("Siddhi app restarted. Waiting for events...");
-
-        //starting RDBMS store.
         String rdbmsStoreDefinition = "define stream DeletionStream (id string, name string);" +
                 "define stream InsertStream(id string, name string);" +
                 "@Store(type='rdbms', jdbc.url='" + databaseURL + "'," +
@@ -223,11 +172,28 @@ public class TestCaseOfCDCSource {
                 "from InsertStream " +
                 "insert into login;";
 
-        String deleteQuery = "@info(name='query2') " +
+        String deleteQuery = "@info(name='queryDel') " +
                 "from DeletionStream " +
                 "delete login on login.id==id and login.name==name;";
 
-        QueryCallback queryCallback2 = new QueryCallback() {
+        SiddhiAppRuntime cdcAppRuntime = siddhiManager.createSiddhiAppRuntime(cdcinStreamDefinition);
+
+        StreamCallback deletionStreamCallback = new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                for (Event event : events) {
+                    currentEvent = event;
+                    eventCount.getAndIncrement();
+                    log.info(eventCount + ". " + event);
+                    eventArrived.set(true);
+                }
+            }
+        };
+
+        cdcAppRuntime.addCallback("delstm",deletionStreamCallback);
+        cdcAppRuntime.start();
+
+        QueryCallback rdbmsQuerycallback = new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
                 for (Event event : inEvents) {
@@ -235,9 +201,10 @@ public class TestCaseOfCDCSource {
                 }
             }
         };
+
         SiddhiAppRuntime rdbmsAppRuntime = siddhiManager.createSiddhiAppRuntime(rdbmsStoreDefinition + insertQuery
                 + deleteQuery);
-        rdbmsAppRuntime.addCallback("query2", queryCallback2);
+        rdbmsAppRuntime.addCallback("queryDel", rdbmsQuerycallback);
         rdbmsAppRuntime.start();
 
         //Do an insert first.
@@ -253,7 +220,7 @@ public class TestCaseOfCDCSource {
         rdbmsInputHandler.send(deletingObject);
 
         //wait to capture the delete event.
-        SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
+        SiddhiTestHelper.waitForEvents(waitTime, 100, eventCount, timeout);
 
         //Assert event arrival.
         Assert.assertTrue(eventArrived.get());
@@ -275,10 +242,7 @@ public class TestCaseOfCDCSource {
         log.info("CDC TestCase-2: Capturing Update change data from MySQL.");
         log.info("------------------------------------------------------------------------------------------------");
 
-        PersistenceStore persistenceStore = new InMemoryPersistenceStore();
-
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.setPersistenceStore(persistenceStore);
 
         String cdcinStreamDefinition = "@app:name('cdcTesting')" +
                 "@source(type = 'cdc'," +
@@ -288,17 +252,24 @@ public class TestCaseOfCDCSource {
                 " table.name = '" + tableName + "', " +
                 " operation = 'update', " +
                 " @map(type='keyvalue'))" +
-                "define stream istm (before_id string, id string, before_name string, name string);";
+                "define stream updatestm (before_id string, id string, before_name string, name string);";
 
-        String cdcquery = ("@info(name = 'query1') " +
-                "from istm#log() " +
-                "select *  " +
-                "insert into outputStream;");
+        String rdbmsStoreDefinition = "define stream UpdateStream(id string, name string);" +
+                "define stream InsertStream(id string, name string);" +
+                "@Store(type='rdbms', jdbc.url='" + databaseURL + "'," +
+                " username='" + username + "', password='" + password + "' ," +
+                " jdbc.driver.name='" + jdbcDriverName + "')" +
+                "define table login (id string, name string);";
 
-        SiddhiAppRuntime cdcAppRuntime = siddhiManager.createSiddhiAppRuntime(cdcinStreamDefinition +
-                cdcquery);
+        String insertQuery = "@info(name='query3') " +
+                "from InsertStream " +
+                "insert into login;";
 
-        siddhiManager.setConfigManager(new InMemoryConfigManager());
+        String updateQuery = "@info(name='queryUpdate') " +
+                "from UpdateStream " +
+                "update login on login.id==id;";
+
+        SiddhiAppRuntime cdcAppRuntime = siddhiManager.createSiddhiAppRuntime(cdcinStreamDefinition);
 
         QueryCallback queryCallback = new QueryCallback() {
             @Override
@@ -311,48 +282,20 @@ public class TestCaseOfCDCSource {
                 }
             }
         };
+        StreamCallback updatingStreamCallback = new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                for (Event event : events) {
+                    currentEvent = event;
+                    eventCount.getAndIncrement();
+                    log.info(eventCount + ". " + event);
+                    eventArrived.set(true);
+                }
+            }
+        };
 
-        cdcAppRuntime.addCallback("query1", queryCallback);
+        cdcAppRuntime.addCallback("updatestm",updatingStreamCallback);
         cdcAppRuntime.start();
-
-        SiddhiTestHelper.waitForEvents(waitTime, 0, eventCount, timeout);
-
-        //persisting
-        cdcAppRuntime.persist();
-
-        //restarting siddhi app
-        cdcAppRuntime.shutdown();
-        eventArrived.set(false);
-        eventCount.set(0);
-
-        cdcAppRuntime = siddhiManager.createSiddhiAppRuntime(cdcinStreamDefinition + cdcquery);
-        cdcAppRuntime.addCallback("query1", queryCallback);
-        cdcAppRuntime.start();
-
-        //loading
-        try {
-            cdcAppRuntime.restoreLastRevision();
-        } catch (CannotRestoreSiddhiAppStateException e) {
-            Assert.fail("Restoring of Siddhi app " + cdcAppRuntime.getName() + " failed");
-        }
-
-        log.info("Siddhi app restarted. Waiting for events...");
-
-        //starting RDBMS store.
-        String rdbmsStoreDefinition = "define stream UpdateStream(id string, name string);" +
-                "define stream InsertStream(id string, name string);" +
-                "@Store(type='rdbms', jdbc.url='" + databaseURL + "'," +
-                " username='" + username + "', password='" + password + "' ," +
-                " jdbc.driver.name='" + jdbcDriverName + "')" +
-                "define table login (id string, name string);";
-
-        String insertQuery = "@info(name='query3') " +
-                "from InsertStream " +
-                "insert into login;";
-
-        String updateQuery = "@info(name='query2') " +
-                "from UpdateStream " +
-                "update login on login.id==id;";
 
         QueryCallback queryCallback2 = new QueryCallback() {
             @Override
@@ -364,7 +307,7 @@ public class TestCaseOfCDCSource {
         };
         SiddhiAppRuntime rdbmsAppRuntime = siddhiManager.createSiddhiAppRuntime(rdbmsStoreDefinition + insertQuery
                 + updateQuery);
-        rdbmsAppRuntime.addCallback("query2", queryCallback2);
+        rdbmsAppRuntime.addCallback("queryUpdate", queryCallback2);
         rdbmsAppRuntime.start();
 
         //Do an insert first.
