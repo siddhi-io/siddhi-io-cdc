@@ -92,7 +92,11 @@
                 <version>${siddhi-store-rdbms.version}</version>
                 <scope>test</scope>
             </dependency>
-
+            <dependency>
+                <groupId>org.wso2.carbon.datasources</groupId>
+                <artifactId>org.wso2.carbon.datasource.core</artifactId>
+                <version>${carbon.datasource.core.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.log4j.wso2</groupId>
                 <artifactId>log4j</artifactId>
@@ -161,6 +165,7 @@
         <hikari.version>2.6.1</hikari.version>
         <org.testng.version>6.11</org.testng.version>
         <siddhi-store-rdbms.version>4.0.39</siddhi-store-rdbms.version>
+        <carbon.datasource.core.version>RELEASE</carbon.datasource.core.version>
     </properties>
     <scm>
         <url>https://github.com/wso2-extensions/siddhi-io-cdc.git</url>
