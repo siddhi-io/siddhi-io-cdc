@@ -69,10 +69,7 @@ public class TestCaseOfCDCSource {
         log.info("CDC TestCase-1: Capturing Insert change data from MySQL.");
         log.info("------------------------------------------------------------------------------------------------");
 
-        PersistenceStore persistenceStore = new InMemoryPersistenceStore();
-
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.setPersistenceStore(persistenceStore);
 
         String cdcinStreamDefinition = "@app:name('cdcTesting')" +
                 "@source(type = 'cdc'," +
@@ -109,30 +106,6 @@ public class TestCaseOfCDCSource {
         cdcAppRuntime.addCallback("query1", queryCallback);
         cdcAppRuntime.start();
 
-        SiddhiTestHelper.waitForEvents(waitTime, 0, eventCount, timeout);
-
-        //persisting
-        cdcAppRuntime.persist();
-
-        //restarting siddhi app
-        cdcAppRuntime.shutdown();
-        eventArrived.set(false);
-        eventCount.set(0);
-
-        cdcAppRuntime = siddhiManager.createSiddhiAppRuntime(cdcinStreamDefinition + cdcquery);
-        cdcAppRuntime.addCallback("query1", queryCallback);
-        cdcAppRuntime.start();
-
-        //loading
-        try {
-            cdcAppRuntime.restoreLastRevision();
-        } catch (CannotRestoreSiddhiAppStateException e) {
-            Assert.fail("Restoring of Siddhi app " + cdcAppRuntime.getName() + " failed");
-        }
-
-        log.info("Siddhi app restarted. Waiting for events...");
-
-        //starting RDBMS store.
         String rdbmsStoreDefinition = "define stream insertionStream (id string, name string);" +
                 "@Store(type='rdbms', jdbc.url='" + databaseURL + "'," +
                 " username='" + username + "', password='" + password + "' ," +
