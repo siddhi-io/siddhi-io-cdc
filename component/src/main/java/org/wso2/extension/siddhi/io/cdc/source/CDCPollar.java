@@ -97,7 +97,7 @@ public class CDCPollar implements Runnable {
         this.usingDatasourceName = true;
     }
 
-    public void addCompletionCallback(CompletionCallback completionCallback) {
+    public void setCompletionCallback(CompletionCallback completionCallback) {
         this.completionCallback = completionCallback;
     }
 
@@ -239,9 +239,12 @@ public class CDCPollar implements Runnable {
         }
     }
 
+    /**
+     * A callback function to be notified when {@code CDCPollar} throws an Error.
+     */
     public interface CompletionCallback {
         /**
-         * Handle the completion of the CDCPollar.
+         * Handle errors from {@link CDCPollar}.
          *
          * @param error the error.
          */

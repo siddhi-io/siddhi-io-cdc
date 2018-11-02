@@ -342,7 +342,7 @@ public class CDCSource extends Source {
                         connectionCallback.onError(new ConnectionUnavailableException(
                                 "Connection to the database lost.", error));
 
-                cdcPollar.addCompletionCallback(cdcCompletionCallback);
+                cdcPollar.setCompletionCallback(cdcCompletionCallback);
                 executorService.execute(cdcPollar);
                 break;
             default:
