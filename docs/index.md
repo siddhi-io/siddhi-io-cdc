@@ -2,11 +2,12 @@
 Siddhi-io-cdc
 ======================================
 
-The **siddhi-io-cdc extension** is an extension to <a target="_blank" href="https://wso2.github.io/siddhi">Siddhi</a>. It receives change data of MySQL database in the key-value format.
+The **siddhi-io-cdc extension** is an extension to <a target="_blank" href="https://wso2.github.io/siddhi">Siddhi</a>. It publishes change data of MySQL database in the key-value format.
 
 ## Prerequisites
 
 * The MySQL server should be configured to use a row-level binary log.
+* MySQL jdbc driver should be added to the `<STREAM_PROCESSOR_HOME>/lib` directory.
 * WSO2 SP State persistence should be enabled.
 * A MySQL user should be created with SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT privileges on the tables he wants to capture changes.
 
