@@ -210,7 +210,7 @@ public class TestCaseOfCDCSource {
         rdbmsInputHandler.send(insertingObject);
 
         //wait to complete deletion
-        SiddhiTestHelper.waitForEvents(waitTime,1,eventCount,timeout);
+        SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
         eventCount.getAndDecrement();
 
         //Delete inserted row
@@ -270,17 +270,6 @@ public class TestCaseOfCDCSource {
 
         SiddhiAppRuntime cdcAppRuntime = siddhiManager.createSiddhiAppRuntime(cdcinStreamDefinition);
 
-        QueryCallback queryCallback = new QueryCallback() {
-            @Override
-            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-                for (Event event : inEvents) {
-                    currentEvent = event;
-                    eventCount.getAndIncrement();
-                    log.info(eventCount + ". " + event);
-                    eventArrived.set(true);
-                }
-            }
-        };
         StreamCallback updatingStreamCallback = new StreamCallback() {
             @Override
             public void receive(Event[] events) {
