@@ -193,6 +193,7 @@ public class TestCaseOfCDCSource {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
                 for (Event event : inEvents) {
+                    eventCount.getAndIncrement();
                     log.info("delete done: " + event);
                 }
             }
@@ -208,7 +209,9 @@ public class TestCaseOfCDCSource {
         Object[] insertingObject = new Object[]{"e001", "tobeDeletedName"};
         rdbmsInputHandler.send(insertingObject);
 
-        Thread.sleep(100);
+        //wait to complete deletion
+        SiddhiTestHelper.waitForEvents(waitTime,1,eventCount,timeout);
+        eventCount.getAndDecrement();
 
         //Delete inserted row
         rdbmsInputHandler = rdbmsAppRuntime.getInputHandler("DeletionStream");
@@ -216,7 +219,7 @@ public class TestCaseOfCDCSource {
         rdbmsInputHandler.send(deletingObject);
 
         //wait to capture the delete event.
-        SiddhiTestHelper.waitForEvents(waitTime, 100, eventCount, timeout);
+        SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
 
         //Assert event arrival.
         Assert.assertTrue(eventArrived.get());
@@ -336,7 +339,7 @@ public class TestCaseOfCDCSource {
     /**
      * Test case to validate operation given by the user.
      */
-    @Test
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void cdcOperationValidation() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -356,32 +359,26 @@ public class TestCaseOfCDCSource {
                 "select *  " +
                 "insert into outputStream;");
 
-        try {
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
-                    query);
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
+                query);
 
-            siddhiAppRuntime.addCallback("query1", new QueryCallback() {
-                @Override
-                public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-                    for (Event event : inEvents) {
-                        log.info("Received event: " + event);
-                    }
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                for (Event event : inEvents) {
+                    log.info("Received event: " + event);
                 }
-            });
-            siddhiAppRuntime.start();
-            SiddhiTestHelper.waitForEvents(500, 2, new AtomicInteger(1), 10000);
-            siddhiAppRuntime.shutdown();
-        } catch (SiddhiAppValidationException valEx) {
-            Assert.assertEquals("Unsupported operation: '" + invalidOperation + "'. operation should be one of" +
-                            " 'insert', 'update' or 'delete'",
-                    valEx.getMessageWithOutContext());
-        }
+            }
+        });
+        siddhiAppRuntime.start();
+        SiddhiTestHelper.waitForEvents(500, 2, new AtomicInteger(1), 10000);
+        siddhiAppRuntime.shutdown();
     }
 
     /**
      * Test case to validate url.
      */
-    @Test
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void cdcUrlValidation() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -401,33 +398,26 @@ public class TestCaseOfCDCSource {
                 "select *  " +
                 "insert into outputStream;");
 
-        try {
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
-                    query);
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
+                query);
 
-            siddhiAppRuntime.addCallback("query1", new QueryCallback() {
-                @Override
-                public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-                    for (Event event : inEvents) {
-                        log.info("Received event: " + event);
-                    }
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                for (Event event : inEvents) {
+                    log.info("Received event: " + event);
                 }
-            });
-            siddhiAppRuntime.start();
-            SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
-            siddhiAppRuntime.shutdown();
-        } catch (SiddhiAppCreationException valEx) {
-            Assert.assertEquals("The cdc source couldn't get started because of invalid configurations." +
-                            " Found configurations: {username='" + username + "', password=******," +
-                            " url='" + wrongURL + "', tablename='" + tableName + "', connetorProperties=''}",
-                    valEx.getMessageWithOutContext());
-        }
+            }
+        });
+        siddhiAppRuntime.start();
+        SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
+        siddhiAppRuntime.shutdown();
     }
 
     /**
      * Test case to validate connector.properties.
      */
-    @Test
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void cdcConnectorPropertiesValidation() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -447,31 +437,27 @@ public class TestCaseOfCDCSource {
                 "select *  " +
                 "insert into outputStream;");
 
-        try {
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
-                    query);
 
-            siddhiAppRuntime.addCallback("query1", new QueryCallback() {
-                @Override
-                public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-                    for (Event event : inEvents) {
-                        log.info("Received event: " + event);
-                    }
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
+                query);
+
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                for (Event event : inEvents) {
+                    log.info("Received event: " + event);
                 }
-            });
-            siddhiAppRuntime.start();
-            SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
-            siddhiAppRuntime.shutdown();
-        } catch (SiddhiAppValidationException valEx) {
-            Assert.assertEquals("connector.properties input is invalid. Check near :" + invalidConnectorProperties,
-                    valEx.getMessageWithOutContext());
-        }
+            }
+        });
+        siddhiAppRuntime.start();
+        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+        siddhiAppRuntime.shutdown();
     }
 
     /**
      * Test case to check for the missing mandatory parameter: url.
      */
-    @Test
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void checkForParameterURL() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
 
@@ -499,22 +485,17 @@ public class TestCaseOfCDCSource {
                 " @map(type='keyvalue'))" +
                 "define stream istm (id string, name string);";
 
-        try {
-            siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streamDefinition + query);
-            siddhiAppRuntime.addCallback("query1", queryCallback);
-            siddhiAppRuntime.start();
-            SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
-            siddhiAppRuntime.shutdown();
-        } catch (SiddhiAppValidationException valEx) {
-            Assert.assertEquals("Option 'url' does not exist in the configuration of 'source:cdc'.",
-                    valEx.getMessageWithOutContext());
-        }
+        siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streamDefinition + query);
+        siddhiAppRuntime.addCallback("query1", queryCallback);
+        siddhiAppRuntime.start();
+        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+        siddhiAppRuntime.shutdown();
     }
 
     /**
      * Test case to check for the missing mandatory parameter: username.
      */
-    @Test
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void checkForParameterUsername() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
 
@@ -542,22 +523,17 @@ public class TestCaseOfCDCSource {
                 " @map(type='keyvalue'))" +
                 "define stream istm (id string, name string);";
 
-        try {
-            siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streamDefinition + query);
-            siddhiAppRuntime.addCallback("query1", queryCallback);
-            siddhiAppRuntime.start();
-            SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
-            siddhiAppRuntime.shutdown();
-        } catch (SiddhiAppValidationException valEx) {
-            Assert.assertEquals("Option 'username' does not exist in the configuration of 'source:cdc'.",
-                    valEx.getMessageWithOutContext());
-        }
+        siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streamDefinition + query);
+        siddhiAppRuntime.addCallback("query1", queryCallback);
+        siddhiAppRuntime.start();
+        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+        siddhiAppRuntime.shutdown();
     }
 
     /**
      * Test case to check for the missing mandatory parameter: password.
      */
-    @Test
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void checkForParameterPassword() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
 
@@ -585,22 +561,17 @@ public class TestCaseOfCDCSource {
                 " @map(type='keyvalue'))" +
                 "define stream istm (id string, name string);";
 
-        try {
-            siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streamDefinition + query);
-            siddhiAppRuntime.addCallback("query1", queryCallback);
-            siddhiAppRuntime.start();
-            SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
-            siddhiAppRuntime.shutdown();
-        } catch (SiddhiAppValidationException valEx) {
-            Assert.assertEquals("Option 'password' does not exist in the configuration of 'source:cdc'.",
-                    valEx.getMessageWithOutContext());
-        }
+        siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streamDefinition + query);
+        siddhiAppRuntime.addCallback("query1", queryCallback);
+        siddhiAppRuntime.start();
+        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+        siddhiAppRuntime.shutdown();
     }
 
     /**
      * Test case to check for the missing mandatory parameter: operation.
      */
-    @Test
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void checkForParameterOperation() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
 
@@ -627,22 +598,17 @@ public class TestCaseOfCDCSource {
                 " @map(type='keyvalue'))" +
                 "define stream istm (id string, name string);";
 
-        try {
-            siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streamDefinition + query);
-            siddhiAppRuntime.addCallback("query1", queryCallback);
-            siddhiAppRuntime.start();
-            SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
-            siddhiAppRuntime.shutdown();
-        } catch (SiddhiAppValidationException valEx) {
-            Assert.assertEquals("Option 'operation' does not exist in the configuration of 'source:cdc'.",
-                    valEx.getMessageWithOutContext());
-        }
+        siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streamDefinition + query);
+        siddhiAppRuntime.addCallback("query1", queryCallback);
+        siddhiAppRuntime.start();
+        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+        siddhiAppRuntime.shutdown();
     }
 
     /**
      * Test case to check for the missing mandatory parameter: table.name.
      */
-    @Test
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void checkForParameterTableName() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
 
@@ -670,15 +636,10 @@ public class TestCaseOfCDCSource {
                 " @map(type='keyvalue'))" +
                 "define stream istm (id string, name string);";
 
-        try {
-            siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streamDefinition + query);
-            siddhiAppRuntime.addCallback("query1", queryCallback);
-            siddhiAppRuntime.start();
-            SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
-            siddhiAppRuntime.shutdown();
-        } catch (SiddhiAppValidationException valEx) {
-            Assert.assertEquals("Option 'table.name' does not exist in the configuration of 'source:cdc'.",
-                    valEx.getMessageWithOutContext());
-        }
+        siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streamDefinition + query);
+        siddhiAppRuntime.addCallback("query1", queryCallback);
+        siddhiAppRuntime.start();
+        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+        siddhiAppRuntime.shutdown();
     }
 }
