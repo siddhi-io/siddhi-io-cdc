@@ -29,7 +29,7 @@
     </modules>
     <groupId>org.wso2.extension.siddhi.io.cdc</groupId>
     <artifactId>siddhi-io-cdc-parent</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4-SNAPSHOT</version>
     <name>Siddhi I/O cdc</name>
     <dependencyManagement>
         <dependencies>
@@ -167,6 +167,6 @@
         <url>https://github.com/wso2-extensions/siddhi-io-cdc.git</url>
         <developerConnection>scm:git:https://github.com/wso2-extensions/siddhi-io-cdc.git</developerConnection>
         <connection>scm:git:https://github.com/wso2-extensions/siddhi-io-cdc.git</connection>
-        <tag>v1.0.3</tag>
+        <tag>HEAD</tag>
     </scm>
 </project>
