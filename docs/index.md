@@ -1,13 +1,12 @@
-﻿
+?
 Siddhi-io-cdc
 ======================================
 
-The **siddhi-io-cdc extension** is an extension to <a target="_blank" href="https://wso2.github.io/siddhi">Siddhi</a>. It publishes change data of MySQL database in the key-value format.
+The **siddhi-io-cdc extension** is an extension to <a target="_blank" href="https://wso2.github.io/siddhi">Siddhi</a>. It receives change data of MySQL database in the key-value format.
 
 ## Prerequisites
 
 * The MySQL server should be configured to use a row-level binary log.
-* MySQL jdbc driver should be added to the `<STREAM_PROCESSOR_HOME>/lib` directory.
 * WSO2 SP State persistence should be enabled.
 * A MySQL user should be created with SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT privileges on the tables he wants to capture changes.
 
@@ -19,7 +18,7 @@ Find some useful links below:
 
 ## Latest API Docs
 
-Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc/api/1.0.0">1.0.0</a>.
+Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc/api/1.0.2">1.0.2</a>.
 
 ## How to use
 
@@ -53,9 +52,7 @@ Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/si
 
 ## Features
 
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc/api/1.0.9/#cdc-source">cdc</a> *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source">(Source)</a>*<br><div style="padding-left: 1em;"><p>The cdc source receives events when MySQL database's change event occurs. The events are received in the form of key-value mappings. <br><br>The following are key values of the map of a change data and their descriptions: 
-	*   X : The table's column X value after the event occurred. Applicable when 'insert' or 'update' operations are specified. 
-	* before_X : The table's column X value before the event occurred. Applicable when 'delete' or 'update' operations are specified.
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc/api/1.0.2/#cdc-source">cdc</a> *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source">(Source)</a>*<br><div style="padding-left: 1em;"><p>The CDC source receives events when a specified MySQL table's change event (INSERT, UPDATE, DELETE) is triggered. The events are received in key-value map format.<br>The following are key values of the map of a CDC change event and their descriptions.<br>&nbsp;&nbsp;&nbsp;&nbsp;For insert: Keys will be specified table's columns<br>&nbsp;&nbsp;&nbsp;&nbsp;For delete: Keys will be 'before_' followed by specified table's columns. Eg: before_X<br>&nbsp;&nbsp;&nbsp;&nbsp;For update: Keys will be specified table's columns and 'before_' followed by specified table's columns.</p></div>
 
 ## How to Contribute
 
