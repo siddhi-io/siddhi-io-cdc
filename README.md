@@ -18,7 +18,7 @@ Find some useful links below:
 
 ## Latest API Docs
 
-Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/">1.0.0</a>.
+Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc/api/1.0.0">1.0.0</a>.
 
 ## How to use
 
