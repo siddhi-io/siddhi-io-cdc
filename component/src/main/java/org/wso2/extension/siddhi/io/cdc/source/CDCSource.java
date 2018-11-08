@@ -49,13 +49,15 @@ import java.util.concurrent.Executors;
 @Extension(
         name = "cdc",
         namespace = "source",
-        description = "The CDC source receives events when a specified MySQL table's change event " +
-                "(INSERT, UPDATE, DELETE) is triggered. The events are received in key-value map format." +
+        description = "The CDC source receives events when a Database table's change event " +
+                "(INSERT, UPDATE, DELETE) is triggered. The events are received in key-value format." +
                 "\nThe following are key values of the map of a CDC change event and their descriptions." +
-                "\n\tFor insert: Keys will be specified table's columns" +
-                "\n\tFor delete: Keys will be 'before_' followed by specified table's columns. Eg: before_X" +
+                "\n\tFor insert: Keys will be specified table's columns." +
+                "\n\tFor delete: Keys will be 'before_' followed by specified table's columns. Eg: before_X." +
                 "\n\tFor update: Keys will be specified table's columns and 'before_' followed by specified table's " +
-                "columns.",
+                "columns." +
+                "\nFor 'polling' mode: Keys will be specified table's columns." +
+                "\nSee parameter: mode for supported databases and change events.",
         parameters = {
                 @Parameter(name = "url",
                         description = "Connection url to the database." +
@@ -67,7 +69,10 @@ import java.util.concurrent.Executors;
                         name = "mode",
                         description = "Mode to capture the change data. Mode ‘polling’ uses a polling.column to" +
                                 " monitor the given table. Mode 'streaming' uses logs to monitor the given table." +
-                                "\nThe required parameters are different for each modes.",
+                                "\nThe required parameters are different for each modes." +
+                                "\nmode 'streaming' currently supports only MySQL. INSERT, UPDATE, DELETE events" +
+                                " can be received." +
+                                "\nmode 'polling' supports RDBs. INSERT, UPDATE events can be received.",
                         type = DataType.STRING,
                         defaultValue = "streaming",
                         optional = true
@@ -75,7 +80,7 @@ import java.util.concurrent.Executors;
                 @Parameter(
                         name = "jdbc.driver.name",
                         description = "The driver class name for connecting the database." +
-                                " Mandatory when mode is ‘polling’.",
+                                " Required for ‘polling’ mode.",
                         type = DataType.STRING,
                         defaultValue = "<Empty_String>",
                         optional = true
@@ -83,7 +88,8 @@ import java.util.concurrent.Executors;
                 @Parameter(
                         name = "username",
                         description = "Username of a user with SELECT, RELOAD, SHOW DATABASES," +
-                                " REPLICATION SLAVE, REPLICATION CLIENT privileges on Change Data Capturing table.",
+                                " REPLICATION SLAVE, REPLICATION CLIENT privileges on Change Data Capturing table." +
+                                "\nFor polling mode, a user with SELECT privileges.",
                         type = DataType.STRING
                 ),
                 @Parameter(
@@ -95,6 +101,7 @@ import java.util.concurrent.Executors;
                         name = "datasource.name",
                         description = "Name of the wso2 datasource to connect to the database." +
                                 " When datasource.name is provided, the url, username and password are not needed." +
+                                "Has a more priority over url based connection." +
                                 "\nAccepted only when mode is set to 'polling'.",
                         type = DataType.STRING,
                         defaultValue = "<Empty_String>",
@@ -108,7 +115,10 @@ import java.util.concurrent.Executors;
                 @Parameter(
                         name = "polling.column",
                         description = "Column name on which the polling is done to capture the change data. " +
-                                "Mandatory when mode is ‘polling’."
+                                "Provide an AUTO_INCREMENT field or a TIMESTAMP field for better change data" +
+                                " capturing. Setting an AUTO_INCREMENT field might fail to receive UPDATE change" +
+                                " data." +
+                                "\nMandatory when mode is ‘polling’."
                         ,
                         type = DataType.STRING,
                         defaultValue = "<Empty_String>",
@@ -125,28 +135,31 @@ import java.util.concurrent.Executors;
                 ),
                 @Parameter(
                         name = "operation",
-                        description = "Interested change event operation. 'insert', 'update' or 'delete'. " +
+                        description = "Interested change event operation. 'insert', 'update' or 'delete'. Required" +
+                                " for 'streaming' mode." +
                                 "\nNot case sensitive.",
                         type = DataType.STRING
                 ),
                 @Parameter(
                         name = "connector.properties",
                         description = "Debezium connector specified properties as a comma separated string. " +
-                                "\nThis properties will have more priority over the parameters.",
+                                "\nThis properties will have more priority over the parameters. Only for 'streaming'" +
+                                " mode",
                         type = DataType.STRING,
                         optional = true,
                         defaultValue = "Empty_String"
                 ),
                 @Parameter(name = "database.server.id",
                         description = "For MySQL, a unique integer between 1 to 2^32 as the ID," +
-                                " This is used when joining MySQL database cluster to read binlog",
+                                " This is used when joining MySQL database cluster to read binlog. Only for" +
+                                " 'streaming'mode.",
                         type = DataType.STRING,
                         optional = true,
                         defaultValue = "Random integer between 5400 and 6400"
                 ),
                 @Parameter(name = "database.server.name",
                         description = "Logical name that identifies and provides a namespace for the " +
-                                "particular database server",
+                                "particular database server. Only for 'streaming' mode.",
                         defaultValue = "{host}_{port}",
                         optional = true,
                         type = DataType.STRING
@@ -461,6 +474,7 @@ public class CDCSource extends Source {
         } else if (!historyFileDirectory.endsWith(File.separator)) {
             historyFileDirectory = historyFileDirectory + File.separator;
         }
+        // TODO: 11/8/18 check for datasource.name is given.
     }
 
     /**
