@@ -29,6 +29,7 @@ import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
+import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.stream.input.source.Source;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 import org.wso2.siddhi.core.util.config.ConfigReader;
@@ -36,6 +37,7 @@ import org.wso2.siddhi.core.util.transport.OptionHolder;
 import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 import java.io.File;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -280,8 +282,8 @@ public class CDCSource extends Source {
                 }
 
                 pollingInterval = Integer.parseInt(
-                            optionHolder.validateAndGetStaticValue(CDCSourceConstants.POLLING_INTERVAL,
-                                    Integer.toString(CDCSourceConstants.DEFAULT_POLLING_INTERVAL_MS)));
+                        optionHolder.validateAndGetStaticValue(CDCSourceConstants.POLLING_INTERVAL,
+                                Integer.toString(CDCSourceConstants.DEFAULT_POLLING_INTERVAL_MS)));
 
                 validatePollingModeParameters();
                 if (!isDatasourceNameAvailable) {
@@ -333,9 +335,16 @@ public class CDCSource extends Source {
                 break;
             case CDCSourceConstants.MODE_POLLING:
                 //create a completion callback to handle exceptions from CDCPollar
-                CDCPollar.CompletionCallback cdcCompletionCallback = error ->
+                CDCPollar.CompletionCallback cdcCompletionCallback = (Throwable error) ->
+                {
+                    if (error.getClass().equals(SQLException.class)) {
                         connectionCallback.onError(new ConnectionUnavailableException(
                                 "Connection to the database lost.", error));
+                    } else {
+                        destroy();
+                        throw new SiddhiAppRuntimeException("CDC Polling mode run failed.", error);
+                    }
+                };
 
                 cdcPollar.setCompletionCallback(cdcCompletionCallback);
                 executorService.execute(cdcPollar);
@@ -351,9 +360,10 @@ public class CDCSource extends Source {
 
     @Override
     public void destroy() {
-        //Remove this CDCSource object from the CDCObjectKeeper.
-        cdcSourceObjectKeeper.removeObject(this.hashCode());
-
+        if (mode.equals(CDCSourceConstants.MODE_STREAMING)) {
+            //Remove this CDCSource object from the CDCObjectKeeper.
+            cdcSourceObjectKeeper.removeObject(this.hashCode());
+        }
         //shutdown the executor service.
         executorService.shutdown();
     }
