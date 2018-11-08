@@ -100,7 +100,7 @@ import java.util.concurrent.Executors;
                 @Parameter(
                         name = "datasource.name",
                         description = "Name of the wso2 datasource to connect to the database." +
-                                " When datasource.name is provided, the url, username and password are not needed." +
+                                " When datasource.name is provided, the url, username and password are not needed. " +
                                 "Has a more priority over url based connection." +
                                 "\nAccepted only when mode is set to 'polling'.",
                         type = DataType.STRING,
@@ -188,7 +188,7 @@ import java.util.concurrent.Executors;
                                 " name string);",
                         description = "In this example, the cdc source starts listening to the row updates" +
                                 " on students table which is under MySQL SimpleDB database that" +
-                                " can be accessed with the given url"
+                                " can be accessed with the given url."
                 ),
                 @Example(
                         syntax = "@source(type = 'cdc' , url = 'jdbc:mysql://localhost:3306/SimpleDB', " +
@@ -199,8 +199,39 @@ import java.util.concurrent.Executors;
                                 "\ndefine stream inputStream (before_id string, before_name string);",
                         description = "In this example, the cdc source starts listening to the row deletions" +
                                 " on students table which is under MySQL SimpleDB database that" +
-                                " can be accessed with the given url"
-                )
+                                " can be accessed with the given url."
+                ),
+                @Example(
+                        syntax = "@source(type = 'cdc', mode='polling', polling.column = 'id', " +
+                                "\njdbc.driver.name = 'com.mysql.jdbc.Driver', " +
+                                "url = 'jdbc:mysql://localhost:3306/SimpleDB', " +
+                                "\nusername = 'cdcuser', password = 'pswd4cdc', " +
+                                "\ntable.name = 'students', " +
+                                "\n@map(type='keyvalue'), @attributes(id = 'id', name = 'name'))" +
+                                "\ndefine stream istm (id int, name string);",
+                        description = "In this example, the cdc source starts polling students table for inserts " +
+                                "and updates. polling.column is an auto incremental field. url, username, password, " +
+                                "and jdbc.driver.name are used to connect to the database."
+                ),
+                @Example(
+                        syntax = "@source(type = 'cdc', mode='polling', polling.column = 'id', " +
+                                "datasource.name = 'SimpleDB'" +
+                                "\ntable.name = 'students', " +
+                                "\n@map(type='keyvalue'), @attributes(id = 'id', name = 'name'))" +
+                                "\ndefine stream istm (id int, name string);",
+                        description = "In this example, the cdc source starts polling students table for inserts " +
+                                "and updates. polling.column is an auto incremental field. datasource.name is used " +
+                                "to connect to the database."
+                ),
+                @Example(
+                        syntax = "@source(type = 'cdc', mode='polling', polling.column = 'last_updated', " +
+                                "datasource.name = 'SimpleDB'" +
+                                "\ntable.name = 'students', " +
+                                "\n@map(type='keyvalue'))" +
+                                "\ndefine stream istm (name string);",
+                        description = "In this example, the cdc source starts polling students table for inserts " +
+                                "and updates. polling.column is a timestamp field."
+                ),
         }
 )
 

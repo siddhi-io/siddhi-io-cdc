@@ -49,8 +49,8 @@ public class TestCaseOfCDCSource {
     private String mysqlJdbcDriverName = "com.mysql.jdbc.Driver";
     private String databaseURL = "jdbc:mysql://localhost:3306/SimpleDB";
     private String tableName = "login";
-    private String pollingColumn = "idn";
-    private String pollingTableName = "contacts";
+    private String pollingColumn = "last_changed";
+    private String pollingTableName = "people";
     private Event currentEvent;
 
     @BeforeMethod
