@@ -28,6 +28,7 @@ import org.wso2.carbon.datasource.core.api.DataSourceService;
 import org.wso2.carbon.datasource.core.exception.DataSourceException;
 import org.wso2.extension.siddhi.io.cdc.util.CDCSourceUtil;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
+import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 
 import java.sql.Connection;
@@ -136,8 +137,15 @@ public class CDCPollar implements Runnable {
         }
     }
 
-    private Connection getConnection() throws SQLException {
-        return this.dataSource.getConnection();
+    private Connection getConnection() {
+        Connection conn;
+        try {
+            conn = this.dataSource.getConnection();
+        } catch (SQLException e) {
+            throw new SiddhiAppRuntimeException("Error initializing datasource connection: "
+                    + e.getMessage(), e);
+        }
+        return conn;
     }
 
     /**
@@ -151,52 +159,57 @@ public class CDCPollar implements Runnable {
      * @param pollingInterval The interval in milliseconds to poll the given table for changes.
      */
     @SuppressWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    private void pollForChanges(String tableName, String lastOffset, String pollingColumn, int pollingInterval)
-            throws SQLException {
+    private void pollForChanges(String tableName, String lastOffset, String pollingColumn, int pollingInterval) {
 
         initializeDatasource();
 
         String selectQuery;
-        Connection connection = getConnection();
-        PreparedStatement statement;
-        Map<String, Object> detailsMap;
-        ResultSet resultSet;
         ResultSetMetaData metadata;
+        Map<String, Object> detailsMap;
+        Connection connection = getConnection();
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
 
-        //If lastOffset is null, assign it with last record of the table.
-        if (lastOffset == null) {
-            selectQuery = "select " + pollingColumn + " from " + tableName + ";";
-            statement = connection.prepareStatement(selectQuery);
-            resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                lastOffset = resultSet.getString(pollingColumn);
-            }
-        }
-
-        selectQuery = "select * from `" + tableName + "` where `" + pollingColumn + "` > ?;";
-        statement = connection.prepareStatement(selectQuery);
-
-        while (true) {
-            statement.setString(1, lastOffset);
-            resultSet = statement.executeQuery();
-            metadata = resultSet.getMetaData();
-            while (resultSet.next()) {
-                detailsMap = new HashMap<>();
-                for (int i = 1; i <= metadata.getColumnCount(); i++) {
-                    String key = metadata.getColumnName(i);
-                    String value = resultSet.getString(key);
-                    detailsMap.put(key, value);
+        try {
+            //If lastOffset is null, assign it with last record of the table.
+            if (lastOffset == null) {
+                selectQuery = "select " + pollingColumn + " from " + tableName + ";";
+                statement = connection.prepareStatement(selectQuery);
+                resultSet = statement.executeQuery();
+                while (resultSet.next()) {
+                    lastOffset = resultSet.getString(pollingColumn);
                 }
-                lastOffset = resultSet.getString(pollingColumn);
-                cdcSource.setLastOffset(lastOffset);
-                handleEvent(detailsMap);
             }
 
-            try {
-                Thread.sleep(pollingInterval);
-            } catch (InterruptedException e) {
-                log.error("Error while polling.", e);
+            selectQuery = "select * from `" + tableName + "` where `" + pollingColumn + "` > ?;";
+            statement = connection.prepareStatement(selectQuery);
+
+            while (true) {
+                statement.setString(1, lastOffset);
+                resultSet = statement.executeQuery();
+                metadata = resultSet.getMetaData();
+                while (resultSet.next()) {
+                    detailsMap = new HashMap<>();
+                    for (int i = 1; i <= metadata.getColumnCount(); i++) {
+                        String key = metadata.getColumnName(i);
+                        String value = resultSet.getString(key);
+                        detailsMap.put(key, value);
+                    }
+                    lastOffset = resultSet.getString(pollingColumn);
+                    cdcSource.setLastOffset(lastOffset);
+                    handleEvent(detailsMap);
+                }
+
+                try {
+                    Thread.sleep(pollingInterval);
+                } catch (InterruptedException e) {
+                    log.error("Error while polling.", e);
+                }
             }
+        } catch (SQLException ex) {
+            throw new SiddhiAppRuntimeException("Error in polling for changes on " + tableName, ex);
+        } finally {
+            CDCSourceUtil.cleanupConnection(resultSet, statement, connection);
         }
     }
 
@@ -234,7 +247,7 @@ public class CDCPollar implements Runnable {
     public void run() {
         try {
             pollForChanges(tableName, lastOffset, pollingColumn, pollingInterval);
-        } catch (SQLException e) {
+        } catch (SiddhiAppRuntimeException e) {
             completionCallback.handle(e);
         }
     }

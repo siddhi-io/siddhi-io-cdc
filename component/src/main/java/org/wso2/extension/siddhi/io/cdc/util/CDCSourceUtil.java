@@ -22,13 +22,16 @@ import org.apache.kafka.connect.connector.ConnectRecord;
 import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.DataException;
+import org.apache.log4j.Logger;
 import org.wso2.extension.siddhi.io.cdc.source.InMemoryOffsetBackingStore;
 import org.wso2.extension.siddhi.io.cdc.source.WrongConfigurationException;
 import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +43,7 @@ import java.util.regex.Pattern;
  * This class contains Util methods for the cdc extension.
  */
 public class CDCSourceUtil {
+    private static final Logger log = Logger.getLogger(CDCSourceUtil.class);
     public static Map<String, Object> getConfigMap(String username, String password, String url, String tableName,
                                                    String historyFileDirectory, String siddhiAppName,
                                                    String siddhiStreamName, int serverID, String serverName,
@@ -261,5 +265,51 @@ public class CDCSourceUtil {
         }
 
         return detailsMap;
+    }
+
+    /**
+     * Method which can be used to clear up and ephemeral SQL connectivity artifacts.
+     *
+     * @param rs   {@link ResultSet} instance (can be null)
+     * @param stmt {@link Statement} instance (can be null)
+     * @param conn {@link Connection} instance (can be null)
+     */
+    public static void cleanupConnection(ResultSet rs, Statement stmt, Connection conn) {
+        if (rs != null) {
+            try {
+                rs.close();
+                if (log.isDebugEnabled()) {
+                    log.debug("Closed ResultSet");
+                }
+            } catch (SQLException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Error in closing ResultSet: " + e.getMessage(), e);
+                }
+            }
+        }
+        if (stmt != null) {
+            try {
+                stmt.close();
+                if (log.isDebugEnabled()) {
+                    log.debug("Closed PreparedStatement");
+                }
+            } catch (SQLException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Error in closing PreparedStatement: " + e.getMessage(), e);
+                }
+            }
+        }
+        if (conn != null) {
+            try {
+                conn.close();
+                if (log.isDebugEnabled()) {
+                    log.debug("Closed Connection");
+                }
+            } catch (SQLException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Error in closing Connection: " + e.getMessage(), e);
+                }
+            }
+        }
     }
 }
