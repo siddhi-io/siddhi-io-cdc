@@ -290,7 +290,7 @@ public class CDCSource extends Source {
                 historyFileDirectory = carbonHome + File.separator + "cdc" + File.separator + "history"
                         + File.separator + siddhiAppName + File.separator;
 
-                validateStreamingModeParameters();
+                validateStreamingModeParameters(optionHolder);
 
                 //send sourceEventListener and preferred operation to changeDataCapture object
                 changeDataCapture = new ChangeDataCapture(operation, sourceEventListener);
@@ -492,7 +492,13 @@ public class CDCSource extends Source {
     /**
      * Used to Validate the parameters for the mode: streaming.
      */
-    private void validateStreamingModeParameters() {
+    private void validateStreamingModeParameters(OptionHolder optionHolder) {
+        //datasource.name should not be accepted for streaming mode.
+        if (optionHolder.isOptionExists(CDCSourceConstants.DATASOURCE_NAME)) {
+            throw new SiddhiAppValidationException("Parameter: " + CDCSourceConstants.DATASOURCE_NAME + " should" +
+                    " not be defined for streaming mode");
+        }
+
         if (!(operation.equalsIgnoreCase(CDCSourceConstants.INSERT)
                 || operation.equalsIgnoreCase(CDCSourceConstants.UPDATE)
                 || operation.equalsIgnoreCase(CDCSourceConstants.DELETE))) {
@@ -505,7 +511,6 @@ public class CDCSource extends Source {
         } else if (!historyFileDirectory.endsWith(File.separator)) {
             historyFileDirectory = historyFileDirectory + File.separator;
         }
-        // TODO: 11/8/18 check for datasource.name is given.
     }
 
     /**
