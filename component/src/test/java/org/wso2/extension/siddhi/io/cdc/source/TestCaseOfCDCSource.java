@@ -60,6 +60,7 @@ public class TestCaseOfCDCSource {
         currentEvent = new Event();
     }
 
+    // TODO: 11/8/18 remove this dev test case
     @Test
     public void testPollingRun() throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();

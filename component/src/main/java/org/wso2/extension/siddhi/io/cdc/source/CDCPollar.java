@@ -150,16 +150,9 @@ public class CDCPollar implements Runnable {
 
     /**
      * Poll for inserts and updates.
-     *
-     * @param tableName       The table to be monitored.
-     * @param lastOffset      The last captured row's timestamp value. If {@code lastOffset} is null,
-     *                        the table will be polled from the last existing record. i.e. change data capturing
-     *                        could be lost in this case.
-     * @param pollingColumn   The column name to poll the table.
-     * @param pollingInterval The interval in milliseconds to poll the given table for changes.
      */
-    @SuppressWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    private void pollForChanges(String tableName, String lastOffset, String pollingColumn, int pollingInterval) {
+    @SuppressWarnings(value = "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
+    private void pollForChanges() {
 
         initializeDatasource();
 
@@ -246,7 +239,7 @@ public class CDCPollar implements Runnable {
     @Override
     public void run() {
         try {
-            pollForChanges(tableName, lastOffset, pollingColumn, pollingInterval);
+            pollForChanges();
         } catch (SiddhiAppRuntimeException e) {
             completionCallback.handle(e);
         }
