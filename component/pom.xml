@@ -100,6 +100,100 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>local-mysql</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.fabric8</groupId>
+                        <artifactId>docker-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>start-docker-for-mysql</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>start</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>stop-docker-for-mysql</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                    <goal>remove</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <images>
+                                <image>
+                                    <alias>siddhi-cdc-mysql</alias>
+                                    <name>mysql:5.7</name>
+                                    <run>
+                                        <volumes>
+                                            <bind>
+                                                <volume>
+                                                    src/test/resources/mysqld:/etc/mysql/conf.d
+                                                </volume>
+                                            </bind>
+                                        </volumes>
+                                        <namingStrategy>alias</namingStrategy>
+                                        <env>
+                                            <MYSQL_DATABASE>SimpleDB</MYSQL_DATABASE>
+                                            <MYSQL_ROOT_PASSWORD>root</MYSQL_ROOT_PASSWORD>
+                                        </env>
+                                        <ports>
+                                            <port>${siddhi-cdc-mysql.port}:3306</port>
+                                        </ports>
+                                        <wait>
+                                            <tcp>
+                                                <ports>
+                                                    <port>3306</port>
+                                                </ports>
+                                            </tcp>
+                                            <time>60000</time>
+                                        </wait>
+                                    </run>
+                                </image>
+                            </images>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.19.1</version>
+                        <executions>
+                            <execution>
+                                <id>integration-test-for-mysql</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>verify-for-mysql</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <environmentVariables>
+                                <DATABASE_TYPE>MySQL</DATABASE_TYPE>
+                                <DATABASE_USER>root</DATABASE_USER>
+                                <DATABASE_PASSWORD>root</DATABASE_PASSWORD>
+                                <PORT>${siddhi-cdc-mysql.port}</PORT>
+                                <DOCKER_HOST_IP>${docker.container.siddhi-cdc-mysql.ip}</DOCKER_HOST_IP>
+                            </environmentVariables>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                            </suiteXmlFiles>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
     <build>
         <resources>
@@ -117,6 +211,7 @@
                         <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
                     </suiteXmlFiles>
                     <useSystemClassLoader>false</useSystemClassLoader>
+                    <skip>${skip.surefire.test}</skip>
                 </configuration>
             </plugin>
             <plugin>

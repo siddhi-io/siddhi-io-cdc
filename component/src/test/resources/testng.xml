@@ -25,7 +25,7 @@
     Uncomment the following test to run with build.-->
     <test name="Siddhi-io-cdc-tests" enabled="true">
         <classes>
-            <!--<class name="org.wso2.extension.siddhi.io.cdc.source.TestCaseOfCDCSource"/>-->
+            <class name="org.wso2.extension.siddhi.io.cdc.source.TestCaseOfCDCSource"/>
         </classes>
     </test>
 </suite>
