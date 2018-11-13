@@ -211,7 +211,7 @@
                         <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
                     </suiteXmlFiles>
                     <useSystemClassLoader>false</useSystemClassLoader>
-                    <skip>${skip.surefire.test}</skip>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
             <plugin>
