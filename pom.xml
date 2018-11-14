@@ -166,6 +166,7 @@
         <org.testng.version>6.11</org.testng.version>
         <siddhi-store-rdbms.version>4.0.39</siddhi-store-rdbms.version>
         <carbon.datasource.core.version>RELEASE</carbon.datasource.core.version>
+        <mavan.findbugsplugin.exclude.file>../findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
     </properties>
     <scm>
         <url>https://github.com/wso2-extensions/siddhi-io-cdc.git</url>

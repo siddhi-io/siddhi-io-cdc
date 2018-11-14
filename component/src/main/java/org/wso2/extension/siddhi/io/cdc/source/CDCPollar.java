@@ -151,7 +151,6 @@ public class CDCPollar implements Runnable {
     /**
      * Poll for inserts and updates.
      */
-    @SuppressWarnings(value = "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     private void pollForChanges() {
 
         initializeDatasource();
