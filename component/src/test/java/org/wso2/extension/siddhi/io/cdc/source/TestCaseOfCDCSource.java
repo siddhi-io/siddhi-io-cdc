@@ -20,14 +20,17 @@ package org.wso2.extension.siddhi.io.cdc.source;
 
 import org.apache.log4j.Logger;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.exception.CannotRestoreSiddhiAppStateException;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
+import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.SiddhiTestHelper;
 import org.wso2.siddhi.core.util.config.InMemoryConfigManager;
 import org.wso2.siddhi.core.util.persistence.InMemoryPersistenceStore;
@@ -49,9 +52,6 @@ public class TestCaseOfCDCSource {
     private String mysqlJdbcDriverName = "com.mysql.jdbc.Driver";
     private String databaseURL = "jdbc:mysql://localhost:3306/SimpleDB";
     private String tableName = "login";
-    private String pollingColumn = "last_changed";
-    private String pollingTableName = "people";
-    private Event currentEvent;
 
     @BeforeMethod
     public void init() {
@@ -288,7 +288,7 @@ public class TestCaseOfCDCSource {
         String rdbmsStoreDefinition = "define stream insertionStream (id string, name string);" +
                 "@Store(type='rdbms', jdbc.url='" + databaseURL + "'," +
                 " username='" + username + "', password='" + password + "' ," +
-                " jdbc.driver.name='" + mysqlJdbcDriverName + "')" +
+                " jdbc.driver.name='" + jdbcDriverName + "')" +
                 "define table login (id string, name string);";
 
         String rdbmsQuery = "@info(name='query2') " +
@@ -393,7 +393,7 @@ public class TestCaseOfCDCSource {
         String rdbmsStoreDefinition = "define stream DeletionStream (id string);" +
                 "@Store(type='rdbms', jdbc.url='" + databaseURL + "'," +
                 " username='" + username + "', password='" + password + "' ," +
-                " jdbc.driver.name='" + mysqlJdbcDriverName + "')" +
+                " jdbc.driver.name='" + jdbcDriverName + "')" +
                 "define table login (id string, name string);";
 
         String rdbmsQuery = "@info(name='query2') " +
@@ -498,7 +498,7 @@ public class TestCaseOfCDCSource {
         String rdbmsStoreDefinition = "define stream UpdateStream (id string, name string);" +
                 "@Store(type='rdbms', jdbc.url='" + databaseURL + "'," +
                 " username='" + username + "', password='" + password + "' ," +
-                " jdbc.driver.name='" + mysqlJdbcDriverName + "')" +
+                " jdbc.driver.name='" + jdbcDriverName + "')" +
                 "define table login (id string, name string);";
 
         String rdbmsQuery = "@info(name='query2') " +

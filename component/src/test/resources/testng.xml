@@ -23,9 +23,9 @@
 <suite name="Siddhi-Io-Cdc-Test-Suite">
     <!--Removed the following test:"Siddhi-io-cdc-tests"; since it depends on the local MySQL instance.
     Uncomment the following test to run with build.-->
-    <!--<test name="Siddhi-io-cdc-tests" enabled="true" preserve-order="true" parallel="false">
+    <test name="Siddhi-io-cdc-tests" enabled="true">
         <classes>
             <class name="org.wso2.extension.siddhi.io.cdc.source.TestCaseOfCDCSource"/>
         </classes>
-    </test>-->
+    </test>
 </suite>

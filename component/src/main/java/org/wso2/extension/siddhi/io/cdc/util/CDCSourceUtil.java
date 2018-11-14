@@ -167,7 +167,7 @@ public class CDCSourceUtil {
 
         try {
             op = (String) record.get("op");
-        } catch (DataException ex) {
+        } catch (NullPointerException | DataException ex) {
             return detailsMap;
         }
 
