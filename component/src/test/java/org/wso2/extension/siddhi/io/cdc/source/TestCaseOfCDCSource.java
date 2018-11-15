@@ -35,12 +35,12 @@ import org.wso2.siddhi.core.util.SiddhiTestHelper;
 import org.wso2.siddhi.core.util.config.InMemoryConfigManager;
 import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 
 public class TestCaseOfCDCSource {
 
@@ -59,7 +59,7 @@ public class TestCaseOfCDCSource {
     private String pollingTableName = "login";
     private int pollingInterval = 1000;
 
-//    @BeforeClass
+    @BeforeClass
     public void initializeConnectionParams() {
         String port = System.getenv("PORT");
         String host = System.getenv("DOCKER_HOST_IP");
@@ -76,7 +76,7 @@ public class TestCaseOfCDCSource {
     }
 
     // TODO: 11/8/18 remove this dev test case, enable necessary.
-    @Test//(enabled = false)
+    @Test(enabled = false)
     public void testPollingRun() throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();
         String cdcinStreamDefinition = "@app:name('cdcTesting')" +
@@ -774,7 +774,7 @@ public class TestCaseOfCDCSource {
     }
 
     @Test
-    public void testConfigRead(){
+    public void testConfigRead() {
         try {
 
             File file = new File("src/main/resources/query-config.xml");
@@ -783,10 +783,10 @@ public class TestCaseOfCDCSource {
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
             QueryConfiguration queryConfiguration =
                     (QueryConfiguration) jaxbUnmarshaller.unmarshal(file);
-            System.out.println(queryConfiguration);
+            log.info(queryConfiguration);
 
         } catch (JAXBException e) {
-            e.printStackTrace();
+            log.error(e);
         }
     }
 }

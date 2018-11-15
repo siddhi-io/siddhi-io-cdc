@@ -33,9 +33,6 @@ import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -48,6 +45,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 
 import static org.wso2.extension.siddhi.io.cdc.util.CDCSourceUtil.cleanupConnection;
 
@@ -176,21 +176,21 @@ public class CDCPollar implements Runnable {
             }
 
             //Read configs from file
-            QueryConfiguration QueryConfiguration = null;
+            QueryConfiguration queryConfiguration = null;
             try {
 
                 File file = new File("src/main/resources/query-config.xml");
                 JAXBContext jaxbContext = JAXBContext.newInstance(QueryConfiguration.class);
 
                 Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-                QueryConfiguration = (QueryConfiguration) jaxbUnmarshaller.unmarshal(file);
+                queryConfiguration = (QueryConfiguration) jaxbUnmarshaller.unmarshal(file);
 
             } catch (JAXBException e) {
                 log.error("Query Configuration read error", e);
             }
 
             //Get database related select query structure
-            for (QueryConfigurationEntry entry : QueryConfiguration.getDatabases()) {
+            for (QueryConfigurationEntry entry : queryConfiguration.getDatabases()) {
                 if (entry.getDatabaseName().equalsIgnoreCase(databaseName)) {
                     selectQueryStructure = entry.getRecordSelectQuery();
                     break;

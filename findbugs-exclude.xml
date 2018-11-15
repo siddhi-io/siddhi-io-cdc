@@ -24,4 +24,10 @@
         <Class name="org.wso2.extension.siddhi.io.cdc.source.CDCPollar"/>
         <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING"/>
     </Match>
+
+    <!-- EI_EXPOSE_REP: These are objects read from config file, expected to be immutable during run time -->
+    <Match>
+        <Class name="org.wso2.extension.siddhi.io.cdc.source.config.QueryConfiguration"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
 </FindBugsFilter>
