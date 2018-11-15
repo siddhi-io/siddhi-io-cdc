@@ -75,52 +75,10 @@ public class TestCaseOfCDCSource {
         currentEvent = new Event();
     }
 
-    // TODO: 11/8/18 remove this dev test case, enable necessary.
-    @Test(enabled = false)
-    public void testPollingRun() throws InterruptedException {
-        SiddhiManager siddhiManager = new SiddhiManager();
-        String cdcinStreamDefinition = "@app:name('cdcTesting')" +
-                "@source(type = 'cdc', mode='polling'," +
-                " polling.column='" + pollingColumn + "'," +
-                " jdbc.driver.name='" + mysqlJdbcDriverName + "'," +
-                " url = '" + databaseURL + "'," +
-                " username = '" + username + "'," +
-                " password = '" + password + "'," +
-                " table.name = '" + pollingTableName + "', " +
-                " @map(type='keyvalue'))" +
-                "define stream istm (name string);";
-
-        String cdcquery = ("@info(name = 'query1') " +
-                "from istm#log() " +
-                "select *  " +
-                "insert into outputStream;");
-
-        SiddhiAppRuntime cdcAppRuntime = siddhiManager.createSiddhiAppRuntime(cdcinStreamDefinition +
-                cdcquery);
-
-        siddhiManager.setConfigManager(new InMemoryConfigManager());
-
-        QueryCallback queryCallback = new QueryCallback() {
-            @Override
-            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-                for (Event event : inEvents) {
-                    currentEvent = event;
-                    eventCount.getAndIncrement();
-                    log.info(eventCount + ". " + event);
-                    eventArrived.set(true);
-                }
-            }
-        };
-
-        cdcAppRuntime.addCallback("query1", queryCallback);
-        cdcAppRuntime.start();
-        SiddhiTestHelper.waitForEvents(waitTime, 100, eventCount, 10000000);
-    }
-
     @Test(dependsOnMethods = "testInsertCDC")
     public void testCDCPollingMode() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
-        log.info("CDC TestCase-4: Capturing change data from MySQL with polling mode.");
+        log.info("CDC TestCase: Capturing change data from MySQL with polling mode.");
         log.info("------------------------------------------------------------------------------------------------");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -204,7 +162,7 @@ public class TestCaseOfCDCSource {
     @Test
     public void testInsertCDC() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
-        log.info("CDC TestCase-1: Capturing Insert change data from MySQL.");
+        log.info("CDC TestCase: Capturing Insert change data from MySQL.");
         log.info("------------------------------------------------------------------------------------------------");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -282,7 +240,7 @@ public class TestCaseOfCDCSource {
     @Test
     public void testDeleteCDC() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
-        log.info("CDC TestCase-3: Capturing Delete change data from MySQL.");
+        log.info("CDC TestCase: Capturing Delete change data from MySQL.");
         log.info("------------------------------------------------------------------------------------------------");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -379,7 +337,7 @@ public class TestCaseOfCDCSource {
     @Test
     public void testUpdateCDC() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
-        log.info("CDC TestCase-2: Capturing Update change data from MySQL.");
+        log.info("CDC TestCase: Capturing Update change data from MySQL.");
         log.info("------------------------------------------------------------------------------------------------");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -472,6 +430,9 @@ public class TestCaseOfCDCSource {
     @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void cdcOperationValidation() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
+        log.info("CDC TestCase: Validating operation parameter.");
+        log.info("------------------------------------------------------------------------------------------------");
+
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String invalidOperation = "otherOperation";
@@ -511,6 +472,9 @@ public class TestCaseOfCDCSource {
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void cdcUrlValidation() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
+        log.info("CDC TestCase: Validating url");
+        log.info("------------------------------------------------------------------------------------------------");
+
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String wrongURL = "jdbc:mysql://0.0.0.0.0:3306/SimpleDB";
@@ -550,6 +514,9 @@ public class TestCaseOfCDCSource {
     @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void cdcConnectorPropertiesValidation() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
+        log.info("CDC TestCase: Validating connector.properties.");
+        log.info("------------------------------------------------------------------------------------------------");
+
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String invalidConnectorProperties = "username=";
@@ -590,6 +557,8 @@ public class TestCaseOfCDCSource {
     @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void checkForParameterURL() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
+        log.info("CDC TestCase: Checking for the missing mandatory parameter: url.");
+        log.info("------------------------------------------------------------------------------------------------");
 
         SiddhiAppRuntime siddhiAppRuntime;
         String streamDefinition;
@@ -627,6 +596,8 @@ public class TestCaseOfCDCSource {
      */
     @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void checkForParameterUsername() throws InterruptedException {
+        log.info("------------------------------------------------------------------------------------------------");
+        log.info("CDC TestCase: Checking for the missing mandatory parameter: username.");
         log.info("------------------------------------------------------------------------------------------------");
 
         SiddhiAppRuntime siddhiAppRuntime;
@@ -666,6 +637,8 @@ public class TestCaseOfCDCSource {
     @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void checkForParameterPassword() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
+        log.info("CDC TestCase: Checking for the missing mandatory parameter: password.");
+        log.info("------------------------------------------------------------------------------------------------");
 
         SiddhiAppRuntime siddhiAppRuntime;
         String streamDefinition;
@@ -704,6 +677,8 @@ public class TestCaseOfCDCSource {
     @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void checkForParameterOperation() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
+        log.info("CDC TestCase: Checking for the missing mandatory parameter: operation.");
+        log.info("------------------------------------------------------------------------------------------------");
 
         SiddhiAppRuntime siddhiAppRuntime;
         String streamDefinition;
@@ -741,6 +716,8 @@ public class TestCaseOfCDCSource {
     @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void checkForParameterTableName() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
+        log.info("CDC TestCase: Checking for the missing mandatory parameter: table.name.");
+        log.info("------------------------------------------------------------------------------------------------");
 
         SiddhiAppRuntime siddhiAppRuntime;
         String streamDefinition;
@@ -771,22 +748,5 @@ public class TestCaseOfCDCSource {
         siddhiAppRuntime.start();
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
         siddhiAppRuntime.shutdown();
-    }
-
-    @Test
-    public void testConfigRead() {
-        try {
-
-            File file = new File("src/main/resources/query-config.xml");
-            JAXBContext jaxbContext = JAXBContext.newInstance(QueryConfiguration.class);
-
-            Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-            QueryConfiguration queryConfiguration =
-                    (QueryConfiguration) jaxbUnmarshaller.unmarshal(file);
-            log.info(queryConfiguration);
-
-        } catch (JAXBException e) {
-            log.error(e);
-        }
     }
 }
