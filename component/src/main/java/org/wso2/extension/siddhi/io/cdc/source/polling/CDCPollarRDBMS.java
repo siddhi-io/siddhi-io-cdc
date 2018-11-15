@@ -16,13 +16,27 @@
  * under the License.
  */
 
-package org.wso2.extension.siddhi.io.cdc.source;
+package org.wso2.extension.siddhi.io.cdc.source.polling;
+
+//import org.wso2.siddhi.core.table.record.AbstractRecordTable;
+//import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
+//
+//import java.sql.ResultSet;
 
 /**
- * This Exception is to be thrown if the user parameters to config the embedded engine are wrong.
+ *
  */
-public class WrongConfigurationException extends Exception {
-    public WrongConfigurationException(String message) {
-        super(message);
-    }
+public class CDCPollarRDBMS {
+    // TODO: 11/15/18 implement here
+//    AbstractRecordTable abstractRecordTable;
+//    CompiledCondition compiledCondition;
+//
+//    public CDCPollarRDBMS(String url, String username, String password, String datasourceName,
+//                          String driverName, String tableName) {
+//
+//    }
+//
+//    public ResultSet poll(String fieldList, String condiction) {
+//        return null;
+//    }
 }

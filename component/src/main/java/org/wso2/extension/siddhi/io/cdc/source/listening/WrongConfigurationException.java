@@ -16,11 +16,13 @@
  * under the License.
  */
 
-package org.wso2.extension.siddhi.io.cdc.source;
+package org.wso2.extension.siddhi.io.cdc.source.listening;
 
 /**
- *
+ * This Exception is to be thrown if the user parameters to config the embedded engine are wrong.
  */
-public class CDCPollarRDBMS {
-
+public class WrongConfigurationException extends Exception {
+    public WrongConfigurationException(String message) {
+        super(message);
+    }
 }

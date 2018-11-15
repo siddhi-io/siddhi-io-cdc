@@ -20,6 +20,10 @@ package org.wso2.extension.siddhi.io.cdc.source;
 
 import io.debezium.embedded.EmbeddedEngine;
 import org.apache.log4j.Logger;
+import org.wso2.extension.siddhi.io.cdc.source.listening.CDCSourceObjectKeeper;
+import org.wso2.extension.siddhi.io.cdc.source.listening.ChangeDataCapture;
+import org.wso2.extension.siddhi.io.cdc.source.listening.WrongConfigurationException;
+import org.wso2.extension.siddhi.io.cdc.source.polling.CDCPollar;
 import org.wso2.extension.siddhi.io.cdc.util.CDCSourceConstants;
 import org.wso2.extension.siddhi.io.cdc.util.CDCSourceUtil;
 import org.wso2.siddhi.annotation.Example;
@@ -472,11 +476,11 @@ public class CDCSource extends Source {
         }
     }
 
-    void setLastOffset(String lastOffset) {
+    public void setLastOffset(String lastOffset) {
         this.lastOffset = lastOffset;
     }
 
-    Map<byte[], byte[]> getOffsetData() {
+    public Map<byte[], byte[]> getOffsetData() {
         try {
             Thread.sleep(50);
         } catch (InterruptedException e) {
@@ -485,7 +489,7 @@ public class CDCSource extends Source {
         return offsetData;
     }
 
-    void setOffsetData(Map<byte[], byte[]> offsetData) {
+    public void setOffsetData(Map<byte[], byte[]> offsetData) {
         this.offsetData = offsetData;
     }
 

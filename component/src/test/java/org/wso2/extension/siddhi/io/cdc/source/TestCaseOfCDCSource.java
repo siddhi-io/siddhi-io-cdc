@@ -117,7 +117,7 @@ public class TestCaseOfCDCSource {
         SiddhiTestHelper.waitForEvents(waitTime, 100, eventCount, 10000000);
     }
 
-    @Test
+    @Test(dependsOnMethods = "testInsertCDC")
     public void testCDCPollingMode() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
         log.info("CDC TestCase-4: Capturing change data from MySQL with polling mode.");
@@ -178,7 +178,7 @@ public class TestCaseOfCDCSource {
 
         //Do an insert and wait for cdc app to capture.
         InputHandler rdbmsInputHandler = rdbmsAppRuntime.getInputHandler("insertionStream");
-        Object[] insertingObject = new Object[]{"e001", "testEmployer"};
+        Object[] insertingObject = new Object[]{"e002", "testEmployer"};
         rdbmsInputHandler.send(insertingObject);
 
         //wait polling interval + 200 ms.

@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.extension.siddhi.io.cdc.source;
+package org.wso2.extension.siddhi.io.cdc.source.polling;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -26,9 +26,10 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.wso2.carbon.datasource.core.api.DataSourceService;
 import org.wso2.carbon.datasource.core.exception.DataSourceException;
+import org.wso2.extension.siddhi.io.cdc.source.CDCSource;
 import org.wso2.extension.siddhi.io.cdc.source.config.QueryConfiguration;
 import org.wso2.extension.siddhi.io.cdc.source.config.QueryConfigurationEntry;
-import org.wso2.extension.siddhi.io.cdc.util.CDCSourceUtil;
+import org.wso2.extension.siddhi.io.cdc.util.CDCPollingUtil;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
@@ -48,8 +49,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-
-import static org.wso2.extension.siddhi.io.cdc.util.CDCSourceUtil.cleanupConnection;
 
 /**
  * Polls a given table for changes. Use {@code pollingColumn} to poll on.
@@ -118,7 +117,7 @@ public class CDCPollar implements Runnable {
 
             connectionProperties.setProperty(CONNECTION_PROPERTY_JDBC_URL, url);
             connectionProperties.setProperty(CONNECTION_PROPERTY_DATASOURCE_USER, username);
-            if (!CDCSourceUtil.isEmpty(password)) {
+            if (!CDCPollingUtil.isEmpty(password)) {
                 connectionProperties.setProperty(CONNECTION_PROPERTY_DATASOURCE_PASSWORD, password);
             }
             connectionProperties.setProperty(CONNECTION_PROPERTY_DRIVER_CLASSNAME, driverClassName);
@@ -172,7 +171,7 @@ public class CDCPollar implements Runnable {
             } catch (SQLException e) {
                 throw new SiddhiAppRuntimeException("Error in looking up database type: " + e.getMessage(), e);
             } finally {
-                cleanupConnection(null, null, conn);
+                CDCPollingUtil.cleanupConnection(null, null, conn);
             }
 
             //Read configs from file
@@ -269,7 +268,7 @@ public class CDCPollar implements Runnable {
         } catch (SQLException ex) {
             throw new SiddhiAppRuntimeException("Error in polling for changes on " + tableName, ex);
         } finally {
-            CDCSourceUtil.cleanupConnection(resultSet, statement, connection);
+            CDCPollingUtil.cleanupConnection(resultSet, statement, connection);
         }
     }
 
@@ -289,11 +288,11 @@ public class CDCPollar implements Runnable {
         sourceEventListener.onEvent(detailsMap, null);
     }
 
-    void pause() {
+    public void pause() {
         paused = true;
     }
 
-    void resume() {
+    public void resume() {
         paused = false;
         try {
             lock.lock();

@@ -21,7 +21,7 @@
 <FindBugsFilter>
     <!-- SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING : SQL statement will different for each event -->
     <Match>
-        <Class name="org.wso2.extension.siddhi.io.cdc.source.CDCPollar"/>
+        <Class name="org.wso2.extension.siddhi.io.cdc.source.polling.CDCPollar"/>
         <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING"/>
     </Match>
 
