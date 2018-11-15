@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<rdbms-table-configuration>
+    <database name="h2">
+        <recordSelectQuery>SELECT {{FIELD_LIST}} FROM {{TABLE_NAME}} {{CONDITION}};</recordSelectQuery>
+    </database>
+    <database name="mysql">
+        <recordSelectQuery>SELECT {{FIELD_LIST}} FROM {{TABLE_NAME}} {{CONDITION}};</recordSelectQuery>
+    </database>
+</rdbms-table-configuration>

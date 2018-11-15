@@ -26,12 +26,19 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.wso2.carbon.datasource.core.api.DataSourceService;
 import org.wso2.carbon.datasource.core.exception.DataSourceException;
+import org.wso2.extension.siddhi.io.cdc.source.config.QueryConfiguration;
+import org.wso2.extension.siddhi.io.cdc.source.config.QueryConfigurationEntry;
 import org.wso2.extension.siddhi.io.cdc.util.CDCSourceUtil;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import java.io.File;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -41,6 +48,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static org.wso2.extension.siddhi.io.cdc.util.CDCSourceUtil.cleanupConnection;
 
 /**
  * Polls a given table for changes. Use {@code pollingColumn} to poll on.
@@ -52,6 +61,7 @@ public class CDCPollar implements Runnable {
     private static final String CONNECTION_PROPERTY_DATASOURCE_USER = "dataSource.user";
     private static final String CONNECTION_PROPERTY_DATASOURCE_PASSWORD = "dataSource.password";
     private static final String CONNECTION_PROPERTY_DRIVER_CLASSNAME = "driverClassName";
+    private String selectQueryStructure = "";
     private String url;
     private String tableName;
     private String username;
@@ -148,6 +158,60 @@ public class CDCPollar implements Runnable {
         return conn;
     }
 
+    private String getSelectQuery(String fieldList, String condition) {
+        String selectQuery;
+
+        if (selectQueryStructure.isEmpty()) {
+            //Get the database product name
+            String databaseName;
+            Connection conn = null;
+            try {
+                conn = getConnection();
+                DatabaseMetaData dmd = conn.getMetaData();
+                databaseName = dmd.getDatabaseProductName();
+            } catch (SQLException e) {
+                throw new SiddhiAppRuntimeException("Error in looking up database type: " + e.getMessage(), e);
+            } finally {
+                cleanupConnection(null, null, conn);
+            }
+
+            //Read configs from file
+            QueryConfiguration QueryConfiguration = null;
+            try {
+
+                File file = new File("src/main/resources/query-config.xml");
+                JAXBContext jaxbContext = JAXBContext.newInstance(QueryConfiguration.class);
+
+                Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+                QueryConfiguration = (QueryConfiguration) jaxbUnmarshaller.unmarshal(file);
+
+            } catch (JAXBException e) {
+                log.error("Query Configuration read error", e);
+            }
+
+            //Get database related select query structure
+            for (QueryConfigurationEntry entry : QueryConfiguration.getDatabases()) {
+                if (entry.getDatabaseName().equalsIgnoreCase(databaseName)) {
+                    selectQueryStructure = entry.getRecordSelectQuery();
+                    break;
+                }
+            }
+
+            if (selectQueryStructure.isEmpty()) {
+                throw new SiddhiAppRuntimeException("Unsupported database: " + databaseName + ". Specify select query" +
+                        " to avoid this error.");
+            }
+        }
+
+        //create the select query with given constraints
+        selectQuery = selectQueryStructure.replace("{{TABLE_NAME}}", tableName)
+                .replace("{{FIELD_LIST}}", fieldList)
+                .replace("{{CONDITION}}", condition);
+// TODO: 11/15/18 move to constants
+        return selectQuery;
+
+    }
+
     /**
      * Poll for inserts and updates.
      */
@@ -165,15 +229,19 @@ public class CDCPollar implements Runnable {
         try {
             //If lastOffset is null, assign it with last record of the table.
             if (lastOffset == null) {
-                selectQuery = "select " + pollingColumn + " from " + tableName + ";";
+                selectQuery = getSelectQuery(pollingColumn, "");
                 statement = connection.prepareStatement(selectQuery);
                 resultSet = statement.executeQuery();
                 while (resultSet.next()) {
                     lastOffset = resultSet.getString(pollingColumn);
                 }
+                //if the table is empty, set last offset to a negative value.
+                if (resultSet.getRow() == 0) {
+                    lastOffset = "-1";
+                }
             }
 
-            selectQuery = "select * from `" + tableName + "` where `" + pollingColumn + "` > ?;";
+            selectQuery = getSelectQuery("*", "where " + pollingColumn + " > ?");
             statement = connection.prepareStatement(selectQuery);
 
             while (true) {

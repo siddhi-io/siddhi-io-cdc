@@ -23,6 +23,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import org.wso2.extension.siddhi.io.cdc.source.config.QueryConfiguration;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
@@ -34,6 +35,10 @@ import org.wso2.siddhi.core.util.SiddhiTestHelper;
 import org.wso2.siddhi.core.util.config.InMemoryConfigManager;
 import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -45,16 +50,16 @@ public class TestCaseOfCDCSource {
     private AtomicBoolean eventArrived = new AtomicBoolean(false);
     private int waitTime = 50;
     private int timeout = 10000;
-    private String username;
-    private String password;
+    private String username = "root";
+    private String password = "1234";
     private String mysqlJdbcDriverName = "com.mysql.jdbc.Driver";
-    private String databaseURL;
+    private String databaseURL = "jdbc:mysql://localhost:3306/SimpleDB?useSSL=false";
     private String tableName = "login";
     private String pollingColumn = "id";
     private String pollingTableName = "login";
     private int pollingInterval = 1000;
 
-    @BeforeClass
+//    @BeforeClass
     public void initializeConnectionParams() {
         String port = System.getenv("PORT");
         String host = System.getenv("DOCKER_HOST_IP");
@@ -71,7 +76,7 @@ public class TestCaseOfCDCSource {
     }
 
     // TODO: 11/8/18 remove this dev test case, enable necessary.
-    @Test(enabled = false)
+    @Test//(enabled = false)
     public void testPollingRun() throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();
         String cdcinStreamDefinition = "@app:name('cdcTesting')" +
@@ -766,5 +771,22 @@ public class TestCaseOfCDCSource {
         siddhiAppRuntime.start();
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
         siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void testConfigRead(){
+        try {
+
+            File file = new File("src/main/resources/query-config.xml");
+            JAXBContext jaxbContext = JAXBContext.newInstance(QueryConfiguration.class);
+
+            Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+            QueryConfiguration queryConfiguration =
+                    (QueryConfiguration) jaxbUnmarshaller.unmarshal(file);
+            System.out.println(queryConfiguration);
+
+        } catch (JAXBException e) {
+            e.printStackTrace();
+        }
     }
 }
