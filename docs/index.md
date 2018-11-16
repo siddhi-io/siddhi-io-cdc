@@ -39,6 +39,19 @@ Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/si
      </dependency>
 ```
 
+## Running Integration tests in docker containers(Optional)
+
+The CDC functionality are tested with the docker base integration test framework.
+The test framework initialize a docker container with required configuration before execute the test suit.
+
+**Start integration tests**
+
+1. Install and run docker
+2. To run the integration test, navigate to the siddhi-io-cdc/ directory and issue the following command.
+```
+    mvn verify -P local-mysql
+```
+
 ## Jenkins Build Status
 
 ---

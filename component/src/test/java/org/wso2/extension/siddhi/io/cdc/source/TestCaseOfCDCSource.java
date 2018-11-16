@@ -20,6 +20,7 @@ package org.wso2.extension.siddhi.io.cdc.source;
 
 import org.apache.log4j.Logger;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
@@ -43,11 +44,20 @@ public class TestCaseOfCDCSource {
     private AtomicBoolean eventArrived = new AtomicBoolean(false);
     private int waitTime = 50;
     private int timeout = 10000;
-    private String username = "";
-    private String password = "";
+    private String username;
+    private String password;
     private String jdbcDriverName = "com.mysql.jdbc.Driver";
-    private String databaseURL = "jdbc:mysql://localhost:3306/SimpleDB";
+    private String databaseURL;
     private String tableName = "login";
+
+    @BeforeClass
+    public void initializeConnectionParams() {
+        String port = System.getenv("PORT");
+        String host = System.getenv("DOCKER_HOST_IP");
+        databaseURL = "jdbc:mysql://" + host + ":" + port + "/SimpleDB?useSSL=false";
+        username = System.getenv("DATABASE_USER");
+        password = System.getenv("DATABASE_PASSWORD");
+    }
 
     @BeforeMethod
     public void init() {
