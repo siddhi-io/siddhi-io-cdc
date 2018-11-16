@@ -231,8 +231,6 @@ public class CDCPollar implements Runnable {
      * Poll for inserts and updates.
      */
     private void pollForChanges() {
-        // TODO: 11/16/18 avoid printing from begining
-
         initializeDatasource();
 
         String selectQuery;
@@ -252,7 +250,7 @@ public class CDCPollar implements Runnable {
                     lastOffset = resultSet.getString(pollingColumn);
                 }
                 //if the table is empty, set last offset to a negative value.
-                if (resultSet.getRow() == 0) {
+                if (lastOffset == null) {
                     lastOffset = "-1";
                 }
             }
