@@ -231,6 +231,7 @@ public class CDCPollar implements Runnable {
      * Poll for inserts and updates.
      */
     private void pollForChanges() {
+        // TODO: 11/16/18 avoid printing from begining
 
         initializeDatasource();
 
@@ -244,7 +245,7 @@ public class CDCPollar implements Runnable {
         try {
             //If lastOffset is null, assign it with last record of the table.
             if (lastOffset == null) {
-                selectQuery = getSelectQuery(pollingColumn, "");
+                selectQuery = getSelectQuery(pollingColumn, "").trim();
                 statement = connection.prepareStatement(selectQuery);
                 resultSet = statement.executeQuery();
                 while (resultSet.next()) {
