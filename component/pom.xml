@@ -169,7 +169,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>2.19.1</version>
                         <executions>
                             <execution>
                                 <id>integration-test-for-mysql</id>
@@ -243,7 +242,8 @@
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                         <Include-Resource>
-                            META-INF=target/classes/META-INF
+                            META-INF=target/classes/META-INF,
+                            {maven-resources}
                         </Include-Resource>
                     </instructions>
                 </configuration>

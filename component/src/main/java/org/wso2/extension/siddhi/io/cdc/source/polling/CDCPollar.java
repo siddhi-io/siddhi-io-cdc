@@ -34,7 +34,8 @@ import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 
-import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -63,6 +64,7 @@ public class CDCPollar implements Runnable {
     private static final String PLACE_HOLDER_TABLE_NAME = "{{TABLE_NAME}}";
     private static final String PLACE_HOLDER_FIELD_LIST = "{{FIELD_LIST}}";
     private static final String PLACE_HOLDER_CONDITION = "{{CONDITION}}";
+    private static final String RDBMS_QUERY_CONFIG_FILE = "query-config.xml";
     private String selectQueryStructure = "";
     private String url;
     private String tableName;
@@ -179,16 +181,28 @@ public class CDCPollar implements Runnable {
 
             //Read configs from file
             QueryConfiguration queryConfiguration = null;
+            InputStream inputStream = null;
             try {
-
-                File file = new File("src/main/resources/query-config.xml");
-                JAXBContext jaxbContext = JAXBContext.newInstance(QueryConfiguration.class);
-
-                Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-                queryConfiguration = (QueryConfiguration) jaxbUnmarshaller.unmarshal(file);
+                JAXBContext ctx = JAXBContext.newInstance(QueryConfiguration.class);
+                Unmarshaller unmarshaller = ctx.createUnmarshaller();
+                ClassLoader classLoader = getClass().getClassLoader();
+                inputStream = classLoader.getResourceAsStream(RDBMS_QUERY_CONFIG_FILE);
+                if (inputStream == null) {
+                    throw new SiddhiAppRuntimeException(RDBMS_QUERY_CONFIG_FILE
+                            + " is not found in the classpath");
+                }
+                queryConfiguration = (QueryConfiguration) unmarshaller.unmarshal(inputStream);
 
             } catch (JAXBException e) {
                 log.error("Query Configuration read error", e);
+            } finally {
+                if (inputStream != null) {
+                    try {
+                        inputStream.close();
+                    } catch (IOException e) {
+                        log.error(String.format("Failed to close the input stream for %s", RDBMS_QUERY_CONFIG_FILE));
+                    }
+                }
             }
 
             //Get database related select query structure

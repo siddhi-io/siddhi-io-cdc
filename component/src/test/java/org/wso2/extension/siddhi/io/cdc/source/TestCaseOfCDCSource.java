@@ -70,10 +70,51 @@ public class TestCaseOfCDCSource {
         currentEvent = new Event();
     }
 
+    @Test(enabled = false)
+    public void testPollingRun() throws InterruptedException {
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String cdcinStreamDefinition = "@app:name('cdcTesting')" +
+                "@source(type = 'cdc', mode='polling'," +
+                " polling.column='" + pollingColumn + "'," +
+                " jdbc.driver.name='" + mysqlJdbcDriverName + "'," +
+                " url = '" + databaseURL + "'," +
+                " username = '" + username + "'," +
+                " password = '" + password + "'," +
+                " table.name = '" + pollingTableName + "', " +
+                " @map(type='keyvalue'))" +
+                "define stream istm (name string);";
+
+        String cdcquery = ("@info(name = 'query1') " +
+                "from istm#log() " +
+                "select *  " +
+                "insert into outputStream;");
+
+        SiddhiAppRuntime cdcAppRuntime = siddhiManager.createSiddhiAppRuntime(cdcinStreamDefinition +
+                cdcquery);
+
+        siddhiManager.setConfigManager(new InMemoryConfigManager());
+
+        QueryCallback queryCallback = new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                for (Event event : inEvents) {
+                    currentEvent = event;
+                    eventCount.getAndIncrement();
+                    log.info(eventCount + ". " + event);
+                    eventArrived.set(true);
+                }
+            }
+        };
+
+        cdcAppRuntime.addCallback("query1", queryCallback);
+        cdcAppRuntime.start();
+        SiddhiTestHelper.waitForEvents(waitTime, 100, eventCount, 10000000);
+    }
+
     /**
      * Test case to Capture Insert, Update operations from a MySQL table using polling mode.
      */
-    @Test(dependsOnMethods = "testInsertCDC")
+    @Test//(dependsOnMethods = "testInsertCDC")
     public void testCDCPollingMode() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
         log.info("CDC TestCase: Capturing change data from MySQL with polling mode.");
