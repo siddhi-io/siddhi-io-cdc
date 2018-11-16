@@ -60,6 +60,9 @@ public class CDCPollar implements Runnable {
     private static final String CONNECTION_PROPERTY_DATASOURCE_USER = "dataSource.user";
     private static final String CONNECTION_PROPERTY_DATASOURCE_PASSWORD = "dataSource.password";
     private static final String CONNECTION_PROPERTY_DRIVER_CLASSNAME = "driverClassName";
+    private static final String PLACE_HOLDER_TABLE_NAME = "{{TABLE_NAME}}";
+    private static final String PLACE_HOLDER_FIELD_LIST = "{{FIELD_LIST}}";
+    private static final String PLACE_HOLDER_CONDITION = "{{CONDITION}}";
     private String selectQueryStructure = "";
     private String url;
     private String tableName;
@@ -198,17 +201,16 @@ public class CDCPollar implements Runnable {
 
             if (selectQueryStructure.isEmpty()) {
                 throw new SiddhiAppRuntimeException("Unsupported database: " + databaseName + ". Specify select query" +
-                        " to avoid this error.");
+                        " for the database to avoid this error.");
             }
         }
 
         //create the select query with given constraints
-        selectQuery = selectQueryStructure.replace("{{TABLE_NAME}}", tableName)
-                .replace("{{FIELD_LIST}}", fieldList)
-                .replace("{{CONDITION}}", condition);
-// TODO: 11/15/18 move to constants
-        return selectQuery;
+        selectQuery = selectQueryStructure.replace(PLACE_HOLDER_TABLE_NAME, tableName)
+                .replace(PLACE_HOLDER_FIELD_LIST, fieldList)
+                .replace(PLACE_HOLDER_CONDITION, condition);
 
+        return selectQuery;
     }
 
     /**
@@ -240,7 +242,7 @@ public class CDCPollar implements Runnable {
                 }
             }
 
-            selectQuery = getSelectQuery("*", "where " + pollingColumn + " > ?");
+            selectQuery = getSelectQuery("*", "WHERE " + pollingColumn + " > ?");
             statement = connection.prepareStatement(selectQuery);
 
             while (true) {

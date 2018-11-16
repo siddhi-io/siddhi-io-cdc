@@ -4,6 +4,15 @@
     <database name="h2">
         <recordSelectQuery>SELECT {{FIELD_LIST}} FROM {{TABLE_NAME}} {{CONDITION}};</recordSelectQuery>
     </database>
+    <database name="oracle">
+        <recordSelectQuery>SELECT {{FIELD_LIST}} FROM {{TABLE_NAME}} {{CONDITION}};</recordSelectQuery>
+    </database>
+    <database name="postgres">
+        <recordSelectQuery>SELECT {{FIELD_LIST}} FROM {{TABLE_NAME}} {{CONDITION}};</recordSelectQuery>
+    </database>
+    <database name="mssql">
+        <recordSelectQuery>SELECT {{FIELD_LIST}} FROM {{TABLE_NAME}} {{CONDITION}};</recordSelectQuery>
+    </database>
     <database name="mysql">
         <recordSelectQuery>SELECT {{FIELD_LIST}} FROM {{TABLE_NAME}} {{CONDITION}};</recordSelectQuery>
     </database>

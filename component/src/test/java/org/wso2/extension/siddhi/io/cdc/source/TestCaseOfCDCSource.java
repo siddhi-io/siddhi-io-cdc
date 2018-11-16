@@ -23,7 +23,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.wso2.extension.siddhi.io.cdc.source.config.QueryConfiguration;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
@@ -35,12 +34,8 @@ import org.wso2.siddhi.core.util.SiddhiTestHelper;
 import org.wso2.siddhi.core.util.config.InMemoryConfigManager;
 import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
-import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 
 public class TestCaseOfCDCSource {
 
@@ -75,6 +70,9 @@ public class TestCaseOfCDCSource {
         currentEvent = new Event();
     }
 
+    /**
+     * Test case to Capture Insert, Update operations from a MySQL table using polling mode.
+     */
     @Test(dependsOnMethods = "testInsertCDC")
     public void testCDCPollingMode() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
@@ -157,7 +155,6 @@ public class TestCaseOfCDCSource {
 
     /**
      * Test case to Capture Insert operations from a MySQL table.
-     * Offset data persistence is enabled.
      */
     @Test
     public void testInsertCDC() throws InterruptedException {
@@ -740,6 +737,51 @@ public class TestCaseOfCDCSource {
                 "@source(type = 'cdc' , url = '" + databaseURL + "',  username = '" + username + "'," +
                 " password = '" + password + "'," +
                 " operation = 'insert'," +
+                " @map(type='keyvalue'))" +
+                "define stream istm (id string, name string);";
+
+        siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streamDefinition + query);
+        siddhiAppRuntime.addCallback("query1", queryCallback);
+        siddhiAppRuntime.start();
+        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+        siddhiAppRuntime.shutdown();
+    }
+
+    /**
+     * Test case to validate mode.
+     */
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    public void cdcModeValidation() throws InterruptedException {
+        log.info("------------------------------------------------------------------------------------------------");
+        log.info("CDC TestCase: Validate parameter: mode");
+        log.info("------------------------------------------------------------------------------------------------");
+
+        String wrongMode = "otherMode";
+
+        SiddhiAppRuntime siddhiAppRuntime;
+        String streamDefinition;
+        SiddhiManager siddhiManager = new SiddhiManager();
+        QueryCallback queryCallback = new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                for (Event event : inEvents) {
+                    log.info("Received event: " + event);
+                }
+            }
+        };
+        String query = ("@info(name = 'query1') " +
+                "from istm " +
+                "select *  " +
+                "insert into outputStream;");
+
+        //stream definition with missing parameter: table.name
+        streamDefinition = "@app:name('cdcTesting')" +
+                "@source(type = 'cdc', mode = '" + wrongMode + "'," +
+                " url = '" + databaseURL + "'," +
+                " username = '" + username + "'," +
+                " password = '" + password + "'," +
+                " table.name = '" + tableName + "', " +
+                " operation = 'insert', " +
                 " @map(type='keyvalue'))" +
                 "define stream istm (id string, name string);";
 
