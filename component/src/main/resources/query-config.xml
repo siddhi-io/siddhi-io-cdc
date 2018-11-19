@@ -7,10 +7,10 @@
     <database name="oracle">
         <recordSelectQuery>SELECT {{FIELD_LIST}} FROM {{TABLE_NAME}} {{CONDITION}}</recordSelectQuery>
     </database>
-    <database name="postgres">
+    <database name="PostgreSQL">
         <recordSelectQuery>SELECT {{FIELD_LIST}} FROM {{TABLE_NAME}} {{CONDITION}}</recordSelectQuery>
     </database>
-    <database name="mssql">
+    <database name="Microsoft SQL Server">
         <recordSelectQuery>SELECT {{FIELD_LIST}} FROM {{TABLE_NAME}} {{CONDITION}}</recordSelectQuery>
     </database>
     <database name="mysql">
