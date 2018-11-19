@@ -49,7 +49,7 @@ The test framework initialize a docker container with required configuration bef
 1. Install and run docker
 2. To run the integration test, navigate to the siddhi-io-cdc/ directory and issue the following command.
 ```
-    mvn verify -P local-mysql
+    mvn verify -P local-mysql -Dskip.surefire.test=true
 ```
 
 ## Jenkins Build Status

@@ -178,7 +178,7 @@ public class CDCPollar implements Runnable {
             } finally {
                 CDCPollingUtil.cleanupConnection(null, null, conn);
             }
-
+// TODO: 11/19/18 let user to override query-configs
             //Read configs from file
             QueryConfiguration queryConfiguration = null;
             InputStream inputStream = null;

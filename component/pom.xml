@@ -193,9 +193,9 @@
                                 <PORT>${siddhi-cdc-mysql.port}</PORT>
                                 <DOCKER_HOST_IP>${docker.container.siddhi-cdc-mysql.ip}</DOCKER_HOST_IP>
                             </environmentVariables>
-                            <suiteXmlFiles>
-                                <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
-                            </suiteXmlFiles>
+                            <test>
+                                org.wso2.extension.siddhi.io.cdc.source.TestCaseOfMySQLCDC
+                            </test>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -218,7 +218,7 @@
                         <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
                     </suiteXmlFiles>
                     <useSystemClassLoader>false</useSystemClassLoader>
-                    <skip>true</skip>
+                    <skip>${skip.surefire.test}</skip>
                 </configuration>
             </plugin>
             <plugin>
