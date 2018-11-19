@@ -16,7 +16,8 @@
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.wso2.extension.siddhi.io.cdc</groupId>
         <artifactId>siddhi-io-cdc-parent</artifactId>
@@ -195,6 +196,90 @@
                             </environmentVariables>
                             <test>
                                 org.wso2.extension.siddhi.io.cdc.source.TestCaseOfMySQLCDC
+                            </test>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>local-oracle</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.fabric8</groupId>
+                        <artifactId>docker-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>start-docker-for-oracle</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>start</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>stop-docker-for-oracle</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                    <goal>remove</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <images>
+                                <image>
+                                    <alias>siddhi-rdbms-oracle</alias>
+                                    <name>oracle/database:11.2.0.2-xe</name>
+                                    <run>
+                                        <namingStrategy>alias</namingStrategy>
+                                        <env>
+                                            <ORACLE_PWD>root</ORACLE_PWD>
+                                        </env>
+                                        <ports>
+                                            <port>${siddhi-rdbms-oracle.port}:1521</port>
+                                        </ports>
+                                        <wait>
+                                            <log>DATABASE IS READY TO USE!</log>
+                                            <time>400000</time>
+                                        </wait>
+                                        <shmSize>2718281829</shmSize>
+                                    </run>
+                                </image>
+                            </images>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.19.1</version>
+                        <executions>
+                            <execution>
+                                <id>integration-test-for-oracle</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>verify-for-oracle</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <environmentVariables>
+                                <DATABASE_USER>system</DATABASE_USER>
+                                <DATABASE_PASSWORD>root</DATABASE_PASSWORD>
+                                <PORT>${siddhi-rdbms-oracle.port}</PORT>
+                                <DOCKER_HOST_IP>${docker.container.siddhi-rdbms-oracle.ip}</DOCKER_HOST_IP>
+                                <SID>ORCLCDB</SID>
+                            </environmentVariables>
+                            <argLine>-Duser.timezone=GMT</argLine>
+                            <test>
+                                org.wso2.extension.siddhi.io.cdc.source.TestCaseOfOracleCDC
                             </test>
                         </configuration>
                     </plugin>

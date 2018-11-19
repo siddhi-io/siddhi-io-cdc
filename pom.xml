@@ -16,7 +16,8 @@
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.wso2</groupId>
         <artifactId>wso2</artifactId>
@@ -177,6 +178,8 @@
         <mavan.findbugsplugin.exclude.file>../findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
         <siddhi-cdc-mysql.port>3309</siddhi-cdc-mysql.port>
         <docker.container.siddhi-cdc-mysql.ip>0.0.0.0</docker.container.siddhi-cdc-mysql.ip>
+        <siddhi-rdbms-oracle.port>1522</siddhi-rdbms-oracle.port>
+        <docker.container.siddhi-rdbms-oracle.ip>0.0.0.0</docker.container.siddhi-rdbms-oracle.ip>
     </properties>
     <scm>
         <url>https://github.com/wso2-extensions/siddhi-io-cdc.git</url>
