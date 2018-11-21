@@ -115,6 +115,12 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>${h2.connector.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.log4j.wso2</groupId>
                 <artifactId>log4j</artifactId>
                 <version>${log4j.version}</version>
@@ -197,6 +203,7 @@
         <ojdbc6.version>12.1.0.1-atlassian-hosted</ojdbc6.version>
         <sqljdbc4.version>4.0</sqljdbc4.version>
         <postgresql.version>RELEASE</postgresql.version>
+        <h2.connector.version>1.4.187</h2.connector.version>
         <siddhi-cdc-mysql.port>3309</siddhi-cdc-mysql.port>
         <docker.container.siddhi-cdc-mysql.ip>0.0.0.0</docker.container.siddhi-cdc-mysql.ip>
         <siddhi-cdc-oracle.port>1522</siddhi-cdc-oracle.port>
