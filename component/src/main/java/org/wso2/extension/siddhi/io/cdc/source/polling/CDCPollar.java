@@ -241,17 +241,19 @@ public class CDCPollar implements Runnable {
         ResultSet resultSet = null;
 
         try {
-            //If lastOffset is null, assign it with last record of the table.
-            if (lastOffset == null) {
-                selectQuery = getSelectQuery(pollingColumn, "").trim();
-                statement = connection.prepareStatement(selectQuery);
-                resultSet = statement.executeQuery();
-                while (resultSet.next()) {
-                    lastOffset = resultSet.getString(pollingColumn);
-                }
-                //if the table is empty, set last offset to a negative value.
+            synchronized (new Object()) { //assign null lastOffset atomically.
+                //If lastOffset is null, assign it with last record of the table.
                 if (lastOffset == null) {
-                    lastOffset = "-1";
+                    selectQuery = getSelectQuery(pollingColumn, "").trim();
+                    statement = connection.prepareStatement(selectQuery);
+                    resultSet = statement.executeQuery();
+                    while (resultSet.next()) {
+                        lastOffset = resultSet.getString(pollingColumn);
+                    }
+                    //if the table is empty, set last offset to a negative value.
+                    if (lastOffset == null) {
+                        lastOffset = "-1";
+                    }
                 }
             }
 

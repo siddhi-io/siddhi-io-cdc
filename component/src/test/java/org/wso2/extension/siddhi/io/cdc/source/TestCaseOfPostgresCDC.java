@@ -34,9 +34,9 @@ import org.wso2.siddhi.core.util.SiddhiTestHelper;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class TestCaseOfOracleCDC {
+public class TestCaseOfPostgresCDC {
 
-    private static final Logger log = Logger.getLogger(TestCaseOfOracleCDC.class);
+    private static final Logger log = Logger.getLogger(TestCaseOfPostgresCDC.class);
     private Event currentEvent;
     private AtomicInteger eventCount = new AtomicInteger(0);
     private AtomicBoolean eventArrived = new AtomicBoolean(false);
@@ -44,19 +44,18 @@ public class TestCaseOfOracleCDC {
     private int timeout = 10000;
     private String username;
     private String password;
-    private String oracleJdbcDriverName;
+    private String postgresqlJdbcDriverName;
     private String databaseURL;
-    // TODO: 11/19/18 test with docker
 
     @BeforeClass
     public void initializeConnectionParams() {
         String port = System.getenv("PORT");
         String host = System.getenv("DOCKER_HOST_IP");
-        String sid = System.getenv("SID");
-        databaseURL = "jdbc:oracle:thin:@" + host + ":" + port + ":" + sid;
+        String postgresDB = System.getenv("POSTGRES_DB");
+        databaseURL = "jdbc:postgresql://" + host + ":" + port + "/" + postgresDB;
         username = System.getenv("DATABASE_USER");
         password = System.getenv("DATABASE_PASSWORD");
-        oracleJdbcDriverName = "oracle.jdbc.driver.OracleDriver";
+        postgresqlJdbcDriverName = "org.postgresql.Driver";
     }
 
     @BeforeMethod
@@ -67,12 +66,12 @@ public class TestCaseOfOracleCDC {
     }
 
     /**
-     * Test case to Capture Insert, Update operations from a Oracle table using polling mode.
+     * Test case to Capture Insert operation from a PostgreSQL table using polling mode.
      */
     @Test
     public void testCDCPollingMode() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
-        log.info("CDC TestCase: Capturing change data from Oracle with polling mode.");
+        log.info("CDC TestCase: Capturing change data from PostgreSQL with polling mode.");
         log.info("------------------------------------------------------------------------------------------------");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -83,7 +82,7 @@ public class TestCaseOfOracleCDC {
         String cdcinStreamDefinition = "@app:name('cdcTesting')" +
                 "@source(type = 'cdc', mode='polling'," +
                 " polling.column='" + pollingColumn + "'," +
-                " jdbc.driver.name='" + oracleJdbcDriverName + "'," +
+                " jdbc.driver.name='" + postgresqlJdbcDriverName + "'," +
                 " url = '" + databaseURL + "'," +
                 " username = '" + username + "'," +
                 " password = '" + password + "'," +
@@ -94,7 +93,7 @@ public class TestCaseOfOracleCDC {
         String rdbmsStoreDefinition = "define stream insertionStream (id string, name string);" +
                 "@Store(type='rdbms', jdbc.url='" + databaseURL + "'," +
                 " username='" + username + "', password='" + password + "' ," +
-                " jdbc.driver.name='" + oracleJdbcDriverName + "')" +
+                " jdbc.driver.name='" + postgresqlJdbcDriverName + "')" +
                 "define table login (id string, name string);";
 
         String rdbmsQuery = "@info(name='query2') " +
@@ -131,13 +130,13 @@ public class TestCaseOfOracleCDC {
         cdcAppRuntime.addCallback("istm", insertionStreamCallback);
         cdcAppRuntime.start();
 
+        //wait till cdc-pollar initialize.
+        Thread.sleep(5000);
+
         //Do an insert and wait for cdc app to capture.
         InputHandler rdbmsInputHandler = rdbmsAppRuntime.getInputHandler("insertionStream");
         Object[] insertingObject = new Object[]{"e001", "testEmployer"};
         rdbmsInputHandler.send(insertingObject);
-
-        //wait polling interval + 200 ms.
-        Thread.sleep(pollingInterval + 200);
 
         SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
 
