@@ -31,8 +31,8 @@
     </tr>
     <tr>
         <td style="vertical-align: top">mode</td>
-        <td style="vertical-align: top; word-wrap: break-word">Mode to capture the change data. Mode ‘polling’ uses a polling.column to monitor the given table. Mode 'streaming' uses logs to monitor the given table.<br>The required parameters are different for each modes.<br>mode 'streaming' currently supports only MySQL. INSERT, UPDATE, DELETE events can be received.<br>mode 'polling' supports RDBs. INSERT, UPDATE events can be received.</td>
-        <td style="vertical-align: top">streaming</td>
+        <td style="vertical-align: top; word-wrap: break-word">Mode to capture the change data. Mode ‘polling’ uses a polling.column to monitor the given table. Mode 'listening' uses logs to monitor the given table.<br>The required parameters are different for each modes.<br>mode 'listening' currently supports only MySQL. INSERT, UPDATE, DELETE events can be received.<br>mode 'polling' supports RDBs. INSERT, UPDATE events can be received.</td>
+        <td style="vertical-align: top">listening</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
@@ -95,7 +95,7 @@
     </tr>
     <tr>
         <td style="vertical-align: top">operation</td>
-        <td style="vertical-align: top; word-wrap: break-word">Interested change event operation. 'insert', 'update' or 'delete'. Required for 'streaming' mode.<br>Not case sensitive.</td>
+        <td style="vertical-align: top; word-wrap: break-word">Interested change event operation. 'insert', 'update' or 'delete'. Required for 'listening' mode.<br>Not case sensitive.</td>
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">No</td>
@@ -103,7 +103,7 @@
     </tr>
     <tr>
         <td style="vertical-align: top">connector.properties</td>
-        <td style="vertical-align: top; word-wrap: break-word">Debezium connector specified properties as a comma separated string. <br>This properties will have more priority over the parameters. Only for 'streaming' mode</td>
+        <td style="vertical-align: top; word-wrap: break-word">Debezium connector specified properties as a comma separated string. <br>This properties will have more priority over the parameters. Only for 'listening' mode</td>
         <td style="vertical-align: top">Empty_String</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
@@ -111,7 +111,7 @@
     </tr>
     <tr>
         <td style="vertical-align: top">database.server.id</td>
-        <td style="vertical-align: top; word-wrap: break-word">For MySQL, a unique integer between 1 to 2^32 as the ID, This is used when joining MySQL database cluster to read binlog. Only for 'streaming'mode.</td>
+        <td style="vertical-align: top; word-wrap: break-word">For MySQL, a unique integer between 1 to 2^32 as the ID, This is used when joining MySQL database cluster to read binlog. Only for 'listening'mode.</td>
         <td style="vertical-align: top">Random integer between 5400 and 6400</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
@@ -119,7 +119,7 @@
     </tr>
     <tr>
         <td style="vertical-align: top">database.server.name</td>
-        <td style="vertical-align: top; word-wrap: break-word">Logical name that identifies and provides a namespace for the particular database server. Only for 'streaming' mode.</td>
+        <td style="vertical-align: top; word-wrap: break-word">Logical name that identifies and provides a namespace for the particular database server. Only for 'listening' mode.</td>
         <td style="vertical-align: top">{host}_{port}</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>

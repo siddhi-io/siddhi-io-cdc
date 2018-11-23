@@ -46,7 +46,6 @@ public class TestCaseOfOracleCDC {
     private String password;
     private String oracleJdbcDriverName;
     private String databaseURL;
-    // TODO: 11/19/18 test with docker
 
     @BeforeClass
     public void initializeConnectionParams() {

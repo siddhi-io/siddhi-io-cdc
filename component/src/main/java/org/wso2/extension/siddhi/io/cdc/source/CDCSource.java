@@ -72,13 +72,13 @@ import java.util.concurrent.Executors;
                 @Parameter(
                         name = "mode",
                         description = "Mode to capture the change data. Mode ‘polling’ uses a polling.column to" +
-                                " monitor the given table. Mode 'streaming' uses logs to monitor the given table." +
+                                " monitor the given table. Mode 'listening' uses logs to monitor the given table." +
                                 "\nThe required parameters are different for each modes." +
-                                "\nmode 'streaming' currently supports only MySQL. INSERT, UPDATE, DELETE events" +
+                                "\nmode 'listening' currently supports only MySQL. INSERT, UPDATE, DELETE events" +
                                 " can be received." +
                                 "\nmode 'polling' supports RDBs. INSERT, UPDATE events can be received.",
                         type = DataType.STRING,
-                        defaultValue = "streaming",
+                        defaultValue = "listening",
                         optional = true
                 ),
                 @Parameter(
@@ -140,14 +140,14 @@ import java.util.concurrent.Executors;
                 @Parameter(
                         name = "operation",
                         description = "Interested change event operation. 'insert', 'update' or 'delete'. Required" +
-                                " for 'streaming' mode." +
+                                " for 'listening' mode." +
                                 "\nNot case sensitive.",
                         type = DataType.STRING
                 ),
                 @Parameter(
                         name = "connector.properties",
                         description = "Debezium connector specified properties as a comma separated string. " +
-                                "\nThis properties will have more priority over the parameters. Only for 'streaming'" +
+                                "\nThis properties will have more priority over the parameters. Only for 'listening'" +
                                 " mode",
                         type = DataType.STRING,
                         optional = true,
@@ -156,14 +156,14 @@ import java.util.concurrent.Executors;
                 @Parameter(name = "database.server.id",
                         description = "For MySQL, a unique integer between 1 to 2^32 as the ID," +
                                 " This is used when joining MySQL database cluster to read binlog. Only for" +
-                                " 'streaming'mode.",
+                                " 'listening'mode.",
                         type = DataType.STRING,
                         optional = true,
                         defaultValue = "Random integer between 5400 and 6400"
                 ),
                 @Parameter(name = "database.server.name",
                         description = "Logical name that identifies and provides a namespace for the " +
-                                "particular database server. Only for 'streaming' mode.",
+                                "particular database server. Only for 'listening' mode.",
                         defaultValue = "{host}_{port}",
                         optional = true,
                         type = DataType.STRING
@@ -257,13 +257,13 @@ public class CDCSource extends Source {
                      String[] requestedTransportPropertyNames, ConfigReader configReader,
                      SiddhiAppContext siddhiAppContext) {
         //initialize mode
-        mode = optionHolder.validateAndGetStaticValue(CDCSourceConstants.MODE, CDCSourceConstants.MODE_STREAMING);
+        mode = optionHolder.validateAndGetStaticValue(CDCSourceConstants.MODE, CDCSourceConstants.MODE_LISTENING);
 
         //initialize common mandatory parameters
         String tableName = optionHolder.validateAndGetOption(CDCSourceConstants.TABLE_NAME).getValue();
 
         switch (mode) {
-            case CDCSourceConstants.MODE_STREAMING:
+            case CDCSourceConstants.MODE_LISTENING:
 
                 String url = optionHolder.validateAndGetOption(CDCSourceConstants.DATABASE_CONNECTION_URL).getValue();
                 String username = optionHolder.validateAndGetOption(CDCSourceConstants.USERNAME).getValue();
@@ -293,7 +293,7 @@ public class CDCSource extends Source {
                 historyFileDirectory = carbonHome + File.separator + "cdc" + File.separator + "history"
                         + File.separator + siddhiAppName + File.separator;
 
-                validateStreamingModeParameters(optionHolder);
+                validateListeningModeParameters(optionHolder);
 
                 //send sourceEventListener and preferred operation to changeDataCapture object
                 changeDataCapture = new ChangeDataCapture(operation, sourceEventListener);
@@ -365,7 +365,7 @@ public class CDCSource extends Source {
     public void connect(ConnectionCallback connectionCallback) throws ConnectionUnavailableException {
 
         switch (mode) {
-            case CDCSourceConstants.MODE_STREAMING:
+            case CDCSourceConstants.MODE_LISTENING:
                 //keep the object reference in Object keeper
                 cdcSourceObjectKeeper.addCdcObject(this);
 
@@ -407,7 +407,7 @@ public class CDCSource extends Source {
 
     @Override
     public void destroy() {
-        if (mode.equals(CDCSourceConstants.MODE_STREAMING)) {
+        if (mode.equals(CDCSourceConstants.MODE_LISTENING)) {
             //Remove this CDCSource object from the CDCObjectKeeper.
             cdcSourceObjectKeeper.removeObject(this.hashCode());
         }
@@ -421,7 +421,7 @@ public class CDCSource extends Source {
             case CDCSourceConstants.MODE_POLLING:
                 cdcPollar.pause();
                 break;
-            case CDCSourceConstants.MODE_STREAMING:
+            case CDCSourceConstants.MODE_LISTENING:
                 changeDataCapture.pause();
                 break;
             default:
@@ -435,7 +435,7 @@ public class CDCSource extends Source {
             case CDCSourceConstants.MODE_POLLING:
                 cdcPollar.resume();
                 break;
-            case CDCSourceConstants.MODE_STREAMING:
+            case CDCSourceConstants.MODE_LISTENING:
                 changeDataCapture.resume();
                 break;
             default:
@@ -450,7 +450,7 @@ public class CDCSource extends Source {
             case CDCSourceConstants.MODE_POLLING:
                 currentState.put("last.offset", lastOffset);
                 break;
-            case CDCSourceConstants.MODE_STREAMING:
+            case CDCSourceConstants.MODE_LISTENING:
                 currentState.put(CDCSourceConstants.CACHE_OBJECT, offsetData);
                 break;
             default:
@@ -466,7 +466,7 @@ public class CDCSource extends Source {
                 Object lastOffsetObj = map.get("last.offset");
                 this.lastOffset = (String) lastOffsetObj;
                 break;
-            case CDCSourceConstants.MODE_STREAMING:
+            case CDCSourceConstants.MODE_LISTENING:
                 Object cacheObj = map.get(CDCSourceConstants.CACHE_OBJECT);
                 this.offsetData = (HashMap<byte[], byte[]>) cacheObj;
                 break;
@@ -493,13 +493,13 @@ public class CDCSource extends Source {
     }
 
     /**
-     * Used to Validate the parameters for the mode: streaming.
+     * Used to Validate the parameters for the mode: listening.
      */
-    private void validateStreamingModeParameters(OptionHolder optionHolder) {
-        //datasource.name should not be accepted for streaming mode.
+    private void validateListeningModeParameters(OptionHolder optionHolder) {
+        //datasource.name should not be accepted for listening mode.
         if (optionHolder.isOptionExists(CDCSourceConstants.DATASOURCE_NAME)) {
             throw new SiddhiAppValidationException("Parameter: " + CDCSourceConstants.DATASOURCE_NAME + " should" +
-                    " not be defined for streaming mode");
+                    " not be defined for listening mode");
         }
 
         if (!(operation.equalsIgnoreCase(CDCSourceConstants.INSERT)
