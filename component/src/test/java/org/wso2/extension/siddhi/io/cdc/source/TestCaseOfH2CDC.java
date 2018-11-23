@@ -85,7 +85,7 @@ public class TestCaseOfH2CDC {
                 " password = '" + password + "'," +
                 " table.name = '" + pollingTableName + "', polling.interval = '" + pollingInterval + "'," +
                 " @map(type='keyvalue'))" +
-                "define stream istm (id string, name string);";
+                "define stream istm (ID string, NAME string);";
 
         String rdbmsStoreDefinition = "define stream insertionStream (id string, name string);" +
                 "@Store(type='rdbms', jdbc.url='" + databaseURL + "'," +

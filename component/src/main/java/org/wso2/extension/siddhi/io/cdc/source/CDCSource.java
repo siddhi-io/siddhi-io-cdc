@@ -188,8 +188,7 @@ import java.util.concurrent.Executors;
                                 "\n@map(type='keyvalue', @attributes(id = 'id', name = 'name', " +
                                 "\nbefore_id = 'before_id', before_name = 'before_name')))" +
                                 "\ndefine stream inputStream (before_id string, id string, " +
-                                "\nbefore_name string, ," +
-                                " name string);",
+                                "\nbefore_name string , name string);",
                         description = "In this example, the cdc source starts listening to the row updates" +
                                 " on students table which is under MySQL SimpleDB database that" +
                                 " can be accessed with the given url."

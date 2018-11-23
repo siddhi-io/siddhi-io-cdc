@@ -47,7 +47,11 @@ The test framework initialize a docker container with required configuration bef
 **Start integration tests**
 
 1. Install and run docker
-2. To run the integration test, navigate to the siddhi-io-cdc/ directory and issue the following commands.
+2. To run the integration tests, navigate to the siddhi-io-cdc/ directory and issue the following commands.
+
+    * H2 default:
+
+            mvn clean install
 
     * MySQL 5.7:
 

@@ -146,7 +146,7 @@ table.name = 'students', operation = 'update',
 @map(type='keyvalue', @attributes(id = 'id', name = 'name', 
 before_id = 'before_id', before_name = 'before_name')))
 define stream inputStream (before_id string, id string, 
-before_name string, , name string);
+before_name string , name string);
 ```
 <p style="word-wrap: break-word">In this example, the cdc source starts listening to the row updates on students table which is under MySQL SimpleDB database that can be accessed with the given url.</p>
 

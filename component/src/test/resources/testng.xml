@@ -24,6 +24,7 @@
     <test name="Siddhi-io-cdc-tests" enabled="true">
         <classes>
             <class name="org.wso2.extension.siddhi.io.cdc.source.TestCaseOfCDCSourceValidation"/>
+            <class name="org.wso2.extension.siddhi.io.cdc.source.TestCaseOfH2CDC"/>
         </classes>
     </test>
 </suite>
