@@ -250,7 +250,7 @@
                             <images>
                                 <image>
                                     <alias>siddhi-cdc-oracle</alias>
-                                    <name>oracle/database:12.2.0.1-ee</name>
+                                    <name>oracle/database:11.2.0.2-xe</name>
                                     <run>
                                         <namingStrategy>alias</namingStrategy>
                                         <env>
@@ -295,7 +295,7 @@
                                 <DATABASE_PASSWORD>root</DATABASE_PASSWORD>
                                 <PORT>${siddhi-cdc-oracle.port}</PORT>
                                 <DOCKER_HOST_IP>${docker.container.siddhi-cdc-oracle.ip}</DOCKER_HOST_IP>
-                                <SID>ORCLCDB</SID>
+                                <SID>XE</SID>
                             </environmentVariables>
                             <argLine>-Duser.timezone=GMT</argLine>
                             <test>

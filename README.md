@@ -65,7 +65,7 @@ The test framework initialize a docker container with required configuration bef
 
              mvn verify -P local-mssql -Dskip.surefire.test=true
 
-    * Oracle 12.2.0.1 Enterprise Edition:
+    * Oracle 11.2.0.2-xe:
 
              mvn verify -P local-oracle -Dskip.surefire.test=true
 

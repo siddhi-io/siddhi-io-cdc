@@ -89,7 +89,7 @@ public class TestCaseOfOracleCDC {
                 " password = '" + password + "'," +
                 " table.name = '" + pollingTableName + "', polling.interval = '" + pollingInterval + "'," +
                 " @map(type='keyvalue'))" +
-                "define stream istm (id string, name string);";
+                "define stream istm (ID string, NAME string);";
 
         String rdbmsStoreDefinition = "define stream insertionStream (id string, name string);" +
                 "@Store(type='rdbms', jdbc.url='" + databaseURL + "'," +
@@ -131,13 +131,13 @@ public class TestCaseOfOracleCDC {
         cdcAppRuntime.addCallback("istm", insertionStreamCallback);
         cdcAppRuntime.start();
 
+        //wait till cdc-pollar initialize.
+        Thread.sleep(5000);
+
         //Do an insert and wait for cdc app to capture.
         InputHandler rdbmsInputHandler = rdbmsAppRuntime.getInputHandler("insertionStream");
         Object[] insertingObject = new Object[]{"e001", "testEmployer"};
         rdbmsInputHandler.send(insertingObject);
-
-        //wait polling interval + 200 ms.
-        Thread.sleep(pollingInterval + 200);
 
         SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
 
