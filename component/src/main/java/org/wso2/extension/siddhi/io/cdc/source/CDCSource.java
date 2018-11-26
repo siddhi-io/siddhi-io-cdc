@@ -211,7 +211,7 @@ import java.util.concurrent.Executors;
                                 "\nusername = 'cdcuser', password = 'pswd4cdc', " +
                                 "\ntable.name = 'students', " +
                                 "\n@map(type='keyvalue'), @attributes(id = 'id', name = 'name'))" +
-                                "\ndefine stream istm (id int, name string);",
+                                "\ndefine stream inputStream (id int, name string);",
                         description = "In this example, the cdc source starts polling students table for inserts " +
                                 "and updates. polling.column is an auto incremental field. url, username, password, " +
                                 "and jdbc.driver.name are used to connect to the database."
@@ -221,7 +221,7 @@ import java.util.concurrent.Executors;
                                 "datasource.name = 'SimpleDB'" +
                                 "\ntable.name = 'students', " +
                                 "\n@map(type='keyvalue'), @attributes(id = 'id', name = 'name'))" +
-                                "\ndefine stream istm (id int, name string);",
+                                "\ndefine stream inputStream (id int, name string);",
                         description = "In this example, the cdc source starts polling students table for inserts " +
                                 "and updates. polling.column is an auto incremental field. datasource.name is used " +
                                 "to connect to the database."
@@ -231,7 +231,7 @@ import java.util.concurrent.Executors;
                                 "datasource.name = 'SimpleDB'" +
                                 "\ntable.name = 'students', " +
                                 "\n@map(type='keyvalue'))" +
-                                "\ndefine stream istm (name string);",
+                                "\ndefine stream inputStream (name string);",
                         description = "In this example, the cdc source starts polling students table for inserts " +
                                 "and updates. polling.column is a timestamp field."
                 ),

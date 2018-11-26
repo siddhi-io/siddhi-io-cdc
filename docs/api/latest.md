@@ -1,4 +1,4 @@
-# API Docs - v1.0.4
+# API Docs - v1.0.5-SNAPSHOT
 
 ## Source
 
@@ -167,7 +167,7 @@ jdbc.driver.name = 'com.mysql.jdbc.Driver', url = 'jdbc:mysql://localhost:3306/S
 username = 'cdcuser', password = 'pswd4cdc', 
 table.name = 'students', 
 @map(type='keyvalue'), @attributes(id = 'id', name = 'name'))
-define stream istm (id int, name string);
+define stream inputStream (id int, name string);
 ```
 <p style="word-wrap: break-word">In this example, the cdc source starts polling students table for inserts and updates. polling.column is an auto incremental field. url, username, password, and jdbc.driver.name are used to connect to the database.</p>
 
@@ -176,7 +176,7 @@ define stream istm (id int, name string);
 @source(type = 'cdc', mode='polling', polling.column = 'id', datasource.name = 'SimpleDB'
 table.name = 'students', 
 @map(type='keyvalue'), @attributes(id = 'id', name = 'name'))
-define stream istm (id int, name string);
+define stream inputStream (id int, name string);
 ```
 <p style="word-wrap: break-word">In this example, the cdc source starts polling students table for inserts and updates. polling.column is an auto incremental field. datasource.name is used to connect to the database.</p>
 
@@ -185,7 +185,7 @@ define stream istm (id int, name string);
 @source(type = 'cdc', mode='polling', polling.column = 'last_updated', datasource.name = 'SimpleDB'
 table.name = 'students', 
 @map(type='keyvalue'))
-define stream istm (name string);
+define stream inputStream (name string);
 ```
 <p style="word-wrap: break-word">In this example, the cdc source starts polling students table for inserts and updates. polling.column is a timestamp field.</p>
 
