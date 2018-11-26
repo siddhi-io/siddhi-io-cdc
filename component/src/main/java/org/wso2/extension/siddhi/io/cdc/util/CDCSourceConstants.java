@@ -21,7 +21,6 @@ package org.wso2.extension.siddhi.io.cdc.util;
 /**
  * CDC source constants
  */
-
 public class CDCSourceConstants {
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";

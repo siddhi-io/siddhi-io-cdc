@@ -33,6 +33,7 @@ import org.wso2.extension.siddhi.io.cdc.util.CDCPollingUtil;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
+import org.wso2.siddhi.core.util.config.ConfigReader;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,7 +65,8 @@ public class CDCPollar implements Runnable {
     private static final String PLACE_HOLDER_TABLE_NAME = "{{TABLE_NAME}}";
     private static final String PLACE_HOLDER_FIELD_LIST = "{{FIELD_LIST}}";
     private static final String PLACE_HOLDER_CONDITION = "{{CONDITION}}";
-    private static final String RDBMS_QUERY_CONFIG_FILE = "query-config.xml";
+    private static final String SELECT_QUERY_CONFIG_FILE = "query-config.xml";
+    private static final String RECORD_SELECT_QUERY = "recordSelectQuery";
     private String selectQueryStructure = "";
     private String url;
     private String tableName;
@@ -83,10 +85,11 @@ public class CDCPollar implements Runnable {
     private boolean paused = false;
     private ReentrantLock lock = new ReentrantLock();
     private Condition condition = lock.newCondition();
+    private ConfigReader configReader;
 
     public CDCPollar(String url, String username, String password, String tableName, String driverClassName,
                      String lastOffset, String pollingColumn, int pollingInterval,
-                     SourceEventListener sourceEventListener, CDCSource cdcSource) {
+                     SourceEventListener sourceEventListener, CDCSource cdcSource, ConfigReader configReader) {
         this.url = url;
         this.tableName = tableName;
         this.username = username;
@@ -98,10 +101,12 @@ public class CDCPollar implements Runnable {
         this.cdcSource = cdcSource;
         this.pollingInterval = pollingInterval;
         this.usingDatasourceName = false;
+        this.configReader = configReader;
     }
 
     public CDCPollar(String datasourceName, String tableName, String lastOffset, String pollingColumn,
-                     int pollingInterval, SourceEventListener sourceEventListener, CDCSource cdcSource) {
+                     int pollingInterval, SourceEventListener sourceEventListener, CDCSource cdcSource,
+                     ConfigReader configReader) {
         this.datasourceName = datasourceName;
         this.tableName = tableName;
         this.lastOffset = lastOffset;
@@ -110,6 +115,7 @@ public class CDCPollar implements Runnable {
         this.cdcSource = cdcSource;
         this.pollingInterval = pollingInterval;
         this.usingDatasourceName = true;
+        this.configReader = configReader;
     }
 
     public void setCompletionCallback(CompletionCallback completionCallback) {
@@ -162,7 +168,7 @@ public class CDCPollar implements Runnable {
         return conn;
     }
 
-    private String getSelectQuery(String fieldList, String condition) {
+    private String getSelectQuery(String fieldList, String condition, ConfigReader configReader) {
         String selectQuery;
 
         if (selectQueryStructure.isEmpty()) {
@@ -178,44 +184,49 @@ public class CDCPollar implements Runnable {
             } finally {
                 CDCPollingUtil.cleanupConnection(null, null, conn);
             }
-// TODO: 11/19/18 let user to override query-configs
-            //Read configs from file
-            QueryConfiguration queryConfiguration = null;
-            InputStream inputStream = null;
-            try {
-                JAXBContext ctx = JAXBContext.newInstance(QueryConfiguration.class);
-                Unmarshaller unmarshaller = ctx.createUnmarshaller();
-                ClassLoader classLoader = getClass().getClassLoader();
-                inputStream = classLoader.getResourceAsStream(RDBMS_QUERY_CONFIG_FILE);
-                if (inputStream == null) {
-                    throw new SiddhiAppRuntimeException(RDBMS_QUERY_CONFIG_FILE
-                            + " is not found in the classpath");
-                }
-                queryConfiguration = (QueryConfiguration) unmarshaller.unmarshal(inputStream);
 
-            } catch (JAXBException e) {
-                log.error("Query Configuration read error", e);
-            } finally {
-                if (inputStream != null) {
-                    try {
-                        inputStream.close();
-                    } catch (IOException e) {
-                        log.error(String.format("Failed to close the input stream for %s", RDBMS_QUERY_CONFIG_FILE));
+            //Read configs from config reader.
+            selectQueryStructure = configReader.readConfig(databaseName + "." + RECORD_SELECT_QUERY, "");
+
+            if (selectQueryStructure.isEmpty()) {
+                //Read configs from file
+                QueryConfiguration queryConfiguration = null;
+                InputStream inputStream = null;
+                try {
+                    JAXBContext ctx = JAXBContext.newInstance(QueryConfiguration.class);
+                    Unmarshaller unmarshaller = ctx.createUnmarshaller();
+                    ClassLoader classLoader = getClass().getClassLoader();
+                    inputStream = classLoader.getResourceAsStream(SELECT_QUERY_CONFIG_FILE);
+                    if (inputStream == null) {
+                        throw new SiddhiAppRuntimeException(SELECT_QUERY_CONFIG_FILE
+                                + " is not found in the classpath");
+                    }
+                    queryConfiguration = (QueryConfiguration) unmarshaller.unmarshal(inputStream);
+
+                } catch (JAXBException e) {
+                    log.error("Query Configuration read error", e);
+                } finally {
+                    if (inputStream != null) {
+                        try {
+                            inputStream.close();
+                        } catch (IOException e) {
+                            log.error("Failed to close the input stream for " + SELECT_QUERY_CONFIG_FILE);
+                        }
+                    }
+                }
+
+                //Get database related select query structure
+                for (QueryConfigurationEntry entry : queryConfiguration.getDatabases()) {
+                    if (entry.getDatabaseName().equalsIgnoreCase(databaseName)) {
+                        selectQueryStructure = entry.getRecordSelectQuery();
+                        break;
                     }
                 }
             }
 
-            //Get database related select query structure
-            for (QueryConfigurationEntry entry : queryConfiguration.getDatabases()) {
-                if (entry.getDatabaseName().equalsIgnoreCase(databaseName)) {
-                    selectQueryStructure = entry.getRecordSelectQuery();
-                    break;
-                }
-            }
-
             if (selectQueryStructure.isEmpty()) {
-                throw new SiddhiAppRuntimeException("Unsupported database: " + databaseName + ". Specify select query" +
-                        " for the database to avoid this error.");
+                throw new SiddhiAppRuntimeException("Unsupported database: " + databaseName + ". Configure system" +
+                        " parameter: " + databaseName + "." + RECORD_SELECT_QUERY);
             }
         }
 
@@ -244,7 +255,7 @@ public class CDCPollar implements Runnable {
             synchronized (new Object()) { //assign null lastOffset atomically.
                 //If lastOffset is null, assign it with last record of the table.
                 if (lastOffset == null) {
-                    selectQuery = getSelectQuery(pollingColumn, "").trim();
+                    selectQuery = getSelectQuery(pollingColumn, "", configReader).trim();
                     statement = connection.prepareStatement(selectQuery);
                     resultSet = statement.executeQuery();
                     while (resultSet.next()) {
@@ -257,7 +268,7 @@ public class CDCPollar implements Runnable {
                 }
             }
 
-            selectQuery = getSelectQuery("*", "WHERE " + pollingColumn + " > ?");
+            selectQuery = getSelectQuery("*", "WHERE " + pollingColumn + " > ?", configReader);
             statement = connection.prepareStatement(selectQuery);
 
             while (true) {

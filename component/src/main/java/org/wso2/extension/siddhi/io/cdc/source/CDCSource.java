@@ -345,10 +345,10 @@ public class CDCSource extends Source {
                                 + CDCSourceConstants.DATASOURCE_NAME + ".");
                     }
                     cdcPollar = new CDCPollar(url, username, password, tableName, driverClassName, lastOffset,
-                            pollingColumn, pollingInterval, sourceEventListener, this);
+                            pollingColumn, pollingInterval, sourceEventListener, this, configReader);
                 } else {
                     cdcPollar = new CDCPollar(datasourceName, tableName, lastOffset, pollingColumn, pollingInterval,
-                            sourceEventListener, this);
+                            sourceEventListener, this, configReader);
                 }
                 break;
             default:
