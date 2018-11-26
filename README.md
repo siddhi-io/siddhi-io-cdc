@@ -1,6 +1,4 @@
-
-
-Siddhi-io-cdc ======================================
+# Siddhi-io-cdc
 
 The **siddhi-io-cdc extension** is an extension to <a target="_blank" href="https://wso2.github.io/siddhi">Siddhi</a>. It receives change data from MySQL, MS SQL Server, Postgresql, H2 and Oracle in the key-value format.
 
@@ -36,8 +34,12 @@ Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/si
  * This extension can be added as a maven dependency along with other Siddhi dependencies to your project.
 
 ```
- <dependency> <groupId>org.wso2.extension.siddhi.io.cdc</groupId> <artifactId>siddhi-io-cdc</artifactId> <version>x.x.x</version> </dependency>
- ```
+<dependency>
+  <groupId>org.wso2.extension.siddhi.io.cdc</groupId>
+  <artifactId>siddhi-io-cdc</artifactId>
+  <version>x.x.x</version>
+ </dependency>
+```
 ## Running Integration tests in docker containers(Optional)
 
 The CDC functionality are tested with the docker base integration test framework.
