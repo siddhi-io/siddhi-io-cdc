@@ -26,7 +26,6 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.wso2.carbon.datasource.core.api.DataSourceService;
 import org.wso2.carbon.datasource.core.exception.DataSourceException;
-import org.wso2.extension.siddhi.io.cdc.source.CDCSource;
 import org.wso2.extension.siddhi.io.cdc.source.config.QueryConfiguration;
 import org.wso2.extension.siddhi.io.cdc.source.config.QueryConfigurationEntry;
 import org.wso2.extension.siddhi.io.cdc.util.CDCPollingUtil;
@@ -55,17 +54,13 @@ import javax.xml.bind.Unmarshaller;
 /**
  * Polls a given table for changes. Use {@code pollingColumn} to poll on.
  */
-public class CDCPollar implements Runnable {
+public class CDCPoller implements Runnable {
 
-    private static final Logger log = Logger.getLogger(CDCPollar.class);
-    private static final String CONNECTION_PROPERTY_JDBC_URL = "jdbcUrl";
-    private static final String CONNECTION_PROPERTY_DATASOURCE_USER = "dataSource.user";
-    private static final String CONNECTION_PROPERTY_DATASOURCE_PASSWORD = "dataSource.password";
-    private static final String CONNECTION_PROPERTY_DRIVER_CLASSNAME = "driverClassName";
+    private static final Logger log = Logger.getLogger(CDCPoller.class);
     private static final String PLACE_HOLDER_TABLE_NAME = "{{TABLE_NAME}}";
     private static final String PLACE_HOLDER_FIELD_LIST = "{{FIELD_LIST}}";
     private static final String PLACE_HOLDER_CONDITION = "{{CONDITION}}";
-    private static final String SELECT_QUERY_CONFIG_FILE = "query-config.xml";
+    private static final String SELECT_QUERY_CONFIG_FILE = "query-config.xml"; // TODO: 11/27/18 move yaml file
     private static final String RECORD_SELECT_QUERY = "recordSelectQuery";
     private String selectQueryStructure = "";
     private String url;
@@ -74,43 +69,42 @@ public class CDCPollar implements Runnable {
     private String password;
     private String driverClassName;
     private HikariDataSource dataSource;
-    private String lastOffset;
+    private String lastReadPollingColumnValue;
     private SourceEventListener sourceEventListener;
     private String pollingColumn;
     private String datasourceName;
     private int pollingInterval;
-    private boolean usingDatasourceName;
     private CompletionCallback completionCallback;
     private boolean paused = false;
-    private ReentrantLock lock = new ReentrantLock();
-    private Condition condition = lock.newCondition();
+    private ReentrantLock pauseLock = new ReentrantLock();
+    private Condition pauseLockCondition = pauseLock.newCondition();
     private ConfigReader configReader;
+    // TODO: 11/27/18 have an optional param, pool.properties
+    // TODO: 11/27/18 support jndi also
 
-    public CDCPollar(String url, String username, String password, String tableName, String driverClassName,
-                     String lastOffset, String pollingColumn, int pollingInterval,
+    public CDCPoller(String url, String username, String password, String tableName, String driverClassName,
+                     String lastReadPollingColumnValue, String pollingColumn, int pollingInterval,
                      SourceEventListener sourceEventListener, ConfigReader configReader) {
         this.url = url;
         this.tableName = tableName;
         this.username = username;
         this.password = password;
         this.driverClassName = driverClassName;
-        this.lastOffset = lastOffset;
+        this.lastReadPollingColumnValue = lastReadPollingColumnValue;
         this.sourceEventListener = sourceEventListener;
         this.pollingColumn = pollingColumn;
         this.pollingInterval = pollingInterval;
-        this.usingDatasourceName = false;
         this.configReader = configReader;
     }
 
-    public CDCPollar(String datasourceName, String tableName, String lastOffset, String pollingColumn,
+    public CDCPoller(String datasourceName, String tableName, String lastReadPollingColumnValue, String pollingColumn,
                      int pollingInterval, SourceEventListener sourceEventListener, ConfigReader configReader) {
         this.datasourceName = datasourceName;
         this.tableName = tableName;
-        this.lastOffset = lastOffset;
+        this.lastReadPollingColumnValue = lastReadPollingColumnValue;
         this.sourceEventListener = sourceEventListener;
         this.pollingColumn = pollingColumn;
         this.pollingInterval = pollingInterval;
-        this.usingDatasourceName = true;
         this.configReader = configReader;
     }
 
@@ -119,15 +113,15 @@ public class CDCPollar implements Runnable {
     }
 
     private void initializeDatasource() {
-        if (!usingDatasourceName) {
+        if (datasourceName == null) {
             Properties connectionProperties = new Properties();
 
-            connectionProperties.setProperty(CONNECTION_PROPERTY_JDBC_URL, url);
-            connectionProperties.setProperty(CONNECTION_PROPERTY_DATASOURCE_USER, username);
+            connectionProperties.setProperty("jdbcUrl", url);
+            connectionProperties.setProperty("dataSource.user", username);
             if (!CDCPollingUtil.isEmpty(password)) {
-                connectionProperties.setProperty(CONNECTION_PROPERTY_DATASOURCE_PASSWORD, password);
+                connectionProperties.setProperty("dataSource.password", password);
             }
-            connectionProperties.setProperty(CONNECTION_PROPERTY_DRIVER_CLASSNAME, driverClassName);
+            connectionProperties.setProperty("driverClassName", driverClassName);
 
             HikariConfig config = new HikariConfig(connectionProperties);
             this.dataSource = new HikariDataSource(config);
@@ -153,14 +147,17 @@ public class CDCPollar implements Runnable {
         }
     }
 
-    public String getLastOffset() {
-        return lastOffset;
+    public String getLastReadPollingColumnValue() {
+        return lastReadPollingColumnValue;
     }
 
     private Connection getConnection() {
         Connection conn;
         try {
             conn = this.dataSource.getConnection();
+            if (log.isDebugEnabled()) {
+                log.debug("A connection is initialized ");
+            }
         } catch (SQLException e) {
             throw new SiddhiAppRuntimeException("Error initializing datasource connection: "
                     + e.getMessage(), e);
@@ -170,7 +167,7 @@ public class CDCPollar implements Runnable {
 
     private String getSelectQuery(String fieldList, String condition, ConfigReader configReader) {
         String selectQuery;
-
+// TODO: 11/27/18 use configReader class variable
         if (selectQueryStructure.isEmpty()) {
             //Get the database product name
             String databaseName;
@@ -184,7 +181,7 @@ public class CDCPollar implements Runnable {
             } finally {
                 CDCPollingUtil.cleanupConnection(null, null, conn);
             }
-
+// TODO: 11/27/18 give the above val as default val for config reader
             //Read configs from config reader.
             selectQueryStructure = configReader.readConfig(databaseName + "." + RECORD_SELECT_QUERY, "");
 
@@ -215,6 +212,7 @@ public class CDCPollar implements Runnable {
                     }
                 }
 
+                // TODO: 11/27/18 handle the null below
                 //Get database related select query structure
                 for (QueryConfigurationEntry entry : queryConfiguration.getDatabases()) {
                     if (entry.getDatabaseName().equalsIgnoreCase(databaseName)) {
@@ -252,18 +250,20 @@ public class CDCPollar implements Runnable {
         ResultSet resultSet = null;
 
         try {
-            synchronized (new Object()) { //assign null lastOffset atomically.
-                //If lastOffset is null, assign it with last record of the table.
-                if (lastOffset == null) {
+            // TODO: 11/27/18 check on this block, (2 app runtimes)
+            synchronized (new Object()) { //assign null lastReadPollingColumnValue atomically.
+                //If lastReadPollingColumnValue is null, assign it with last record of the table.
+                if (lastReadPollingColumnValue == null) {
                     selectQuery = getSelectQuery(pollingColumn, "", configReader).trim();
                     statement = connection.prepareStatement(selectQuery);
                     resultSet = statement.executeQuery();
                     while (resultSet.next()) {
-                        lastOffset = resultSet.getString(pollingColumn);
+                        lastReadPollingColumnValue = resultSet.getString(pollingColumn);
                     }
+                    // TODO: 11/27/18 take max
                     //if the table is empty, set last offset to a negative value.
-                    if (lastOffset == null) {
-                        lastOffset = "-1";
+                    if (lastReadPollingColumnValue == null) {
+                        lastReadPollingColumnValue = "-1";
                     }
                 }
             }
@@ -272,25 +272,30 @@ public class CDCPollar implements Runnable {
             statement = connection.prepareStatement(selectQuery);
 
             while (true) {
-                statement.setString(1, lastOffset);
-                resultSet = statement.executeQuery();
-                metadata = resultSet.getMetaData();
-                while (resultSet.next()) {
-                    detailsMap = new HashMap<>();
-                    for (int i = 1; i <= metadata.getColumnCount(); i++) {
-                        String key = metadata.getColumnName(i);
-                        String value = resultSet.getString(key);
-                        detailsMap.put(key, value);
+                try {
+                    statement.setString(1, lastReadPollingColumnValue);
+                    resultSet = statement.executeQuery();
+                    metadata = resultSet.getMetaData();
+                    while (resultSet.next()) {
+                        detailsMap = new HashMap<>();
+                        for (int i = 1; i <= metadata.getColumnCount(); i++) {
+                            String key = metadata.getColumnName(i);
+                            String value = resultSet.getString(key);
+                            detailsMap.put(key, value);
+                        }
+                        lastReadPollingColumnValue = resultSet.getString(pollingColumn);
+                        handleEvent(detailsMap);
                     }
-                    lastOffset = resultSet.getString(pollingColumn);
-                    handleEvent(detailsMap);
+                } catch (SQLException ex) {
+                    log.error(ex);
                 }
-
                 try {
                     Thread.sleep(pollingInterval * 1000);
                 } catch (InterruptedException e) {
                     log.error("Error while polling.", e);
                 }
+                // TODO: 11/27/18 consider cleaning resultset
+                // TODO: 11/27/18 catch throwables and log inside the while
             }
         } catch (SQLException ex) {
             throw new SiddhiAppRuntimeException("Error in polling for changes on " + tableName, ex);
@@ -301,15 +306,15 @@ public class CDCPollar implements Runnable {
 
     private void handleEvent(Map detailsMap) {
         if (paused) {
-            lock.lock();
+            pauseLock.lock();
             try {
                 while (paused) {
-                    condition.await();
+                    pauseLockCondition.await();
                 }
             } catch (InterruptedException ie) {
                 Thread.currentThread().interrupt();
             } finally {
-                lock.unlock();
+                pauseLock.unlock();
             }
         }
         sourceEventListener.onEvent(detailsMap, null);
@@ -322,10 +327,10 @@ public class CDCPollar implements Runnable {
     public void resume() {
         paused = false;
         try {
-            lock.lock();
-            condition.signal();
+            pauseLock.lock();
+            pauseLockCondition.signal();
         } finally {
-            lock.unlock();
+            pauseLock.unlock();
         }
     }
 
@@ -339,11 +344,11 @@ public class CDCPollar implements Runnable {
     }
 
     /**
-     * A callback function to be notified when {@code CDCPollar} throws an Error.
+     * A callback function to be notified when {@code CDCPoller} throws an Error.
      */
     public interface CompletionCallback {
         /**
-         * Handle errors from {@link CDCPollar}.
+         * Handle errors from {@link CDCPoller}.
          *
          * @param error the error.
          */

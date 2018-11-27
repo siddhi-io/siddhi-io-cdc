@@ -23,7 +23,7 @@ import org.apache.log4j.Logger;
 import org.wso2.extension.siddhi.io.cdc.source.listening.CDCSourceObjectKeeper;
 import org.wso2.extension.siddhi.io.cdc.source.listening.ChangeDataCapture;
 import org.wso2.extension.siddhi.io.cdc.source.listening.WrongConfigurationException;
-import org.wso2.extension.siddhi.io.cdc.source.polling.CDCPollar;
+import org.wso2.extension.siddhi.io.cdc.source.polling.CDCPoller;
 import org.wso2.extension.siddhi.io.cdc.util.CDCSourceConstants;
 import org.wso2.extension.siddhi.io.cdc.util.CDCSourceUtil;
 import org.wso2.siddhi.annotation.Example;
@@ -252,7 +252,7 @@ public class CDCSource extends Source {
     private String historyFileDirectory;
     private CDCSourceObjectKeeper cdcSourceObjectKeeper = CDCSourceObjectKeeper.getCdcSourceObjectKeeper();
     private String carbonHome;
-    private CDCPollar cdcPollar;
+    private CDCPoller cdcPoller;
     private String lastOffset;
 
     @Override
@@ -333,7 +333,7 @@ public class CDCSource extends Source {
 
                 if (isDatasourceNameAvailable) {
                     String datasourceName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.DATASOURCE_NAME);
-                    cdcPollar = new CDCPollar(datasourceName, tableName, lastOffset, pollingColumn, pollingInterval,
+                    cdcPoller = new CDCPoller(datasourceName, tableName, lastOffset, pollingColumn, pollingInterval,
                             sourceEventListener, configReader);
                 } else {
                     String driverClassName;
@@ -346,7 +346,7 @@ public class CDCSource extends Source {
                         throw new SiddhiAppValidationException(ex.getMessage() + " Alternatively, define "
                                 + CDCSourceConstants.DATASOURCE_NAME + ".");
                     }
-                    cdcPollar = new CDCPollar(url, username, password, tableName, driverClassName, lastOffset,
+                    cdcPoller = new CDCPoller(url, username, password, tableName, driverClassName, lastOffset,
                             pollingColumn, pollingInterval, sourceEventListener,  configReader);
                 }
                 break;
@@ -380,8 +380,8 @@ public class CDCSource extends Source {
                 executorService.execute(engine);
                 break;
             case CDCSourceConstants.MODE_POLLING:
-                //create a completion callback to handle exceptions from CDCPollar
-                CDCPollar.CompletionCallback cdcCompletionCallback = (Throwable error) ->
+                //create a completion callback to handle exceptions from CDCPoller
+                CDCPoller.CompletionCallback cdcCompletionCallback = (Throwable error) ->
                 {
                     if (error.getClass().equals(SQLException.class)) {
                         connectionCallback.onError(new ConnectionUnavailableException(
@@ -392,8 +392,8 @@ public class CDCSource extends Source {
                     }
                 };
 
-                cdcPollar.setCompletionCallback(cdcCompletionCallback);
-                executorService.execute(cdcPollar);
+                cdcPoller.setCompletionCallback(cdcCompletionCallback);
+                executorService.execute(cdcPoller);
                 break;
             default:
                 break; //Never get executed since mode is validated.
@@ -418,7 +418,7 @@ public class CDCSource extends Source {
     public void pause() {
         switch (mode) {
             case CDCSourceConstants.MODE_POLLING:
-                cdcPollar.pause();
+                cdcPoller.pause();
                 break;
             case CDCSourceConstants.MODE_LISTENING:
                 changeDataCapture.pause();
@@ -432,7 +432,7 @@ public class CDCSource extends Source {
     public void resume() {
         switch (mode) {
             case CDCSourceConstants.MODE_POLLING:
-                cdcPollar.resume();
+                cdcPoller.resume();
                 break;
             case CDCSourceConstants.MODE_LISTENING:
                 changeDataCapture.resume();
@@ -447,7 +447,7 @@ public class CDCSource extends Source {
         Map<String, Object> currentState = new HashMap<>();
         switch (mode) {
             case CDCSourceConstants.MODE_POLLING:
-                currentState.put("last.offset", cdcPollar.getLastOffset());
+                currentState.put("last.offset", cdcPoller.getLastReadPollingColumnValue());
                 break;
             case CDCSourceConstants.MODE_LISTENING:
                 currentState.put(CDCSourceConstants.CACHE_OBJECT, offsetData);

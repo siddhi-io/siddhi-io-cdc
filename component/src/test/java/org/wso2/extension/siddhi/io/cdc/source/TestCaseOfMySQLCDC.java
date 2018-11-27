@@ -166,7 +166,7 @@ public class TestCaseOfMySQLCDC {
     /**
      * Test case to test state persistence of polling mode.
      */
-    @Test//(dependsOnMethods = "testCDCPollingMode")
+    @Test(dependsOnMethods = "testCDCPollingMode", enabled = false)
     public void testCDCPollingModeStatePersistence() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
         log.info("CDC TestCase: Testing state persistence of the polling mode.");

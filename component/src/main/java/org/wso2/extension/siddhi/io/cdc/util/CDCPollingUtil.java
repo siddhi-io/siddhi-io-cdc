@@ -26,7 +26,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
- * This class contains Util methods for the CDCPollar.
+ * This class contains Util methods for the CDCPoller.
  */
 public class CDCPollingUtil {
     private static final Logger log = Logger.getLogger(CDCPollingUtil.class);
