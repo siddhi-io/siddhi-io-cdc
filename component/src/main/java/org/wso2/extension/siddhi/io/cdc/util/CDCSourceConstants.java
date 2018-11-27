@@ -63,6 +63,6 @@ public class CDCSourceConstants {
     public static final String JDBC_DRIVER_NAME = "jdbc.driver.name";
     public static final String POLLING_COLUMN = "polling.column";
     public static final String POLLING_INTERVAL = "polling.interval";
-    public static final int DEFAULT_POLLING_INTERVAL_MS = 1000;
+    public static final int DEFAULT_POLLING_INTERVAL_SECONDS = 1;
     public static final String DATASOURCE_NAME = "datasource.name";
 }

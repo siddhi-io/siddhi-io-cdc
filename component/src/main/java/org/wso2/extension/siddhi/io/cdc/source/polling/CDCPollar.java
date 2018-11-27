@@ -77,7 +77,6 @@ public class CDCPollar implements Runnable {
     private String lastOffset;
     private SourceEventListener sourceEventListener;
     private String pollingColumn;
-    private CDCSource cdcSource;
     private String datasourceName;
     private int pollingInterval;
     private boolean usingDatasourceName;
@@ -89,7 +88,7 @@ public class CDCPollar implements Runnable {
 
     public CDCPollar(String url, String username, String password, String tableName, String driverClassName,
                      String lastOffset, String pollingColumn, int pollingInterval,
-                     SourceEventListener sourceEventListener, CDCSource cdcSource, ConfigReader configReader) {
+                     SourceEventListener sourceEventListener, ConfigReader configReader) {
         this.url = url;
         this.tableName = tableName;
         this.username = username;
@@ -98,21 +97,18 @@ public class CDCPollar implements Runnable {
         this.lastOffset = lastOffset;
         this.sourceEventListener = sourceEventListener;
         this.pollingColumn = pollingColumn;
-        this.cdcSource = cdcSource;
         this.pollingInterval = pollingInterval;
         this.usingDatasourceName = false;
         this.configReader = configReader;
     }
 
     public CDCPollar(String datasourceName, String tableName, String lastOffset, String pollingColumn,
-                     int pollingInterval, SourceEventListener sourceEventListener, CDCSource cdcSource,
-                     ConfigReader configReader) {
+                     int pollingInterval, SourceEventListener sourceEventListener, ConfigReader configReader) {
         this.datasourceName = datasourceName;
         this.tableName = tableName;
         this.lastOffset = lastOffset;
         this.sourceEventListener = sourceEventListener;
         this.pollingColumn = pollingColumn;
-        this.cdcSource = cdcSource;
         this.pollingInterval = pollingInterval;
         this.usingDatasourceName = true;
         this.configReader = configReader;
@@ -155,6 +151,10 @@ public class CDCPollar implements Runnable {
                 throw new SiddhiAppCreationException("Datasource '" + datasourceName + "' cannot be connected.", e);
             }
         }
+    }
+
+    public String getLastOffset() {
+        return lastOffset;
     }
 
     private Connection getConnection() {
@@ -283,12 +283,11 @@ public class CDCPollar implements Runnable {
                         detailsMap.put(key, value);
                     }
                     lastOffset = resultSet.getString(pollingColumn);
-                    cdcSource.setLastOffset(lastOffset);
                     handleEvent(detailsMap);
                 }
 
                 try {
-                    Thread.sleep(pollingInterval);
+                    Thread.sleep(pollingInterval * 1000);
                 } catch (InterruptedException e) {
                     log.error("Error while polling.", e);
                 }

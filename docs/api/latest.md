@@ -31,7 +31,7 @@
     </tr>
     <tr>
         <td style="vertical-align: top">mode</td>
-        <td style="vertical-align: top; word-wrap: break-word">Mode to capture the change data. Mode ‘polling’ uses a polling.column to monitor the given table. Mode 'listening' uses logs to monitor the given table.<br>The required parameters are different for each modes.<br>mode 'listening' currently supports only MySQL. INSERT, UPDATE, DELETE events can be received.<br>mode 'polling' supports RDBs. INSERT, UPDATE events can be received.</td>
+        <td style="vertical-align: top; word-wrap: break-word">Mode to capture the change data. Mode ‘polling’ uses a polling.column to monitor the given table. Mode 'listening' uses logs to monitor the given table.<br>The required parameters are different for each modes.<br>mode 'listening' currently supports only MySQL. INSERT, UPDATE, DELETE events can be received.<br>mode 'polling' supports RDBMS. INSERT, UPDATE events can be received.</td>
         <td style="vertical-align: top">listening</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
@@ -39,7 +39,7 @@
     </tr>
     <tr>
         <td style="vertical-align: top">jdbc.driver.name</td>
-        <td style="vertical-align: top; word-wrap: break-word">The driver class name for connecting the database. Required for ‘polling’ mode.</td>
+        <td style="vertical-align: top; word-wrap: break-word">The driver class name for connecting the database. **Required for ‘polling’ mode.**</td>
         <td style="vertical-align: top"><Empty_String></td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>

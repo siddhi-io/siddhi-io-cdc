@@ -76,15 +76,15 @@ import java.util.concurrent.Executors;
                                 "\nThe required parameters are different for each modes." +
                                 "\nmode 'listening' currently supports only MySQL. INSERT, UPDATE, DELETE events" +
                                 " can be received." +
-                                "\nmode 'polling' supports RDBs. INSERT, UPDATE events can be received.",
+                                "\nmode 'polling' supports RDBMS. INSERT, UPDATE events can be received.",
                         type = DataType.STRING,
-                        defaultValue = "listening",
+                        defaultValue = "listening", //todo: make sure to display the 'mode' in error msgs
                         optional = true
                 ),
                 @Parameter(
                         name = "jdbc.driver.name",
                         description = "The driver class name for connecting the database." +
-                                " Required for ‘polling’ mode.",
+                                " **Required for ‘polling’ mode.**",
                         type = DataType.STRING,
                         defaultValue = "<Empty_String>",
                         optional = true
@@ -119,10 +119,12 @@ import java.util.concurrent.Executors;
                 @Parameter(
                         name = "polling.column",
                         description = "Column name on which the polling is done to capture the change data. " +
-                                "Provide an AUTO_INCREMENT field or a TIMESTAMP field for better change data" +
-                                " capturing. Setting an AUTO_INCREMENT field might fail to receive UPDATE change" +
-                                " data." +
-                                "\nMandatory when mode is ‘polling’."
+                                "It is recommend to have a TIMESTAMP field as the polling.column in order to capture" +
+                                " inserts and updates." +
+                                "\nNumeric auto incremental fields and char fields can be also" +
+                                " used as polling.column. Note that it will only support insert change capturing and" +
+                                " depends on how the char field's data is input." +
+                                "\n**Mandatory when mode is ‘polling’.**"
                         ,
                         type = DataType.STRING,
                         defaultValue = "<Empty_String>",
@@ -130,11 +132,11 @@ import java.util.concurrent.Executors;
                 ),
                 @Parameter(
                         name = "polling.interval",
-                        description = "The interval in milliseconds to poll the given table for changes." +
+                        description = "The interval in seconds to poll the given table for changes." +
                                 "\nAccepted only when mode is set to 'polling'."
                         ,
                         type = DataType.INT,
-                        defaultValue = "1000",
+                        defaultValue = "1",
                         optional = true
                 ),
                 @Parameter(
@@ -212,8 +214,8 @@ import java.util.concurrent.Executors;
                                 "\ntable.name = 'students', " +
                                 "\n@map(type='keyvalue'), @attributes(id = 'id', name = 'name'))" +
                                 "\ndefine stream inputStream (id int, name string);",
-                        description = "In this example, the cdc source starts polling students table for inserts " +
-                                "and updates. polling.column is an auto incremental field. url, username, password, " +
+                        description = "In this example, the cdc source starts polling students table for inserts." +
+                                " polling.column is an auto incremental field. url, username, password, " +
                                 "and jdbc.driver.name are used to connect to the database."
                 ),
                 @Example(
@@ -222,9 +224,10 @@ import java.util.concurrent.Executors;
                                 "\ntable.name = 'students', " +
                                 "\n@map(type='keyvalue'), @attributes(id = 'id', name = 'name'))" +
                                 "\ndefine stream inputStream (id int, name string);",
-                        description = "In this example, the cdc source starts polling students table for inserts " +
-                                "and updates. polling.column is an auto incremental field. datasource.name is used " +
-                                "to connect to the database."
+                        description = "In this example, the cdc source starts polling students table for inserts. " +
+                                "polling.column is a char column with the pattern S001, S002, ... ." +
+                                " datasource.name is used to connect to the database. Note that the" +
+                                " datasource.name works only with the Stream Processor."
                 ),
                 @Example(
                         syntax = "@source(type = 'cdc', mode='polling', polling.column = 'last_updated', " +
@@ -323,17 +326,16 @@ public class CDCSource extends Source {
 
                 String pollingColumn = optionHolder.validateAndGetStaticValue(CDCSourceConstants.POLLING_COLUMN);
                 boolean isDatasourceNameAvailable = optionHolder.isOptionExists(CDCSourceConstants.DATASOURCE_NAME);
-                String datasourceName = "";
-                if (isDatasourceNameAvailable) {
-                    datasourceName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.DATASOURCE_NAME);
-                }
-
                 pollingInterval = Integer.parseInt(
                         optionHolder.validateAndGetStaticValue(CDCSourceConstants.POLLING_INTERVAL,
-                                Integer.toString(CDCSourceConstants.DEFAULT_POLLING_INTERVAL_MS)));
-
+                                Integer.toString(CDCSourceConstants.DEFAULT_POLLING_INTERVAL_SECONDS)));
                 validatePollingModeParameters();
-                if (!isDatasourceNameAvailable) {
+
+                if (isDatasourceNameAvailable) {
+                    String datasourceName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.DATASOURCE_NAME);
+                    cdcPollar = new CDCPollar(datasourceName, tableName, lastOffset, pollingColumn, pollingInterval,
+                            sourceEventListener, configReader);
+                } else {
                     String driverClassName;
                     try {
                         driverClassName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.JDBC_DRIVER_NAME);
@@ -345,14 +347,11 @@ public class CDCSource extends Source {
                                 + CDCSourceConstants.DATASOURCE_NAME + ".");
                     }
                     cdcPollar = new CDCPollar(url, username, password, tableName, driverClassName, lastOffset,
-                            pollingColumn, pollingInterval, sourceEventListener, this, configReader);
-                } else {
-                    cdcPollar = new CDCPollar(datasourceName, tableName, lastOffset, pollingColumn, pollingInterval,
-                            sourceEventListener, this, configReader);
+                            pollingColumn, pollingInterval, sourceEventListener,  configReader);
                 }
                 break;
             default:
-                throw new SiddhiAppValidationException("unsupported " + CDCSourceConstants.MODE + ": " + mode);
+                throw new SiddhiAppValidationException("Unsupported " + CDCSourceConstants.MODE + ": " + mode);
         }
     }
 
@@ -397,7 +396,7 @@ public class CDCSource extends Source {
                 executorService.execute(cdcPollar);
                 break;
             default:
-                break;
+                break; //Never get executed since mode is validated.
         }
     }
 
@@ -448,7 +447,7 @@ public class CDCSource extends Source {
         Map<String, Object> currentState = new HashMap<>();
         switch (mode) {
             case CDCSourceConstants.MODE_POLLING:
-                currentState.put("last.offset", lastOffset);
+                currentState.put("last.offset", cdcPollar.getLastOffset());
                 break;
             case CDCSourceConstants.MODE_LISTENING:
                 currentState.put(CDCSourceConstants.CACHE_OBJECT, offsetData);
@@ -473,10 +472,6 @@ public class CDCSource extends Source {
             default:
                 break;
         }
-    }
-
-    public void setLastOffset(String lastOffset) {
-        this.lastOffset = lastOffset;
     }
 
     public Map<byte[], byte[]> getOffsetData() {
