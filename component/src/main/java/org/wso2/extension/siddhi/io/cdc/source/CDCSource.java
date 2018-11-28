@@ -78,7 +78,7 @@ import java.util.concurrent.Executors;
                                 " can be received." +
                                 "\nmode 'polling' supports RDBMS. INSERT, UPDATE events can be received.",
                         type = DataType.STRING,
-                        defaultValue = "listening", //todo: make sure to display the 'mode' in error msgs
+                        defaultValue = "listening",
                         optional = true
                 ),
                 @Parameter(
@@ -360,7 +360,8 @@ public class CDCSource extends Source {
                         password = optionHolder.validateAndGetOption(CDCSourceConstants.PASSWORD).getValue();
                     } catch (SiddhiAppValidationException ex) {
                         throw new SiddhiAppValidationException(ex.getMessage() + " Alternatively, define "
-                                + CDCSourceConstants.DATASOURCE_NAME + " or " + CDCSourceConstants.JNDI_RESOURCE + ".");
+                                + CDCSourceConstants.DATASOURCE_NAME + " or " + CDCSourceConstants.JNDI_RESOURCE +
+                                ". Current mode: " + CDCSourceConstants.MODE_POLLING);
                     }
                     cdcPoller = new CDCPoller(url, username, password, tableName, driverClassName,
                             null, null, pollingColumn, pollingInterval, poolPropertyString,
@@ -535,7 +536,7 @@ public class CDCSource extends Source {
     private void validatePollingModeParameters() {
         if (pollingInterval < 0) {
             throw new SiddhiAppValidationException(CDCSourceConstants.POLLING_INTERVAL + " should be a " +
-                    "non negative integer.");
+                    "non negative integer. Current mode: " + CDCSourceConstants.MODE_POLLING);
         }
     }
 }

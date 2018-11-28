@@ -29,6 +29,7 @@ import org.wso2.carbon.datasource.core.exception.DataSourceException;
 import org.wso2.extension.siddhi.io.cdc.source.config.Database;
 import org.wso2.extension.siddhi.io.cdc.source.config.QueryConfiguration;
 import org.wso2.extension.siddhi.io.cdc.util.CDCPollingUtil;
+import org.wso2.extension.siddhi.io.cdc.util.CDCSourceConstants;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
@@ -151,11 +152,12 @@ public class CDCPoller implements Runnable {
 
                     if (log.isDebugEnabled()) {
                         log.debug("Lookup for datasource '" + datasourceName + "' completed through " +
-                                "DataSource Service lookup.");
+                                "DataSource Service lookup. Current mode: " + CDCSourceConstants.MODE_POLLING);
                     }
                 }
             } catch (DataSourceException e) {
-                throw new SiddhiAppCreationException("Datasource '" + datasourceName + "' cannot be connected.", e);
+                throw new SiddhiAppCreationException("Datasource '" + datasourceName + "' cannot be connected. " +
+                        "Current mode: \" + CDCSourceConstants.MODE_POLLING", e);
             }
         }
     }
@@ -176,8 +178,8 @@ public class CDCPoller implements Runnable {
                 log.debug("A connection is initialized ");
             }
         } catch (SQLException e) {
-            throw new SiddhiAppRuntimeException("Error initializing datasource connection: "
-                    + e.getMessage(), e);
+            throw new SiddhiAppRuntimeException("Error initializing datasource connection. Current mode: " +
+                    CDCSourceConstants.MODE_POLLING, e);
         }
         return conn;
     }
@@ -193,7 +195,8 @@ public class CDCPoller implements Runnable {
                 DatabaseMetaData dmd = conn.getMetaData();
                 databaseName = dmd.getDatabaseProductName();
             } catch (SQLException e) {
-                throw new SiddhiAppRuntimeException("Error in looking up database type: " + e.getMessage(), e);
+                throw new SiddhiAppRuntimeException("Error in looking up database type. Current mode: " +
+                        CDCSourceConstants.MODE_POLLING, e);
             } finally {
                 CDCPollingUtil.cleanupConnection(null, null, conn);
             }
@@ -211,7 +214,7 @@ public class CDCPoller implements Runnable {
                     inputStream = classLoader.getResourceAsStream(SELECT_QUERY_CONFIG_FILE);
                     if (inputStream == null) {
                         throw new SiddhiAppRuntimeException(SELECT_QUERY_CONFIG_FILE
-                                + " is not found in the classpath");
+                                + " is not found in the classpath. Current mode: " + CDCSourceConstants.MODE_POLLING);
                     }
                     queryConfiguration = (QueryConfiguration) yaml.load(inputStream);
                 } finally {
@@ -219,7 +222,8 @@ public class CDCPoller implements Runnable {
                         try {
                             inputStream.close();
                         } catch (IOException e) {
-                            log.error("Failed to close the input stream for " + SELECT_QUERY_CONFIG_FILE);
+                            log.error("Failed to close the input stream for " + SELECT_QUERY_CONFIG_FILE + ". " +
+                                    "Current mode: " + CDCSourceConstants.MODE_POLLING);
                         }
                     }
                 }
@@ -237,7 +241,8 @@ public class CDCPoller implements Runnable {
 
             if (selectQueryStructure.isEmpty()) {
                 throw new SiddhiAppRuntimeException("Unsupported database: " + databaseName + ". Configure system" +
-                        " parameter: " + databaseName + "." + RECORD_SELECT_QUERY);
+                        " parameter: " + databaseName + "." + RECORD_SELECT_QUERY + ". Current mode: " +
+                        CDCSourceConstants.MODE_POLLING);
             }
         }
 
@@ -256,7 +261,8 @@ public class CDCPoller implements Runnable {
         try {
             initializeDatasource();
         } catch (NamingException e) {
-            throw new SiddhiAppRuntimeException("Error in initializing connection for " + tableName, e);
+            throw new SiddhiAppRuntimeException("Error in initializing connection for " + tableName + ". " +
+                    "Current mode: " + CDCSourceConstants.MODE_POLLING, e);
         }
 
         String selectQuery;
@@ -310,11 +316,12 @@ public class CDCPoller implements Runnable {
                 try {
                     Thread.sleep((long) pollingInterval * 1000);
                 } catch (InterruptedException e) {
-                    log.error("Error while polling.", e);
+                    log.error("Error while polling. Current mode: " + CDCSourceConstants.MODE_POLLING, e);
                 }
             }
         } catch (SQLException ex) {
-            throw new SiddhiAppRuntimeException("Error in polling for changes on " + tableName, ex);
+            throw new SiddhiAppRuntimeException("Error in polling for changes on " + tableName + ". Current mode: " +
+                    CDCSourceConstants.MODE_POLLING, ex);
         } finally {
             CDCPollingUtil.cleanupConnection(resultSet, statement, connection);
         }

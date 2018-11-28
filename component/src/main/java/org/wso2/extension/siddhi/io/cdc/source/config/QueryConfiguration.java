@@ -19,7 +19,7 @@
 package org.wso2.extension.siddhi.io.cdc.source.config;
 
 /**
- * This class represents JAXB configs for DB vendor-specific SQL syntax.
+ * This class represents yaml configs for DB vendor-specific SQL syntax.
  */
 public class QueryConfiguration {
     private Database[] databases;
