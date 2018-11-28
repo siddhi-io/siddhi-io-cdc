@@ -19,11 +19,14 @@
 package org.wso2.extension.siddhi.io.cdc.util;
 
 import org.apache.log4j.Logger;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class contains Util methods for the CDCPoller.
@@ -85,5 +88,34 @@ public class CDCPollingUtil {
                 }
             }
         }
+    }
+
+    /**
+     * Converts a flat string of key/value pairs (e.g. from an annotation) into a list of pairs.
+     * Used String[] since Java does not offer tuples.
+     *
+     * @param annotationString the comma-separated string of key/value pairs.
+     * @return a list processed and validated pairs.
+     */
+    public static List<String[]> processKeyValuePairs(String annotationString) {
+        List<String[]> keyValuePairs = new ArrayList<>();
+        if (!isEmpty(annotationString)) {
+            String[] pairs = annotationString.split(",");
+            for (String element : pairs) {
+                if (!element.contains(":")) {
+                    throw new SiddhiAppCreationException("Property '" + element + "' does not adhere to the expected " +
+                            "format: a property must be a key-value pair separated by a colon (:)");
+                }
+                // TODO: 11/28/18 create a specific exception class and throw
+                String[] pair = element.split(":");
+                if (pair.length != 2) {
+                    throw new SiddhiAppCreationException("Property '" + pair[0] + "' does not adhere to the expected " +
+                            "format: a property must be a key-value pair separated by a colon (:)");
+                } else {
+                    keyValuePairs.add(new String[]{pair[0].trim(), pair[1].trim()});
+                }
+            }
+        }
+        return keyValuePairs;
     }
 }

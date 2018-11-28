@@ -43,10 +43,13 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -58,7 +61,7 @@ public class CDCPoller implements Runnable {
 
     private static final Logger log = Logger.getLogger(CDCPoller.class);
     private static final String PLACE_HOLDER_TABLE_NAME = "{{TABLE_NAME}}";
-    private static final String PLACE_HOLDER_FIELD_LIST = "{{FIELD_LIST}}";
+    private static final String PLACE_HOLDER_COLUMN_LIST = "{{COLUMN_LIST}}";
     private static final String PLACE_HOLDER_CONDITION = "{{CONDITION}}";
     private static final String SELECT_QUERY_CONFIG_FILE = "query-config.xml"; // TODO: 11/27/18 move yaml file
     private static final String RECORD_SELECT_QUERY = "recordSelectQuery";
@@ -79,53 +82,64 @@ public class CDCPoller implements Runnable {
     private ReentrantLock pauseLock = new ReentrantLock();
     private Condition pauseLockCondition = pauseLock.newCondition();
     private ConfigReader configReader;
-    // TODO: 11/27/18 have an optional param, pool.properties
-    // TODO: 11/27/18 support jndi also
+    private String poolPropertyString;
+    private String jndiResource;
 
     public CDCPoller(String url, String username, String password, String tableName, String driverClassName,
-                     String lastReadPollingColumnValue, String pollingColumn, int pollingInterval,
+                     String datasourceName, String jndiResource,
+                     String pollingColumn, int pollingInterval, String poolPropertyString,
                      SourceEventListener sourceEventListener, ConfigReader configReader) {
         this.url = url;
         this.tableName = tableName;
         this.username = username;
         this.password = password;
         this.driverClassName = driverClassName;
-        this.lastReadPollingColumnValue = lastReadPollingColumnValue;
         this.sourceEventListener = sourceEventListener;
         this.pollingColumn = pollingColumn;
         this.pollingInterval = pollingInterval;
         this.configReader = configReader;
-    }
-
-    public CDCPoller(String datasourceName, String tableName, String lastReadPollingColumnValue, String pollingColumn,
-                     int pollingInterval, SourceEventListener sourceEventListener, ConfigReader configReader) {
+        this.poolPropertyString = poolPropertyString;
         this.datasourceName = datasourceName;
-        this.tableName = tableName;
-        this.lastReadPollingColumnValue = lastReadPollingColumnValue;
-        this.sourceEventListener = sourceEventListener;
-        this.pollingColumn = pollingColumn;
-        this.pollingInterval = pollingInterval;
-        this.configReader = configReader;
+        this.jndiResource = jndiResource;
     }
 
     public void setCompletionCallback(CompletionCallback completionCallback) {
         this.completionCallback = completionCallback;
     }
 
-    private void initializeDatasource() {
+    private void initializeDatasource() throws NamingException {
         if (datasourceName == null) {
-            Properties connectionProperties = new Properties();
+            if (jndiResource == null) {
+                //init using query parameters
+                Properties connectionProperties = new Properties();
 
-            connectionProperties.setProperty("jdbcUrl", url);
-            connectionProperties.setProperty("dataSource.user", username);
-            if (!CDCPollingUtil.isEmpty(password)) {
-                connectionProperties.setProperty("dataSource.password", password);
+                connectionProperties.setProperty("jdbcUrl", url);
+                connectionProperties.setProperty("dataSource.user", username);
+                if (!CDCPollingUtil.isEmpty(password)) {
+                    connectionProperties.setProperty("dataSource.password", password);
+                }
+                connectionProperties.setProperty("driverClassName", driverClassName);
+                if (poolPropertyString != null) {
+                    List<String[]> poolProps = CDCPollingUtil.processKeyValuePairs(poolPropertyString);
+                    poolProps.forEach(pair -> connectionProperties.setProperty(pair[0], pair[1]));
+                }
+
+                HikariConfig config = new HikariConfig(connectionProperties);
+                this.dataSource = new HikariDataSource(config);
+                if (log.isDebugEnabled()) {
+                    log.debug("Database connection for '" + this.tableName + "' created through connection" +
+                            " parameters specified in the query.");
+                }
+            } else {
+                //init using jndi resource name
+                this.dataSource = InitialContext.doLookup(jndiResource);
+                if (log.isDebugEnabled()) {
+                    log.debug("Lookup for resource '" + jndiResource + "' completed through " +
+                            "JNDI lookup.");
+                }
             }
-            connectionProperties.setProperty("driverClassName", driverClassName);
-
-            HikariConfig config = new HikariConfig(connectionProperties);
-            this.dataSource = new HikariDataSource(config);
         } else {
+            //init using jndi datasource name.
             try {
                 BundleContext bundleContext = FrameworkUtil.getBundle(DataSourceService.class).getBundleContext();
                 ServiceReference serviceRef = bundleContext.getServiceReference(DataSourceService.class.getName());
@@ -151,6 +165,10 @@ public class CDCPoller implements Runnable {
         return lastReadPollingColumnValue;
     }
 
+    public void setLastReadPollingColumnValue(String lastReadPollingColumnValue) {
+        this.lastReadPollingColumnValue = lastReadPollingColumnValue;
+    }
+
     private Connection getConnection() {
         Connection conn;
         try {
@@ -165,9 +183,8 @@ public class CDCPoller implements Runnable {
         return conn;
     }
 
-    private String getSelectQuery(String fieldList, String condition, ConfigReader configReader) {
+    private String getSelectQuery(String columnList, String condition) {
         String selectQuery;
-// TODO: 11/27/18 use configReader class variable
         if (selectQueryStructure.isEmpty()) {
             //Get the database product name
             String databaseName;
@@ -181,7 +198,7 @@ public class CDCPoller implements Runnable {
             } finally {
                 CDCPollingUtil.cleanupConnection(null, null, conn);
             }
-// TODO: 11/27/18 give the above val as default val for config reader
+
             //Read configs from config reader.
             selectQueryStructure = configReader.readConfig(databaseName + "." + RECORD_SELECT_QUERY, "");
 
@@ -212,12 +229,13 @@ public class CDCPoller implements Runnable {
                     }
                 }
 
-                // TODO: 11/27/18 handle the null below
                 //Get database related select query structure
-                for (QueryConfigurationEntry entry : queryConfiguration.getDatabases()) {
-                    if (entry.getDatabaseName().equalsIgnoreCase(databaseName)) {
-                        selectQueryStructure = entry.getRecordSelectQuery();
-                        break;
+                if (queryConfiguration != null) {
+                    for (QueryConfigurationEntry entry : queryConfiguration.getDatabases()) {
+                        if (entry.getDatabaseName().equalsIgnoreCase(databaseName)) {
+                            selectQueryStructure = entry.getRecordSelectQuery();
+                            break;
+                        }
                     }
                 }
             }
@@ -230,7 +248,7 @@ public class CDCPoller implements Runnable {
 
         //create the select query with given constraints
         selectQuery = selectQueryStructure.replace(PLACE_HOLDER_TABLE_NAME, tableName)
-                .replace(PLACE_HOLDER_FIELD_LIST, fieldList)
+                .replace(PLACE_HOLDER_COLUMN_LIST, columnList)
                 .replace(PLACE_HOLDER_CONDITION, condition);
 
         return selectQuery;
@@ -240,7 +258,11 @@ public class CDCPoller implements Runnable {
      * Poll for inserts and updates.
      */
     private void pollForChanges() {
-        initializeDatasource();
+        try {
+            initializeDatasource();
+        } catch (NamingException e) {
+            throw new SiddhiAppRuntimeException("Error in initializing connection for " + tableName, e);
+        }
 
         String selectQuery;
         ResultSetMetaData metadata;
@@ -254,13 +276,12 @@ public class CDCPoller implements Runnable {
             synchronized (new Object()) { //assign null lastReadPollingColumnValue atomically.
                 //If lastReadPollingColumnValue is null, assign it with last record of the table.
                 if (lastReadPollingColumnValue == null) {
-                    selectQuery = getSelectQuery(pollingColumn, "", configReader).trim();
+                    selectQuery = getSelectQuery("MAX(" + pollingColumn + ")", "").trim();
                     statement = connection.prepareStatement(selectQuery);
                     resultSet = statement.executeQuery();
-                    while (resultSet.next()) {
-                        lastReadPollingColumnValue = resultSet.getString(pollingColumn);
+                    if (resultSet.next()) {
+                        lastReadPollingColumnValue = resultSet.getString(1);
                     }
-                    // TODO: 11/27/18 take max
                     //if the table is empty, set last offset to a negative value.
                     if (lastReadPollingColumnValue == null) {
                         lastReadPollingColumnValue = "-1";
@@ -268,7 +289,7 @@ public class CDCPoller implements Runnable {
                 }
             }
 
-            selectQuery = getSelectQuery("*", "WHERE " + pollingColumn + " > ?", configReader);
+            selectQuery = getSelectQuery("*", "WHERE " + pollingColumn + " > ?");
             statement = connection.prepareStatement(selectQuery);
 
             while (true) {
@@ -288,14 +309,14 @@ public class CDCPoller implements Runnable {
                     }
                 } catch (SQLException ex) {
                     log.error(ex);
+                } finally {
+                    CDCPollingUtil.cleanupConnection(resultSet, null, null);
                 }
                 try {
-                    Thread.sleep(pollingInterval * 1000);
+                    Thread.sleep((long) pollingInterval * 1000);
                 } catch (InterruptedException e) {
                     log.error("Error while polling.", e);
                 }
-                // TODO: 11/27/18 consider cleaning resultset
-                // TODO: 11/27/18 catch throwables and log inside the while
             }
         } catch (SQLException ex) {
             throw new SiddhiAppRuntimeException("Error in polling for changes on " + tableName, ex);

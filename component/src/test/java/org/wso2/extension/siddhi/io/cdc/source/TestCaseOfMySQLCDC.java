@@ -139,9 +139,6 @@ public class TestCaseOfMySQLCDC {
         cdcAppRuntime.addCallback("istm", insertionStreamCallback);
         cdcAppRuntime.start();
 
-        //wait till cdc-pollar initialize.
-        Thread.sleep(5000);
-
         //Do an insert and wait for cdc app to capture.
         InputHandler rdbmsInputHandler = rdbmsAppRuntime.getInputHandler("insertionStream");
         Object[] insertingObject = new Object[]{"e003", "testEmployer"};
@@ -166,6 +163,7 @@ public class TestCaseOfMySQLCDC {
     /**
      * Test case to test state persistence of polling mode.
      */
+    // TODO: 11/28/18 make state persistence working
     @Test(dependsOnMethods = "testCDCPollingMode", enabled = false)
     public void testCDCPollingModeStatePersistence() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
@@ -230,9 +228,6 @@ public class TestCaseOfMySQLCDC {
         cdcAppRuntime.addCallback("istm", insertionStreamCallback);
         cdcAppRuntime.start();
 
-        //wait till cdc-pollar initialize.
-        Thread.sleep(5000);
-
         //Do an insert and wait for cdc app to capture.
         InputHandler rdbmsInputHandler = rdbmsAppRuntime.getInputHandler("insertionStream");
         Object[] insertingObject = new Object[]{"e004", "testEmployer"};
@@ -275,9 +270,6 @@ public class TestCaseOfMySQLCDC {
         } catch (CannotRestoreSiddhiAppStateException e) {
             Assert.fail("Restoring of Siddhi app " + cdcAppRuntime.getName() + " failed", e);
         }
-
-        //wait till cdc-pollar initialize.
-        Thread.sleep(5000);
 
         //Assert event arrival.
         Assert.assertTrue(eventArrived.get());

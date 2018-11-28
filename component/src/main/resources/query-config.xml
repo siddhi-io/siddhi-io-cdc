@@ -20,18 +20,18 @@
 
 <rdbms-table-configuration>
     <database name="h2">
-        <recordSelectQuery>SELECT {{FIELD_LIST}} FROM {{TABLE_NAME}} {{CONDITION}}</recordSelectQuery>
+        <recordSelectQuery>SELECT {{COLUMN_LIST}} FROM {{TABLE_NAME}} {{CONDITION}}</recordSelectQuery>
     </database>
     <database name="oracle">
-        <recordSelectQuery>SELECT {{FIELD_LIST}} FROM {{TABLE_NAME}} {{CONDITION}}</recordSelectQuery>
+        <recordSelectQuery>SELECT {{COLUMN_LIST}} FROM {{TABLE_NAME}} {{CONDITION}}</recordSelectQuery>
     </database>
     <database name="PostgreSQL">
-        <recordSelectQuery>SELECT {{FIELD_LIST}} FROM {{TABLE_NAME}} {{CONDITION}}</recordSelectQuery>
+        <recordSelectQuery>SELECT {{COLUMN_LIST}} FROM {{TABLE_NAME}} {{CONDITION}}</recordSelectQuery>
     </database>
     <database name="Microsoft SQL Server">
-        <recordSelectQuery>SELECT {{FIELD_LIST}} FROM {{TABLE_NAME}} {{CONDITION}}</recordSelectQuery>
+        <recordSelectQuery>SELECT {{COLUMN_LIST}} FROM {{TABLE_NAME}} {{CONDITION}}</recordSelectQuery>
     </database>
     <database name="mysql">
-        <recordSelectQuery>SELECT {{FIELD_LIST}} FROM {{TABLE_NAME}} {{CONDITION}}</recordSelectQuery>
+        <recordSelectQuery>SELECT {{COLUMN_LIST}} FROM {{TABLE_NAME}} {{CONDITION}}</recordSelectQuery>
     </database>
 </rdbms-table-configuration>

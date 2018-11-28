@@ -101,6 +101,13 @@ import java.util.concurrent.Executors;
                         description = "Password for the above user.",
                         type = DataType.STRING
                 ),
+                @Parameter(name = "pool.properties",
+                        description = "Any pool parameters for the database connection must be specified as key-value" +
+                                " pairs.",
+                        type = DataType.STRING,
+                        optional = true,
+                        defaultValue = "<Empty_String>"
+                ),
                 @Parameter(
                         name = "datasource.name",
                         description = "Name of the wso2 datasource to connect to the database." +
@@ -253,7 +260,7 @@ public class CDCSource extends Source {
     private CDCSourceObjectKeeper cdcSourceObjectKeeper = CDCSourceObjectKeeper.getCdcSourceObjectKeeper();
     private String carbonHome;
     private CDCPoller cdcPoller;
-    private String lastOffset;
+    private String lastReadPollingColumnValue;
 
     @Override
     public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
@@ -326,14 +333,23 @@ public class CDCSource extends Source {
 
                 String pollingColumn = optionHolder.validateAndGetStaticValue(CDCSourceConstants.POLLING_COLUMN);
                 boolean isDatasourceNameAvailable = optionHolder.isOptionExists(CDCSourceConstants.DATASOURCE_NAME);
+                boolean isJndiResourceAvailable = optionHolder.isOptionExists(CDCSourceConstants.JNDI_RESOURCE);
                 pollingInterval = Integer.parseInt(
                         optionHolder.validateAndGetStaticValue(CDCSourceConstants.POLLING_INTERVAL,
                                 Integer.toString(CDCSourceConstants.DEFAULT_POLLING_INTERVAL_SECONDS)));
                 validatePollingModeParameters();
+                String poolPropertyString = optionHolder.validateAndGetStaticValue(CDCSourceConstants.POOL_PROPERTIES,
+                        null);
 
                 if (isDatasourceNameAvailable) {
                     String datasourceName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.DATASOURCE_NAME);
-                    cdcPoller = new CDCPoller(datasourceName, tableName, lastOffset, pollingColumn, pollingInterval,
+                    cdcPoller = new CDCPoller(null, null, null, tableName, null,
+                            datasourceName, null, pollingColumn, pollingInterval,
+                            poolPropertyString, sourceEventListener, configReader);
+                } else if (isJndiResourceAvailable) {
+                    String jndiResource = optionHolder.validateAndGetStaticValue(CDCSourceConstants.JNDI_RESOURCE);
+                    cdcPoller = new CDCPoller(null, null, null, tableName, null,
+                            null, jndiResource, pollingColumn, pollingInterval, poolPropertyString,
                             sourceEventListener, configReader);
                 } else {
                     String driverClassName;
@@ -344,10 +360,11 @@ public class CDCSource extends Source {
                         password = optionHolder.validateAndGetOption(CDCSourceConstants.PASSWORD).getValue();
                     } catch (SiddhiAppValidationException ex) {
                         throw new SiddhiAppValidationException(ex.getMessage() + " Alternatively, define "
-                                + CDCSourceConstants.DATASOURCE_NAME + ".");
+                                + CDCSourceConstants.DATASOURCE_NAME + " or " + CDCSourceConstants.JNDI_RESOURCE + ".");
                     }
-                    cdcPoller = new CDCPoller(url, username, password, tableName, driverClassName, lastOffset,
-                            pollingColumn, pollingInterval, sourceEventListener,  configReader);
+                    cdcPoller = new CDCPoller(url, username, password, tableName, driverClassName,
+                            null, null, pollingColumn, pollingInterval, poolPropertyString,
+                            sourceEventListener, configReader);
                 }
                 break;
             default:
@@ -463,7 +480,8 @@ public class CDCSource extends Source {
         switch (mode) {
             case CDCSourceConstants.MODE_POLLING:
                 Object lastOffsetObj = map.get("last.offset");
-                this.lastOffset = (String) lastOffsetObj;
+                this.lastReadPollingColumnValue = (String) lastOffsetObj;
+                cdcPoller.setLastReadPollingColumnValue(lastReadPollingColumnValue);
                 break;
             case CDCSourceConstants.MODE_LISTENING:
                 Object cacheObj = map.get(CDCSourceConstants.CACHE_OBJECT);

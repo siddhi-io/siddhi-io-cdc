@@ -75,7 +75,7 @@ public class TestCaseOfH2CDC {
 
         String pollingColumn = "id";
         String pollingTableName = "login";
-        int pollingInterval = 500;
+        int pollingInterval = 1;
         String cdcinStreamDefinition = "@app:name('cdcTesting')" +
                 "@source(type = 'cdc', mode='polling'," +
                 " polling.column='" + pollingColumn + "'," +

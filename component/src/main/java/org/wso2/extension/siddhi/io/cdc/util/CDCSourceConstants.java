@@ -25,6 +25,7 @@ public class CDCSourceConstants {
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";
     public static final String DATABASE_CONNECTION_URL = "url";
+    public static final String POOL_PROPERTIES = "pool.properties";
     public static final String OPERATION = "operation";
     public static final String DATABASE_HISTORY_FILEBASE_HISTORY = "io.debezium.relational.history.FileDatabaseHistory";
     public static final String DATABASE_HISTORY_FILE_NAME = "database.history.file.filename";
@@ -65,4 +66,5 @@ public class CDCSourceConstants {
     public static final String POLLING_INTERVAL = "polling.interval";
     public static final int DEFAULT_POLLING_INTERVAL_SECONDS = 1;
     public static final String DATASOURCE_NAME = "datasource.name";
+    public static final String JNDI_RESOURCE = "jndi.resource";
 }
