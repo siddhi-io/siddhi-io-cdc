@@ -16,28 +16,24 @@
  * under the License.
  */
 
-package org.wso2.extension.siddhi.io.cdc.source.config;
+package org.wso2.extension.siddhi.io.cdc.source.polling;
+
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 
 /**
- * Class to represent the database object with select query.
- */
-public class Database {
-    private String name;
-    private String selectQuery;
+* This Exception is to be thrown in the CDC polling mode.
+*/
+public class CDCPollingModeException extends SiddhiAppCreationException {
 
-    public String getName() {
-        return name;
+    public CDCPollingModeException(String message) {
+        super(message);
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public CDCPollingModeException(String message, Throwable throwable) {
+        super(message, throwable);
     }
 
-    public String getSelectQuery() {
-        return selectQuery;
-    }
-
-    public void setSelectQuery(String selectQuery) {
-        this.selectQuery = selectQuery;
+    public CDCPollingModeException(Throwable throwable) {
+        super(throwable);
     }
 }

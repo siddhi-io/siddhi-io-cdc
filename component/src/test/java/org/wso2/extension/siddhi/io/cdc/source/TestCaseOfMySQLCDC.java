@@ -31,13 +31,9 @@ import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.SiddhiTestHelper;
-import org.wso2.siddhi.core.util.config.ConfigManager;
-import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.siddhi.core.util.config.InMemoryConfigManager;
 import org.wso2.siddhi.core.util.persistence.InMemoryPersistenceStore;
 import org.wso2.siddhi.core.util.persistence.PersistenceStore;
 
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -57,18 +53,19 @@ public class TestCaseOfMySQLCDC {
 
     @BeforeClass
     public void initializeConnectionParams() {
-//        String port = System.getenv("PORT");
-//        String host = System.getenv("DOCKER_HOST_IP");
-//        databaseURL = "jdbc:mysql://" + host + ":" + port + "/SimpleDB?useSSL=false";
-//        username = System.getenv("DATABASE_USER");
-//        password = System.getenv("DATABASE_PASSWORD");
-//        mysqlJdbcDriverName = "com.mysql.jdbc.Driver";
-        String port = "3306";
-        String host = "localhost";
+        String port = System.getenv("PORT");
+        String host = System.getenv("DOCKER_HOST_IP");
         databaseURL = "jdbc:mysql://" + host + ":" + port + "/SimpleDB?useSSL=false";
-        username = "root";
-        password = "1234";
+        username = System.getenv("DATABASE_USER");
+        password = System.getenv("DATABASE_PASSWORD");
         mysqlJdbcDriverName = "com.mysql.jdbc.Driver";
+//        String port = "3306";
+//        String host = "localhost";
+//        databaseURL = "jdbc:mysql://" + host + ":" + port + "/SimpleDB?useSSL=false";
+//        username = "root";
+//        password = "1234";
+//        mysqlJdbcDriverName = "com.mysql.jdbc.Driver";
+        // TODO: 11/28/18 clean up before PR
     }
 
     @BeforeMethod
