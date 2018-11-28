@@ -139,6 +139,8 @@ public class TestCaseOfMySQLCDC {
         cdcAppRuntime.addCallback("istm", insertionStreamCallback);
         cdcAppRuntime.start();
 
+        Thread.sleep(2000);
+
         //Do an insert and wait for cdc app to capture.
         InputHandler rdbmsInputHandler = rdbmsAppRuntime.getInputHandler("insertionStream");
         Object[] insertingObject = new Object[]{"e003", "testEmployer"};

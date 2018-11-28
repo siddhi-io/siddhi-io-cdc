@@ -26,13 +26,15 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.wso2.carbon.datasource.core.api.DataSourceService;
 import org.wso2.carbon.datasource.core.exception.DataSourceException;
+import org.wso2.extension.siddhi.io.cdc.source.config.Database;
 import org.wso2.extension.siddhi.io.cdc.source.config.QueryConfiguration;
-import org.wso2.extension.siddhi.io.cdc.source.config.QueryConfigurationEntry;
 import org.wso2.extension.siddhi.io.cdc.util.CDCPollingUtil;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 import org.wso2.siddhi.core.util.config.ConfigReader;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,9 +52,6 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 
 /**
  * Polls a given table for changes. Use {@code pollingColumn} to poll on.
@@ -63,7 +62,7 @@ public class CDCPoller implements Runnable {
     private static final String PLACE_HOLDER_TABLE_NAME = "{{TABLE_NAME}}";
     private static final String PLACE_HOLDER_COLUMN_LIST = "{{COLUMN_LIST}}";
     private static final String PLACE_HOLDER_CONDITION = "{{CONDITION}}";
-    private static final String SELECT_QUERY_CONFIG_FILE = "query-config.xml"; // TODO: 11/27/18 move yaml file
+    private static final String SELECT_QUERY_CONFIG_FILE = "query-config.yaml";
     private static final String RECORD_SELECT_QUERY = "recordSelectQuery";
     private String selectQueryStructure = "";
     private String url;
@@ -203,22 +202,18 @@ public class CDCPoller implements Runnable {
             selectQueryStructure = configReader.readConfig(databaseName + "." + RECORD_SELECT_QUERY, "");
 
             if (selectQueryStructure.isEmpty()) {
-                //Read configs from file
-                QueryConfiguration queryConfiguration = null;
+                //Read configs from yaml file
+                QueryConfiguration queryConfiguration;
                 InputStream inputStream = null;
                 try {
-                    JAXBContext ctx = JAXBContext.newInstance(QueryConfiguration.class);
-                    Unmarshaller unmarshaller = ctx.createUnmarshaller();
+                    Yaml yaml = new Yaml(new Constructor(QueryConfiguration.class));
                     ClassLoader classLoader = getClass().getClassLoader();
                     inputStream = classLoader.getResourceAsStream(SELECT_QUERY_CONFIG_FILE);
                     if (inputStream == null) {
                         throw new SiddhiAppRuntimeException(SELECT_QUERY_CONFIG_FILE
                                 + " is not found in the classpath");
                     }
-                    queryConfiguration = (QueryConfiguration) unmarshaller.unmarshal(inputStream);
-
-                } catch (JAXBException e) {
-                    log.error("Query Configuration read error", e);
+                    queryConfiguration = (QueryConfiguration) yaml.load(inputStream);
                 } finally {
                     if (inputStream != null) {
                         try {
@@ -231,9 +226,9 @@ public class CDCPoller implements Runnable {
 
                 //Get database related select query structure
                 if (queryConfiguration != null) {
-                    for (QueryConfigurationEntry entry : queryConfiguration.getDatabases()) {
-                        if (entry.getDatabaseName().equalsIgnoreCase(databaseName)) {
-                            selectQueryStructure = entry.getRecordSelectQuery();
+                    for (Database database : queryConfiguration.getDatabases()) {
+                        if (database.getName().equalsIgnoreCase(databaseName)) {
+                            selectQueryStructure = database.getSelectQuery();
                             break;
                         }
                     }

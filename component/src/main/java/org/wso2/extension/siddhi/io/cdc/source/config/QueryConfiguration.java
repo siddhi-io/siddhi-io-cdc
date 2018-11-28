@@ -18,23 +18,17 @@
  */
 package org.wso2.extension.siddhi.io.cdc.source.config;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
 /**
  * This class represents JAXB configs for DB vendor-specific SQL syntax.
  */
-@XmlRootElement(name = "rdbms-table-configuration")
 public class QueryConfiguration {
+    private Database[] databases;
 
-    private QueryConfigurationEntry[] databases;
-
-    @XmlElement(name = "database")
-    public QueryConfigurationEntry[] getDatabases() {
+    public Database[] getDatabases() {
         return databases;
     }
 
-    public void setDatabases(QueryConfigurationEntry[] databases) {
+    public void setDatabases(Database[] databases) {
         this.databases = databases;
     }
 }
