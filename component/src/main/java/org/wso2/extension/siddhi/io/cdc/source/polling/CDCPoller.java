@@ -271,20 +271,17 @@ public class CDCPoller implements Runnable {
         ResultSet resultSet = null;
 
         try {
-            // TODO: 11/27/18 check on this block, (2 app runtimes)
-            synchronized (new Object()) { //assign null lastReadPollingColumnValue atomically.
-                //If lastReadPollingColumnValue is null, assign it with last record of the table.
+            //If lastReadPollingColumnValue is null, assign it with last record of the table.
+            if (lastReadPollingColumnValue == null) {
+                selectQuery = getSelectQuery("MAX(" + pollingColumn + ")", "").trim();
+                statement = connection.prepareStatement(selectQuery);
+                resultSet = statement.executeQuery();
+                if (resultSet.next()) {
+                    lastReadPollingColumnValue = resultSet.getString(1);
+                }
+                //if the table is empty, set last offset to a negative value.
                 if (lastReadPollingColumnValue == null) {
-                    selectQuery = getSelectQuery("MAX(" + pollingColumn + ")", "").trim();
-                    statement = connection.prepareStatement(selectQuery);
-                    resultSet = statement.executeQuery();
-                    if (resultSet.next()) {
-                        lastReadPollingColumnValue = resultSet.getString(1);
-                    }
-                    //if the table is empty, set last offset to a negative value.
-                    if (lastReadPollingColumnValue == null) {
-                        lastReadPollingColumnValue = "-1";
-                    }
+                    lastReadPollingColumnValue = "-1";
                 }
             }
 

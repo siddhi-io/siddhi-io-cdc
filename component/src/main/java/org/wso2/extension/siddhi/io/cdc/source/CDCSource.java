@@ -411,6 +411,7 @@ public class CDCSource extends Source {
                 };
 
                 cdcPoller.setCompletionCallback(cdcCompletionCallback);
+                cdcPoller.setLastReadPollingColumnValue(lastReadPollingColumnValue);
                 executorService.execute(cdcPoller);
                 break;
             default:
@@ -482,7 +483,6 @@ public class CDCSource extends Source {
             case CDCSourceConstants.MODE_POLLING:
                 Object lastOffsetObj = map.get("last.offset");
                 this.lastReadPollingColumnValue = (String) lastOffsetObj;
-                cdcPoller.setLastReadPollingColumnValue(lastReadPollingColumnValue);
                 break;
             case CDCSourceConstants.MODE_LISTENING:
                 Object cacheObj = map.get(CDCSourceConstants.CACHE_OBJECT);

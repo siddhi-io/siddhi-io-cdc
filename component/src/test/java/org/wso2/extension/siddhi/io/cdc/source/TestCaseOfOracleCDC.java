@@ -109,11 +109,9 @@ public class TestCaseOfOracleCDC {
             }
         };
 
-        SiddhiAppRuntime rdbmsAppRuntime = siddhiManager.createSiddhiAppRuntime(rdbmsStoreDefinition + rdbmsQuery);
-        rdbmsAppRuntime.addCallback("query2", rdbmsQueryCallback);
-        rdbmsAppRuntime.start();
-
-        SiddhiAppRuntime cdcAppRuntime = siddhiManager.createSiddhiAppRuntime(cdcinStreamDefinition);
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cdcinStreamDefinition +
+                rdbmsStoreDefinition + rdbmsQuery);
+        siddhiAppRuntime.addCallback("query2", rdbmsQueryCallback);
 
         StreamCallback insertionStreamCallback = new StreamCallback() {
             @Override
@@ -127,16 +125,16 @@ public class TestCaseOfOracleCDC {
             }
         };
 
-        cdcAppRuntime.addCallback("istm", insertionStreamCallback);
-        cdcAppRuntime.start();
+        siddhiAppRuntime.addCallback("istm", insertionStreamCallback);
+        siddhiAppRuntime.start();
 
-        //wait till cdc-pollar initialize.
+        //wait till cdc-poller initialize.
         Thread.sleep(5000);
 
         //Do an insert and wait for cdc app to capture.
-        InputHandler rdbmsInputHandler = rdbmsAppRuntime.getInputHandler("insertionStream");
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("insertionStream");
         Object[] insertingObject = new Object[]{"e001", "testEmployer"};
-        rdbmsInputHandler.send(insertingObject);
+        inputHandler.send(insertingObject);
 
         SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
 
@@ -146,8 +144,7 @@ public class TestCaseOfOracleCDC {
         //Assert event data.
         Assert.assertEquals(insertingObject, currentEvent.getData());
 
-        cdcAppRuntime.shutdown();
-        rdbmsAppRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
         siddhiManager.shutdown();
     }
 }

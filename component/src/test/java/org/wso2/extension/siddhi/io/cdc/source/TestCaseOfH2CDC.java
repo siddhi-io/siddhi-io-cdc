@@ -76,8 +76,7 @@ public class TestCaseOfH2CDC {
         String pollingColumn = "id";
         String pollingTableName = "login";
         int pollingInterval = 1;
-        String cdcinStreamDefinition = "@app:name('cdcTesting')" +
-                "@source(type = 'cdc', mode='polling'," +
+        String cdcinStreamDefinition = "@source(type = 'cdc', mode='polling'," +
                 " polling.column='" + pollingColumn + "'," +
                 " jdbc.driver.name='" + h2JdbcDriverName + "'," +
                 " url = '" + databaseURL + "'," +
@@ -85,13 +84,13 @@ public class TestCaseOfH2CDC {
                 " password = '" + password + "'," +
                 " table.name = '" + pollingTableName + "', polling.interval = '" + pollingInterval + "'," +
                 " @map(type='keyvalue'))" +
-                "define stream istm (ID string, NAME string);";
+                " define stream istm (ID string, NAME string);\n";
 
         String rdbmsStoreDefinition = "define stream insertionStream (id string, name string);" +
                 "@Store(type='rdbms', jdbc.url='" + databaseURL + "'," +
                 " username='" + username + "', password='" + password + "' ," +
                 " jdbc.driver.name='" + h2JdbcDriverName + "')" +
-                "define table login (id string, name string);";
+                " define table login (id string, name string);";
 
         String rdbmsQuery = "@info(name='query2') " +
                 "from insertionStream " +
@@ -106,11 +105,9 @@ public class TestCaseOfH2CDC {
             }
         };
 
-        SiddhiAppRuntime rdbmsAppRuntime = siddhiManager.createSiddhiAppRuntime(rdbmsStoreDefinition + rdbmsQuery);
-        rdbmsAppRuntime.addCallback("query2", rdbmsQueryCallback);
-        rdbmsAppRuntime.start();
-
-        SiddhiAppRuntime cdcAppRuntime = siddhiManager.createSiddhiAppRuntime(cdcinStreamDefinition);
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cdcinStreamDefinition +
+                rdbmsStoreDefinition + rdbmsQuery);
+        siddhiAppRuntime.addCallback("query2", rdbmsQueryCallback);
 
         StreamCallback insertionStreamCallback = new StreamCallback() {
             @Override
@@ -124,16 +121,16 @@ public class TestCaseOfH2CDC {
             }
         };
 
-        cdcAppRuntime.addCallback("istm", insertionStreamCallback);
-        cdcAppRuntime.start();
+        siddhiAppRuntime.addCallback("istm", insertionStreamCallback);
+        siddhiAppRuntime.start();
 
-        //wait till cdc-pollar initialize.
+        //wait till cdc-poller initialize.
         Thread.sleep(5000);
 
         //Do an insert and wait for cdc app to capture.
-        InputHandler rdbmsInputHandler = rdbmsAppRuntime.getInputHandler("insertionStream");
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("insertionStream");
         Object[] insertingObject = new Object[]{"e001", "testEmployer"};
-        rdbmsInputHandler.send(insertingObject);
+        inputHandler.send(insertingObject);
 
         SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
 
@@ -143,8 +140,7 @@ public class TestCaseOfH2CDC {
         //Assert event data.
         Assert.assertEquals(insertingObject, currentEvent.getData());
 
-        cdcAppRuntime.shutdown();
-        rdbmsAppRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
         siddhiManager.shutdown();
     }
 }
