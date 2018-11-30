@@ -260,7 +260,6 @@ public class CDCSource extends Source {
     private CDCSourceObjectKeeper cdcSourceObjectKeeper = CDCSourceObjectKeeper.getCdcSourceObjectKeeper();
     private String carbonHome;
     private CDCPoller cdcPoller;
-    private String lastReadPollingColumnValue;
 
     @Override
     public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
@@ -411,7 +410,6 @@ public class CDCSource extends Source {
                 };
 
                 cdcPoller.setCompletionCallback(cdcCompletionCallback);
-                cdcPoller.setLastReadPollingColumnValue(lastReadPollingColumnValue);
                 executorService.execute(cdcPoller);
                 break;
             default:
@@ -482,7 +480,7 @@ public class CDCSource extends Source {
         switch (mode) {
             case CDCSourceConstants.MODE_POLLING:
                 Object lastOffsetObj = map.get("last.offset");
-                this.lastReadPollingColumnValue = (String) lastOffsetObj;
+                cdcPoller.setLastReadPollingColumnValue((String) lastOffsetObj);
                 break;
             case CDCSourceConstants.MODE_LISTENING:
                 Object cacheObj = map.get(CDCSourceConstants.CACHE_OBJECT);

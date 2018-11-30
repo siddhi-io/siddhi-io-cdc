@@ -270,6 +270,8 @@ public class CDCPoller implements Runnable {
         PreparedStatement statement = null;
         ResultSet resultSet = null;
 
+        //lastReadPollingColumnValue = cdcSource.getLastReadPollingColumnValue();
+
         try {
             //If lastReadPollingColumnValue is null, assign it with last record of the table.
             if (lastReadPollingColumnValue == null) {
