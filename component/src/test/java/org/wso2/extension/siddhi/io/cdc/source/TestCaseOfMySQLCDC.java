@@ -53,21 +53,12 @@ public class TestCaseOfMySQLCDC {
 
     @BeforeClass
     public void initializeConnectionParams() {
-        // TODO: 11/30/18 docker.container.alias.ip
         String port = System.getenv("PORT");
         String host = System.getenv("DOCKER_HOST_IP");
         databaseURL = "jdbc:mysql://" + host + ":" + port + "/SimpleDB?useSSL=false";
         username = System.getenv("DATABASE_USER");
         password = System.getenv("DATABASE_PASSWORD");
         mysqlJdbcDriverName = "com.mysql.jdbc.Driver";
-
-//        String port = "3306";
-//        String host = "localhost";
-//        databaseURL = "jdbc:mysql://" + host + ":" + port + "/SimpleDB?useSSL=false";
-//        username = "root";
-//        password = "1234";
-//        mysqlJdbcDriverName = "com.mysql.jdbc.Driver";
-        // TODO: 11/30/18 clean
     }
 
     @BeforeMethod
@@ -257,10 +248,8 @@ public class TestCaseOfMySQLCDC {
         inputHandler.send(insertingObject);
         siddhiAppRuntime.shutdown();
 
-        //call initializing.
+        //start CDC siddhi app
         init();
-
-        //start siddhi app
         siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cdcinStreamDefinition);
         siddhiAppRuntime.addCallback("istm", insertionStreamCallback);
         siddhiAppRuntime.start();
