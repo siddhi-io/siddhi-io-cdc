@@ -227,7 +227,7 @@ import java.util.concurrent.Executors;
                 ),
                 @Example(
                         syntax = "@source(type = 'cdc', mode='polling', polling.column = 'id', " +
-                                "datasource.name = 'SimpleDB'" +
+                                "datasource.name = 'SimpleDB'," +
                                 "\ntable.name = 'students', " +
                                 "\n@map(type='keyvalue'), @attributes(id = 'id', name = 'name'))" +
                                 "\ndefine stream inputStream (id int, name string);",
@@ -238,7 +238,7 @@ import java.util.concurrent.Executors;
                 ),
                 @Example(
                         syntax = "@source(type = 'cdc', mode='polling', polling.column = 'last_updated', " +
-                                "datasource.name = 'SimpleDB'" +
+                                "datasource.name = 'SimpleDB'," +
                                 "\ntable.name = 'students', " +
                                 "\n@map(type='keyvalue'))" +
                                 "\ndefine stream inputStream (name string);",
