@@ -300,7 +300,7 @@ public class CDCPoller implements Runnable {
                         detailsMap = new HashMap<>();
                         for (int i = 1; i <= metadata.getColumnCount(); i++) {
                             String key = metadata.getColumnName(i);
-                            String value = resultSet.getString(key);
+                            Object value = resultSet.getObject(key);
                             detailsMap.put(key.toLowerCase(Locale.ENGLISH), value);
                         }
                         lastReadPollingColumnValue = resultSet.getString(pollingColumn);
