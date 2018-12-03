@@ -22,7 +22,7 @@
 
 <!--This test suit is used to test MySQL CDC in polling mode and listening mode-->
 <suite name="Siddhi-Io-Cdc-Test-Suite2">
-    <test name="Siddhi-io-cdc-tests-2" enabled="true" parallel="false">
+    <test name="Siddhi-io-cdc-tests-2" enabled="true">
         <classes>
             <class name="org.wso2.extension.siddhi.io.cdc.source.TestCaseOfCDCPollingMode"/>
             <class name="org.wso2.extension.siddhi.io.cdc.source.TestCaseOfCDCListeningMode"/>

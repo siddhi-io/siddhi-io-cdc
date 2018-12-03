@@ -103,7 +103,7 @@ public class TestCaseOfCDCPollingMode {
     @Test
     public void testCDCPollingMode() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
-        log.info("CDC TestCase: Capturing change data from MySQL with polling mode.");
+        log.info("CDC TestCase: Capturing change data with polling mode.");
         log.info("------------------------------------------------------------------------------------------------");
 
         SiddhiManager siddhiManager = new SiddhiManager();
