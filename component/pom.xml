@@ -214,9 +214,10 @@
                                 <PORT>${siddhi-cdc-mysql.port}</PORT>
                                 <DOCKER_HOST_IP>${docker.container.siddhi-cdc-mysql.ip}</DOCKER_HOST_IP>
                             </environmentVariables>
-                            <test>
-                                org.wso2.extension.siddhi.io.cdc.source.TestCaseOfMySQLCDC
-                            </test>
+                            <includes>
+                                <include>org.wso2.extension.siddhi.io.cdc.source.TestCaseOfCDCPollingMode</include>
+                                <include>org.wso2.extension.siddhi.io.cdc.source.TestCaseOfCDCListeningMode</include>
+                            </includes>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -291,6 +292,7 @@
                         </executions>
                         <configuration>
                             <environmentVariables>
+                                <DATABASE_TYPE>ORACLE</DATABASE_TYPE>
                                 <DATABASE_USER>system</DATABASE_USER>
                                 <DATABASE_PASSWORD>root</DATABASE_PASSWORD>
                                 <PORT>${siddhi-cdc-oracle.port}</PORT>
@@ -299,7 +301,7 @@
                             </environmentVariables>
                             <argLine>-Duser.timezone=GMT</argLine>
                             <test>
-                                org.wso2.extension.siddhi.io.cdc.source.TestCaseOfOracleCDC
+                                org.wso2.extension.siddhi.io.cdc.source.TestCaseOfCDCPollingMode
                             </test>
                         </configuration>
                     </plugin>
@@ -382,7 +384,7 @@
                                 <DOCKER_HOST_IP>${docker.container.siddhi-cdc-mssql.ip}</DOCKER_HOST_IP>
                             </environmentVariables>
                             <test>
-                                org.wso2.extension.siddhi.io.cdc.source.TestCaseOfMsSqlCDC
+                                org.wso2.extension.siddhi.io.cdc.source.TestCaseOfCDCPollingMode
                             </test>
                         </configuration>
                     </plugin>
@@ -471,7 +473,7 @@
                                 <DOCKER_HOST_IP>${docker.container.siddhi-cdc-postgres.ip}</DOCKER_HOST_IP>
                             </environmentVariables>
                             <test>
-                                org.wso2.extension.siddhi.io.cdc.source.TestCaseOfPostgresCDC
+                                org.wso2.extension.siddhi.io.cdc.source.TestCaseOfCDCPollingMode
                             </test>
                         </configuration>
                     </plugin>
@@ -491,6 +493,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
+                    <environmentVariables>
+                        <DATABASE_TYPE>H2</DATABASE_TYPE>
+                    </environmentVariables>
                     <suiteXmlFiles>
                         <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
                     </suiteXmlFiles>

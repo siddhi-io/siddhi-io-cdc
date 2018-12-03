@@ -45,6 +45,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.locks.Condition;
@@ -300,7 +301,7 @@ public class CDCPoller implements Runnable {
                         for (int i = 1; i <= metadata.getColumnCount(); i++) {
                             String key = metadata.getColumnName(i);
                             String value = resultSet.getString(key);
-                            detailsMap.put(key, value);
+                            detailsMap.put(key.toLowerCase(Locale.ENGLISH), value);
                         }
                         lastReadPollingColumnValue = resultSet.getString(pollingColumn);
                         handleEvent(detailsMap);
