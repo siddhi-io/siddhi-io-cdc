@@ -20,11 +20,12 @@
 
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="Siddhi-Io-Cdc-Test-Suite">
-    <test name="Siddhi-io-cdc-tests" enabled="true">
+<!--This test suit is used to test MySQL CDC in polling mode and listening mode-->
+<suite name="Siddhi-Io-Cdc-Test-Suite2">
+    <test name="Siddhi-io-cdc-tests-2" enabled="true" parallel="false">
         <classes>
-            <class name="org.wso2.extension.siddhi.io.cdc.source.TestCaseOfCDCSourceValidation"/>
             <class name="org.wso2.extension.siddhi.io.cdc.source.TestCaseOfCDCPollingMode"/>
+            <class name="org.wso2.extension.siddhi.io.cdc.source.TestCaseOfCDCListeningMode"/>
         </classes>
     </test>
 </suite>
