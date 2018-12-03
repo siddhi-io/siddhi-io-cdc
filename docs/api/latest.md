@@ -181,7 +181,7 @@ define stream inputStream (id int, name string);
 
 <span id="example-5" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 5</span>
 ```
-@source(type = 'cdc', mode='polling', polling.column = 'id', datasource.name = 'SimpleDB'
+@source(type = 'cdc', mode='polling', polling.column = 'id', datasource.name = 'SimpleDB',
 table.name = 'students', 
 @map(type='keyvalue'), @attributes(id = 'id', name = 'name'))
 define stream inputStream (id int, name string);
@@ -190,7 +190,7 @@ define stream inputStream (id int, name string);
 
 <span id="example-6" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 6</span>
 ```
-@source(type = 'cdc', mode='polling', polling.column = 'last_updated', datasource.name = 'SimpleDB'
+@source(type = 'cdc', mode='polling', polling.column = 'last_updated', datasource.name = 'SimpleDB',
 table.name = 'students', 
 @map(type='keyvalue'))
 define stream inputStream (name string);
