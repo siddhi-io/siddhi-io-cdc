@@ -83,6 +83,7 @@ public class CDCPoller implements Runnable {
     private ConfigReader configReader;
     private String poolPropertyString;
     private String jndiResource;
+    private boolean isLocalDataSource = false;
 
     public CDCPoller(String url, String username, String password, String tableName, String driverClassName,
                      String datasourceName, String jndiResource,
@@ -100,6 +101,10 @@ public class CDCPoller implements Runnable {
         this.poolPropertyString = poolPropertyString;
         this.datasourceName = datasourceName;
         this.jndiResource = jndiResource;
+    }
+
+    public HikariDataSource getDataSource() {
+        return dataSource;
     }
 
     public void setCompletionCallback(CompletionCallback completionCallback) {
@@ -125,6 +130,7 @@ public class CDCPoller implements Runnable {
 
                 HikariConfig config = new HikariConfig(connectionProperties);
                 this.dataSource = new HikariDataSource(config);
+                isLocalDataSource = true;
                 if (log.isDebugEnabled()) {
                     log.debug("Database connection for '" + this.tableName + "' created through connection" +
                             " parameters specified in the query.");
@@ -132,6 +138,7 @@ public class CDCPoller implements Runnable {
             } else {
                 //init using jndi resource name
                 this.dataSource = InitialContext.doLookup(jndiResource);
+                isLocalDataSource = false;
                 if (log.isDebugEnabled()) {
                     log.debug("Lookup for resource '" + jndiResource + "' completed through " +
                             "JNDI lookup.");
@@ -148,7 +155,7 @@ public class CDCPoller implements Runnable {
                 } else {
                     DataSourceService dataSourceService = (DataSourceService) bundleContext.getService(serviceRef);
                     this.dataSource = (HikariDataSource) dataSourceService.getDataSource(datasourceName);
-
+                    isLocalDataSource = false;
                     if (log.isDebugEnabled()) {
                         log.debug("Lookup for datasource '" + datasourceName + "' completed through " +
                                 "DataSource Service lookup. Current mode: " + CDCSourceConstants.MODE_POLLING);
@@ -159,6 +166,10 @@ public class CDCPoller implements Runnable {
                         "Current mode: " + CDCSourceConstants.MODE_POLLING, e);
             }
         }
+    }
+
+    public boolean isLocalDataSource() {
+        return isLocalDataSource;
     }
 
     public String getLastReadPollingColumnValue() {
@@ -271,8 +282,6 @@ public class CDCPoller implements Runnable {
         PreparedStatement statement = null;
         ResultSet resultSet = null;
 
-        //lastReadPollingColumnValue = cdcSource.getLastReadPollingColumnValue();
-
         try {
             //If lastReadPollingColumnValue is null, assign it with last record of the table.
             if (lastReadPollingColumnValue == null) {
@@ -292,6 +301,18 @@ public class CDCPoller implements Runnable {
             statement = connection.prepareStatement(selectQuery);
 
             while (true) {
+                if (paused) {
+                    pauseLock.lock();
+                    try {
+                        while (paused) {
+                            pauseLockCondition.await();
+                        }
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    } finally {
+                        pauseLock.unlock();
+                    }
+                }
                 try {
                     statement.setString(1, lastReadPollingColumnValue);
                     resultSet = statement.executeQuery();
@@ -326,18 +347,6 @@ public class CDCPoller implements Runnable {
     }
 
     private void handleEvent(Map detailsMap) {
-        if (paused) {
-            pauseLock.lock();
-            try {
-                while (paused) {
-                    pauseLockCondition.await();
-                }
-            } catch (InterruptedException ie) {
-                Thread.currentThread().interrupt();
-            } finally {
-                pauseLock.unlock();
-            }
-        }
         sourceEventListener.onEvent(detailsMap, null);
     }
 

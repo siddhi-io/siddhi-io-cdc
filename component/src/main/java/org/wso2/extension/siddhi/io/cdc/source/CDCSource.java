@@ -419,10 +419,21 @@ public class CDCSource extends Source {
 
     @Override
     public void disconnect() {
+        if (mode.equals(CDCSourceConstants.MODE_POLLING)) {
+            cdcPoller.pause();
+            if (cdcPoller.isLocalDataSource()) {
+                cdcPoller.getDataSource().close();
+                if (log.isDebugEnabled()) {
+                    log.debug("Closing the pool for CDC polling mode.");
+                }
+            }
+        }
     }
 
     @Override
     public void destroy() {
+        this.disconnect();
+
         if (mode.equals(CDCSourceConstants.MODE_LISTENING)) {
             //Remove this CDCSource object from the CDCObjectKeeper.
             cdcSourceObjectKeeper.removeObject(this.hashCode());
