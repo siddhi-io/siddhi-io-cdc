@@ -18,6 +18,7 @@
 
 package org.wso2.extension.siddhi.io.cdc.source;
 
+import com.zaxxer.hikari.HikariDataSource;
 import io.debezium.embedded.EmbeddedEngine;
 import org.apache.log4j.Logger;
 import org.wso2.extension.siddhi.io.cdc.source.listening.CDCSourceObjectKeeper;
@@ -419,10 +420,22 @@ public class CDCSource extends Source {
 
     @Override
     public void disconnect() {
+        if (mode.equals(CDCSourceConstants.MODE_POLLING)) {
+            HikariDataSource dataSource = cdcPoller.getDataSource();
+            boolean isLocalDatasource = cdcPoller.isLocalDataSource();
+            if (dataSource != null && isLocalDatasource) {
+                dataSource.close();
+                if (log.isDebugEnabled()) {
+                    log.debug("Closing the pool name: " + dataSource.getPoolName());
+                }
+            }
+        }
     }
 
     @Override
     public void destroy() {
+        this.disconnect();
+
         if (mode.equals(CDCSourceConstants.MODE_LISTENING)) {
             //Remove this CDCSource object from the CDCObjectKeeper.
             cdcSourceObjectKeeper.removeObject(this.hashCode());

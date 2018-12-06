@@ -83,6 +83,7 @@ public class CDCPoller implements Runnable {
     private ConfigReader configReader;
     private String poolPropertyString;
     private String jndiResource;
+    private boolean localDataSource = false;
 
     public CDCPoller(String url, String username, String password, String tableName, String driverClassName,
                      String datasourceName, String jndiResource,
@@ -100,6 +101,10 @@ public class CDCPoller implements Runnable {
         this.poolPropertyString = poolPropertyString;
         this.datasourceName = datasourceName;
         this.jndiResource = jndiResource;
+    }
+
+    public HikariDataSource getDataSource() {
+        return dataSource;
     }
 
     public void setCompletionCallback(CompletionCallback completionCallback) {
@@ -125,6 +130,7 @@ public class CDCPoller implements Runnable {
 
                 HikariConfig config = new HikariConfig(connectionProperties);
                 this.dataSource = new HikariDataSource(config);
+                localDataSource = true;
                 if (log.isDebugEnabled()) {
                     log.debug("Database connection for '" + this.tableName + "' created through connection" +
                             " parameters specified in the query.");
@@ -132,6 +138,7 @@ public class CDCPoller implements Runnable {
             } else {
                 //init using jndi resource name
                 this.dataSource = InitialContext.doLookup(jndiResource);
+                localDataSource = false;
                 if (log.isDebugEnabled()) {
                     log.debug("Lookup for resource '" + jndiResource + "' completed through " +
                             "JNDI lookup.");
@@ -148,7 +155,7 @@ public class CDCPoller implements Runnable {
                 } else {
                     DataSourceService dataSourceService = (DataSourceService) bundleContext.getService(serviceRef);
                     this.dataSource = (HikariDataSource) dataSourceService.getDataSource(datasourceName);
-
+                    localDataSource = false;
                     if (log.isDebugEnabled()) {
                         log.debug("Lookup for datasource '" + datasourceName + "' completed through " +
                                 "DataSource Service lookup. Current mode: " + CDCSourceConstants.MODE_POLLING);
@@ -159,6 +166,10 @@ public class CDCPoller implements Runnable {
                         "Current mode: " + CDCSourceConstants.MODE_POLLING, e);
             }
         }
+    }
+
+    public boolean isLocalDataSource() {
+        return localDataSource;
     }
 
     public String getLastReadPollingColumnValue() {
