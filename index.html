@@ -311,13 +311,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#features" title="Features" class="md-nav__link">
-    Features
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#how-to-contribute" title="How to Contribute" class="md-nav__link">
     How to Contribute
   </a>
@@ -374,32 +367,8 @@
 
 
   <li class="md-nav__item">
-    <a href="api/1.0.4/" title="1.0.4" class="md-nav__link">
-      1.0.4
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="api/1.0.3/" title="1.0.3" class="md-nav__link">
-      1.0.3
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="api/1.0.2/" title="1.0.2" class="md-nav__link">
-      1.0.2
+    <a href="api/1.0.5/" title="1.0.5" class="md-nav__link">
+      1.0.5
     </a>
   </li>
 
@@ -489,13 +458,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#features" title="Features" class="md-nav__link">
-    Features
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#how-to-contribute" title="How to Contribute" class="md-nav__link">
     How to Contribute
   </a>
@@ -536,13 +498,17 @@
                 
                 
                 <h1 id="siddhi-io-cdc">Siddhi-io-cdc<a class="headerlink" href="#siddhi-io-cdc" title="Permanent link">&para;</a></h1>
-<p>The <strong>siddhi-io-cdc extension</strong> is an extension to <a target="_blank" href="https://wso2.github.io/siddhi">Siddhi</a>. It receives change data of MySQL database in the key-value format.</p>
+<p>The <strong>siddhi-io-cdc extension</strong> is an extension to <a target="_blank" href="https://wso2.github.io/siddhi">Siddhi</a>. It receives change data from MySQL, MS SQL Server, Postgresql, H2 and Oracle in the key-value format.</p>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<p>Default mode (listening):</p>
 <ul>
 <li>The MySQL server should be configured to use a row-level binary log.</li>
 <li>WSO2 SP State persistence should be enabled.</li>
 <li>A MySQL user should be created with SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT privileges on the tables he wants to capture changes.</li>
 </ul>
+<p>Polling mode:
+* Change data capturing table should be have a polling column. Auto Incremental column or Timestamp can be used.</p>
+<p>Please see API docs for more details about change data capturing modes.</p>
 <p>Find some useful links below:</p>
 <ul>
 <li><a target="_blank" href="https://github.com/wso2-extensions/siddhi-io-cdc">Source code</a></li>
@@ -550,38 +516,48 @@
 <li><a target="_blank" href="https://github.com/wso2-extensions/siddhi-io-cdc/issues">Issue tracker</a></li>
 </ul>
 <h2 id="latest-api-docs">Latest API Docs<a class="headerlink" href="#latest-api-docs" title="Permanent link">&para;</a></h2>
-<p>Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc/api/1.0.4">1.0.4</a>.</p>
+<p>Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc/api/1.0.5">1.0.5</a>.</p>
 <h2 id="how-to-use">How to use<a class="headerlink" href="#how-to-use" title="Permanent link">&para;</a></h2>
-<p><strong>Using the extension in <a target="_blank" href="https://github.com/wso2/product-sp">WSO2 Stream Processor</a></strong></p>
+<p><strong>Using the extension in <a target="_blank" href="https://github.com/wso2/product-sp">WSO2 Stream Processor</a></strong>
+ * You can use this extension with the latest <a target="_blank" href="https://github.com/wso2/product-sp/releases">WSO2 Stream Processor</a> that is a part of the <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Analytics</a> offering, with editor, debugger and simulation support.</p>
 <ul>
-<li>
-<p>You can use this extension with the latest <a target="_blank" href="https://github.com/wso2/product-sp/releases">WSO2 Stream Processor</a> that is a part of the <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Analytics</a> offering, with editor, debugger and simulation support.</p>
-</li>
-<li>
-<p>This extension is shipped by default with WSO2 Stream Processor. If you need to use an alternative version of this extension, you can replace the component <a target="_blank" href="https://github.com/wso2-extensions/siddhi-io-cdc/releases">jar</a> that can be found in the <code>&lt;STREAM_PROCESSOR_HOME&gt;/lib</code> directory.</p>
-</li>
+<li>This extension is shipped by default with WSO2 Stream Processor. If you need to use an alternative version of this extension, you can replace the component <a target="_blank" href="https://github.com/wso2-extensions/siddhi-io-cdc/releases">jar</a> that can be found in the <code>&lt;STREAM_PROCESSOR_HOME&gt;/lib</code> directory.</li>
 </ul>
-<p><strong>Using the extension as a <a target="_blank" href="https://wso2.github.io/siddhi/documentation/running-as-a-java-library">java library</a></strong></p>
-<ul>
-<li>This extension can be added as a maven dependency along with other Siddhi dependencies to your project.</li>
-</ul>
-<div class="codehilite"><pre><span></span>     &lt;dependency&gt;
-        &lt;groupId&gt;org.wso2.extension.siddhi.io.cdc&lt;/groupId&gt;
-        &lt;artifactId&gt;siddhi-io-cdc&lt;/artifactId&gt;
-        &lt;version&gt;x.x.x&lt;/version&gt;
-     &lt;/dependency&gt;
+<p><strong>Using the extension as a <a target="_blank" href="https://wso2.github.io/siddhi/documentation/running-as-a-java-library">java library</a></strong>
+ * This extension can be added as a maven dependency along with other Siddhi dependencies to your project.</p>
+<div class="codehilite"><pre><span></span>&lt;dependency&gt;
+  &lt;groupId&gt;org.wso2.extension.siddhi.io.cdc&lt;/groupId&gt;
+  &lt;artifactId&gt;siddhi-io-cdc&lt;/artifactId&gt;
+  &lt;version&gt;x.x.x&lt;/version&gt;
+ &lt;/dependency&gt;
 </pre></div>
 
 
 <h2 id="running-integration-tests-in-docker-containersoptional">Running Integration tests in docker containers(Optional)<a class="headerlink" href="#running-integration-tests-in-docker-containersoptional" title="Permanent link">&para;</a></h2>
 <p>The CDC functionality are tested with the docker base integration test framework.
 The test framework initialize a docker container with required configuration before execute the test suit.</p>
-<p><strong>Start integration tests</strong></p>
-<ol>
-<li>Install and run docker</li>
-<li>To run the integration test, navigate to the siddhi-io-cdc/ directory and issue the following command.</li>
-</ol>
-<div class="codehilite"><pre><span></span>    mvn verify -P local-mysql
+<p><strong>Start integration tests</strong>
+ 1. Install and run docker
+2. To run the integration tests, navigate to the siddhi-io-cdc/ directory and issue the following commands.</p>
+<div class="codehilite"><pre><span></span>* H2 default:
+
+        mvn clean install
+
+* MySQL 5.7:
+
+         mvn verify -P local-mysql -Dskip.surefire.test=true
+
+* Postgres 9.6:
+
+         mvn verify -P local-postgres -Dskip.surefire.test=true
+
+* MSSQL:
+
+         mvn verify -P local-mssql -Dskip.surefire.test=true
+
+* Oracle 11.2.0.2-xe:
+
+         mvn verify -P local-oracle -Dskip.surefire.test=true
 </pre></div>
 
 
@@ -599,13 +575,28 @@ The test framework initialize a docker container with required configuration bef
 <td align="left">master</td>
 <td align="left"><a href="https://wso2.org/jenkins/job/siddhi/job/siddhi-io-cdc/"><img alt="Build Status" src="https://wso2.org/jenkins/job/siddhi/job/siddhi-io-cdc/badge/icon" /></a></td>
 </tr>
+<tr>
+<td align="left">---</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">## Features</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc/api/1.0.4/#cdc-source">cdc</a> <em><a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source">(Source)</a></em><br><div style="padding-left: 1em;"><p>The CDC source receives events when a Database table's change event (INSERT, UPDATE, DELETE) is triggered. The events are received in key-value format.</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><br>The following are key values of the map of a CDC change event and their descriptions.  <br>&nbsp;&nbsp;&nbsp;&nbsp;For insert:For insert: Keys will be specified table's columns.<br>&nbsp;&nbsp;&nbsp;&nbsp;For delete: Keys will be 'before_' followed by specified table's columns. Eg: before_X.  <br>&nbsp;&nbsp;&nbsp;&nbsp;For update:Keys will be specified table's columns and 'before_' followed by specified table's columns.  <br>&nbsp;&nbsp;&nbsp;&nbsp;For 'polling' mode: Keys will be specified table's columns.    <br>See parameter: mode for supported databases and change events.</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"></p></div></td>
+<td align="left"></td>
+</tr>
 </tbody>
 </table>
-<hr />
-<h2 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h2>
-<ul>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc/api/1.0.4/#cdc-source">cdc</a> <em><a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source">(Source)</a></em><br><div style="padding-left: 1em;"><p>The CDC source receives events when a specified MySQL table's change event (INSERT, UPDATE, DELETE) is triggered. The events are received in key-value map format.<br>The following are key values of the map of a CDC change event and their descriptions.<br>&nbsp;&nbsp;&nbsp;&nbsp;For insert: Keys will be specified table's columns<br>&nbsp;&nbsp;&nbsp;&nbsp;For delete: Keys will be 'before_' followed by specified table's columns. Eg: before_X<br>&nbsp;&nbsp;&nbsp;&nbsp;For update: Keys will be specified table's columns and 'before_' followed by specified table's columns.</p></div></li>
-</ul>
 <h2 id="how-to-contribute">How to Contribute<a class="headerlink" href="#how-to-contribute" title="Permanent link">&para;</a></h2>
 <ul>
 <li>
@@ -657,13 +648,13 @@ The test framework initialize a docker container with required configuration bef
       <nav class="md-footer-nav__inner md-grid">
         
         
-          <a href="api/1.0.4/" title="1.0.4" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="api/1.0.5/" title="1.0.5" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                1.0.4
+                1.0.5
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
