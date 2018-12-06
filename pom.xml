@@ -16,7 +16,8 @@
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.wso2</groupId>
         <artifactId>wso2</artifactId>
@@ -69,6 +70,11 @@
                 <version>${debezium-connector-oracle.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.zaxxer</groupId>
+                <artifactId>HikariCP</artifactId>
+                <version>${hikari.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.wso2.extension.siddhi.map.keyvalue</groupId>
                 <artifactId>siddhi-map-keyvalue</artifactId>
                 <version>${siddhi-map-keyvalue.version}</version>
@@ -83,6 +89,35 @@
                 <groupId>org.wso2.extension.siddhi.store.rdbms</groupId>
                 <artifactId>siddhi-store-rdbms</artifactId>
                 <version>${siddhi-store-rdbms.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.datasources</groupId>
+                <artifactId>org.wso2.carbon.datasource.core</artifactId>
+                <version>${carbon.datasource.core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.oracle</groupId>
+                <artifactId>ojdbc6</artifactId>
+                <version>${ojdbc6.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.microsoft.sqlserver</groupId>
+                <artifactId>sqljdbc4</artifactId>
+                <version>${sqljdbc4.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${postgresql.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>${h2.connector.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -160,10 +195,23 @@
         <debezium-connector-mysql.version>0.8.3.Final</debezium-connector-mysql.version>
         <debezium-embedded.version>0.8.3.Final</debezium-embedded.version>
         <debezium-connector-oracle.version>0.8.3.Final</debezium-connector-oracle.version>
+        <hikari.version>3.2.0</hikari.version>
         <org.testng.version>6.11</org.testng.version>
         <siddhi-store-rdbms.version>4.0.39</siddhi-store-rdbms.version>
+        <carbon.datasource.core.version>RELEASE</carbon.datasource.core.version>
+        <mavan.findbugsplugin.exclude.file>../findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
+        <ojdbc6.version>12.1.0.1-atlassian-hosted</ojdbc6.version>
+        <sqljdbc4.version>4.0</sqljdbc4.version>
+        <postgresql.version>RELEASE</postgresql.version>
+        <h2.connector.version>1.4.187</h2.connector.version>
         <siddhi-cdc-mysql.port>3309</siddhi-cdc-mysql.port>
         <docker.container.siddhi-cdc-mysql.ip>0.0.0.0</docker.container.siddhi-cdc-mysql.ip>
+        <siddhi-cdc-oracle.port>1522</siddhi-cdc-oracle.port>
+        <docker.container.siddhi-cdc-oracle.ip>0.0.0.0</docker.container.siddhi-cdc-oracle.ip>
+        <siddhi-cdc-mssql.port>1434</siddhi-cdc-mssql.port>
+        <docker.container.siddhi-cdc-mssql.ip>0.0.0.0</docker.container.siddhi-cdc-mssql.ip>
+        <siddhi-cdc-postgres.port>5433</siddhi-cdc-postgres.port>
+        <docker.container.siddhi-cdc-postgres.ip>0.0.0.0</docker.container.siddhi-cdc-postgres.ip>
     </properties>
     <scm>
         <url>https://github.com/wso2-extensions/siddhi-io-cdc.git</url>

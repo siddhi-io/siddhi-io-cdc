@@ -20,12 +20,12 @@
 
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="Siddhi-Io-Cdc-Test-Suite">
-    <!--Removed the following test:"Siddhi-io-cdc-tests"; since it depends on the local MySQL instance.
-    Uncomment the following test to run with build.-->
-    <test name="Siddhi-io-cdc-tests" enabled="true">
+<!--This test suit is used to validate CDCSource and test H2 CDC in polling mode-->
+<suite name="Siddhi-Io-Cdc-Test-Suite1">
+    <test name="Siddhi-io-cdc-tests-1" enabled="true" parallel="false">
         <classes>
-            <class name="org.wso2.extension.siddhi.io.cdc.source.TestCaseOfCDCSource"/>
+            <class name="org.wso2.extension.siddhi.io.cdc.source.TestCaseOfCDCSourceValidation"/>
+            <class name="org.wso2.extension.siddhi.io.cdc.source.TestCaseOfCDCPollingMode"/>
         </classes>
     </test>
 </suite>

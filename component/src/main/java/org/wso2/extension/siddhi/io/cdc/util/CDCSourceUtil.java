@@ -18,23 +18,18 @@
 
 package org.wso2.extension.siddhi.io.cdc.util;
 
-import org.apache.kafka.connect.connector.ConnectRecord;
-import org.apache.kafka.connect.data.Field;
-import org.apache.kafka.connect.data.Struct;
-import org.apache.kafka.connect.errors.DataException;
-import org.wso2.extension.siddhi.io.cdc.source.InMemoryOffsetBackingStore;
-import org.wso2.extension.siddhi.io.cdc.source.WrongConfigurationException;
+import org.wso2.extension.siddhi.io.cdc.source.listening.InMemoryOffsetBackingStore;
+import org.wso2.extension.siddhi.io.cdc.source.listening.WrongConfigurationException;
 import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * This class contains Util methods for the cdc extension.
+ * This class contains Util methods for the CDCSource.
  */
 public class CDCSourceUtil {
     public static Map<String, Object> getConfigMap(String username, String password, String url, String tableName,
@@ -139,81 +134,6 @@ public class CDCSourceUtil {
             }
         }
         return connectorPropertiesMap;
-    }
-
-    /**
-     * Create Hash map using the connect record and operation,
-     *
-     * @param connectRecord is the change data object which is received from debezium embedded engine.
-     * @param operation     is the change data event which is specified by the user.
-     **/
-
-    public static Map<String, Object> createMap(ConnectRecord connectRecord, String operation) {
-
-        //Map to return
-        Map<String, Object> detailsMap = new HashMap<>();
-
-        Struct record = (Struct) connectRecord.value();
-
-        //get the change data object's operation.
-        String op;
-
-        try {
-            op = (String) record.get("op");
-        } catch (NullPointerException | DataException ex) {
-            return detailsMap;
-        }
-
-        //match the change data's operation with user specifying operation and proceed.
-        if (operation.equalsIgnoreCase(CDCSourceConstants.INSERT) &&
-                op.equals(CDCSourceConstants.CONNECT_RECORD_INSERT_OPERATION)
-                || operation.equalsIgnoreCase(CDCSourceConstants.DELETE) &&
-                op.equals(CDCSourceConstants.CONNECT_RECORD_DELETE_OPERATION)
-                || operation.equalsIgnoreCase(CDCSourceConstants.UPDATE) &&
-                op.equals(CDCSourceConstants.CONNECT_RECORD_UPDATE_OPERATION)) {
-
-            Struct rawDetails;
-            List<Field> fields;
-            String fieldName;
-
-            switch (op) {
-                case CDCSourceConstants.CONNECT_RECORD_INSERT_OPERATION:
-                    //append row details after insert.
-                    rawDetails = (Struct) record.get(CDCSourceConstants.AFTER);
-                    fields = rawDetails.schema().fields();
-                    for (Field key : fields) {
-                        fieldName = key.name();
-                        detailsMap.put(fieldName, rawDetails.get(fieldName));
-                    }
-                    break;
-                case CDCSourceConstants.CONNECT_RECORD_DELETE_OPERATION:
-                    //append row details before delete.
-                    rawDetails = (Struct) record.get(CDCSourceConstants.BEFORE);
-                    fields = rawDetails.schema().fields();
-                    for (Field key : fields) {
-                        fieldName = key.name();
-                        detailsMap.put(CDCSourceConstants.BEFORE_PREFIX + fieldName, rawDetails.get(fieldName));
-                    }
-                    break;
-                case CDCSourceConstants.CONNECT_RECORD_UPDATE_OPERATION:
-                    //append row details before update.
-                    rawDetails = (Struct) record.get(CDCSourceConstants.BEFORE);
-                    fields = rawDetails.schema().fields();
-                    for (Field key : fields) {
-                        fieldName = key.name();
-                        detailsMap.put(CDCSourceConstants.BEFORE_PREFIX + fieldName, rawDetails.get(fieldName));
-                    }
-                    //append row details after update.
-                    rawDetails = (Struct) record.get(CDCSourceConstants.AFTER);
-                    fields = rawDetails.schema().fields();
-                    for (Field key : fields) {
-                        fieldName = key.name();
-                        detailsMap.put(fieldName, rawDetails.get(fieldName));
-                    }
-                    break;
-            }
-        }
-        return detailsMap;
     }
 
     /**

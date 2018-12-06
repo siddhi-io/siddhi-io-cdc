@@ -1,0 +1,12 @@
+databases:
+  - name: "mysql"
+    selectQuery: SELECT {{COLUMN_LIST}} FROM {{TABLE_NAME}} {{CONDITION}}
+  - name: "oracle"
+    selectQuery: SELECT {{COLUMN_LIST}} FROM {{TABLE_NAME}} {{CONDITION}}
+  - name: "PostgreSQL"
+    selectQuery: SELECT {{COLUMN_LIST}} FROM {{TABLE_NAME}} {{CONDITION}}
+  - name: "H2"
+    selectQuery: SELECT {{COLUMN_LIST}} FROM {{TABLE_NAME}} {{CONDITION}}
+  - name: "Microsoft SQL Server"
+    selectQuery: SELECT {{COLUMN_LIST}} FROM {{TABLE_NAME}} {{CONDITION}}
+    

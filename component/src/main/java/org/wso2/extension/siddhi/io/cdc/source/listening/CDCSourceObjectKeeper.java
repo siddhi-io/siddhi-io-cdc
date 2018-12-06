@@ -16,7 +16,9 @@
  * under the License.
  */
 
-package org.wso2.extension.siddhi.io.cdc.source;
+package org.wso2.extension.siddhi.io.cdc.source.listening;
+
+import org.wso2.extension.siddhi.io.cdc.source.CDCSource;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +26,7 @@ import java.util.Map;
 /**
  * This class Contains methods to store and retrieve the CDCSource objects.
  */
-class CDCSourceObjectKeeper {
+public class CDCSourceObjectKeeper {
 
     private static CDCSourceObjectKeeper cdcSourceObjectKeeper = new CDCSourceObjectKeeper();
     private Map<Integer, CDCSource> objectMap;
@@ -36,14 +38,14 @@ class CDCSourceObjectKeeper {
     /**
      * @param cdcSource is added to the objectMap against it's toString() value.
      */
-    void addCdcObject(CDCSource cdcSource) {
+    public void addCdcObject(CDCSource cdcSource) {
         objectMap.put(cdcSource.hashCode(), cdcSource);
     }
 
     /**
      * @param cdcSourceHashCode is the CDCSource's hashcode to be removed from the objectMap.
      */
-    void removeObject(int cdcSourceHashCode) {
+    public void removeObject(int cdcSourceHashCode) {
         objectMap.remove(cdcSourceHashCode);
     }
 
@@ -55,7 +57,7 @@ class CDCSourceObjectKeeper {
         return objectMap.get(hashCode);
     }
 
-    static CDCSourceObjectKeeper getCdcSourceObjectKeeper() {
+    public static CDCSourceObjectKeeper getCdcSourceObjectKeeper() {
         return cdcSourceObjectKeeper;
     }
 }
