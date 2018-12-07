@@ -311,6 +311,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#features" title="Features" class="md-nav__link">
+    Features
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#how-to-contribute" title="How to Contribute" class="md-nav__link">
     How to Contribute
   </a>
@@ -360,6 +367,18 @@
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
         
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="api/1.0.6/" title="1.0.6" class="md-nav__link">
+      1.0.6
+    </a>
+  </li>
+
         
           
           
@@ -458,6 +477,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#features" title="Features" class="md-nav__link">
+    Features
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#how-to-contribute" title="How to Contribute" class="md-nav__link">
     How to Contribute
   </a>
@@ -506,8 +532,10 @@
 <li>WSO2 SP State persistence should be enabled.</li>
 <li>A MySQL user should be created with SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT privileges on the tables he wants to capture changes.</li>
 </ul>
-<p>Polling mode:
-* Change data capturing table should be have a polling column. Auto Incremental column or Timestamp can be used.</p>
+<p>Polling mode:</p>
+<ul>
+<li>Change data capturing table should be have a polling column. Auto Incremental column or Timestamp can be used.</li>
+</ul>
 <p>Please see API docs for more details about change data capturing modes.</p>
 <p>Find some useful links below:</p>
 <ul>
@@ -516,15 +544,21 @@
 <li><a target="_blank" href="https://github.com/wso2-extensions/siddhi-io-cdc/issues">Issue tracker</a></li>
 </ul>
 <h2 id="latest-api-docs">Latest API Docs<a class="headerlink" href="#latest-api-docs" title="Permanent link">&para;</a></h2>
-<p>Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc/api/1.0.5">1.0.5</a>.</p>
+<p>Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc/api/1.0.6">1.0.6</a>.</p>
 <h2 id="how-to-use">How to use<a class="headerlink" href="#how-to-use" title="Permanent link">&para;</a></h2>
-<p><strong>Using the extension in <a target="_blank" href="https://github.com/wso2/product-sp">WSO2 Stream Processor</a></strong>
- * You can use this extension with the latest <a target="_blank" href="https://github.com/wso2/product-sp/releases">WSO2 Stream Processor</a> that is a part of the <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Analytics</a> offering, with editor, debugger and simulation support.</p>
+<p><strong>Using the extension in <a target="_blank" href="https://github.com/wso2/product-sp">WSO2 Stream Processor</a></strong></p>
 <ul>
-<li>This extension is shipped by default with WSO2 Stream Processor. If you need to use an alternative version of this extension, you can replace the component <a target="_blank" href="https://github.com/wso2-extensions/siddhi-io-cdc/releases">jar</a> that can be found in the <code>&lt;STREAM_PROCESSOR_HOME&gt;/lib</code> directory.</li>
+<li>
+<p>You can use this extension with the latest <a target="_blank" href="https://github.com/wso2/product-sp/releases">WSO2 Stream Processor</a> that is a part of the <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Analytics</a> offering, with editor, debugger and simulation support.</p>
+</li>
+<li>
+<p>This extension is shipped by default with WSO2 Stream Processor. If you need to use an alternative version of this extension, you can replace the component <a target="_blank" href="https://github.com/wso2-extensions/siddhi-io-cdc/releases">jar</a> that can be found in the <code>&lt;STREAM_PROCESSOR_HOME&gt;/lib</code> directory.</p>
+</li>
 </ul>
-<p><strong>Using the extension as a <a target="_blank" href="https://wso2.github.io/siddhi/documentation/running-as-a-java-library">java library</a></strong>
- * This extension can be added as a maven dependency along with other Siddhi dependencies to your project.</p>
+<p><strong>Using the extension as a <a target="_blank" href="https://wso2.github.io/siddhi/documentation/running-as-a-java-library">java library</a></strong></p>
+<ul>
+<li>This extension can be added as a maven dependency along with other Siddhi dependencies to your project.</li>
+</ul>
 <div class="codehilite"><pre><span></span>&lt;dependency&gt;
   &lt;groupId&gt;org.wso2.extension.siddhi.io.cdc&lt;/groupId&gt;
   &lt;artifactId&gt;siddhi-io-cdc&lt;/artifactId&gt;
@@ -536,31 +570,52 @@
 <h2 id="running-integration-tests-in-docker-containersoptional">Running Integration tests in docker containers(Optional)<a class="headerlink" href="#running-integration-tests-in-docker-containersoptional" title="Permanent link">&para;</a></h2>
 <p>The CDC functionality are tested with the docker base integration test framework.
 The test framework initialize a docker container with required configuration before execute the test suit.</p>
-<p><strong>Start integration tests</strong>
- 1. Install and run docker
-2. To run the integration tests, navigate to the siddhi-io-cdc/ directory and issue the following commands.</p>
-<div class="codehilite"><pre><span></span>* H2 default:
-
-        mvn clean install
-
-* MySQL 5.7:
-
-         mvn verify -P local-mysql -Dskip.surefire.test=true
-
-* Postgres 9.6:
-
-         mvn verify -P local-postgres -Dskip.surefire.test=true
-
-* MSSQL:
-
-         mvn verify -P local-mssql -Dskip.surefire.test=true
-
-* Oracle 11.2.0.2-xe:
-
-         mvn verify -P local-oracle -Dskip.surefire.test=true
+<p><strong>Start integration tests</strong></p>
+<ol>
+<li>
+<p>Install and run docker</p>
+</li>
+<li>
+<p>To run the integration tests, navigate to the siddhi-io-cdc/ directory and issue the following commands.</p>
+<ul>
+<li>
+<p>H2 default:</p>
+<div class="codehilite"><pre><span></span>mvn clean install
 </pre></div>
 
 
+</li>
+<li>
+<p>MySQL 5.7:</p>
+<div class="codehilite"><pre><span></span> mvn verify -P local-mysql -Dskip.surefire.test=true
+</pre></div>
+
+
+</li>
+<li>
+<p>Postgres 9.6:</p>
+<div class="codehilite"><pre><span></span> mvn verify -P local-postgres -Dskip.surefire.test=true
+</pre></div>
+
+
+</li>
+<li>
+<p>MSSQL:</p>
+<div class="codehilite"><pre><span></span> mvn verify -P local-mssql -Dskip.surefire.test=true
+</pre></div>
+
+
+</li>
+<li>
+<p>Oracle 11.2.0.2-xe:</p>
+<div class="codehilite"><pre><span></span> mvn verify -P local-oracle -Dskip.surefire.test=true
+</pre></div>
+
+
+</li>
+</ul>
+</li>
+</ol>
 <h2 id="jenkins-build-status">Jenkins Build Status<a class="headerlink" href="#jenkins-build-status" title="Permanent link">&para;</a></h2>
 <hr />
 <table>
@@ -575,28 +630,12 @@ The test framework initialize a docker container with required configuration bef
 <td align="left">master</td>
 <td align="left"><a href="https://wso2.org/jenkins/job/siddhi/job/siddhi-io-cdc/"><img alt="Build Status" src="https://wso2.org/jenkins/job/siddhi/job/siddhi-io-cdc/badge/icon" /></a></td>
 </tr>
-<tr>
-<td align="left">---</td>
-<td align="left"></td>
-</tr>
-<tr>
-<td align="left">## Features</td>
-<td align="left"></td>
-</tr>
-<tr>
-<td align="left">* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc/api/1.0.4/#cdc-source">cdc</a> <em><a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source">(Source)</a></em><br><div style="padding-left: 1em;"><p>The CDC source receives events when a Database table's change event (INSERT, UPDATE, DELETE) is triggered. The events are received in key-value format.</td>
-<td align="left"></td>
-</tr>
-<tr>
-<td align="left"><br>The following are key values of the map of a CDC change event and their descriptions.  <br>&nbsp;&nbsp;&nbsp;&nbsp;For insert:For insert: Keys will be specified table's columns.<br>&nbsp;&nbsp;&nbsp;&nbsp;For delete: Keys will be 'before_' followed by specified table's columns. Eg: before_X.  <br>&nbsp;&nbsp;&nbsp;&nbsp;For update:Keys will be specified table's columns and 'before_' followed by specified table's columns.  <br>&nbsp;&nbsp;&nbsp;&nbsp;For 'polling' mode: Keys will be specified table's columns.    <br>See parameter: mode for supported databases and change events.</td>
-<td align="left"></td>
-</tr>
-<tr>
-<td align="left"></p></div></td>
-<td align="left"></td>
-</tr>
 </tbody>
 </table>
+<h2 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc/api/1.0.6/#cdc-source">cdc</a> <em><a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source">(Source)</a></em><br><div style="padding-left: 1em;"><p>The CDC source receives events when a Database table's change event (INSERT, UPDATE, DELETE) is triggered. The events are received in key-value format.<br>The following are key values of the map of a CDC change event and their descriptions.<br>&nbsp;&nbsp;&nbsp;&nbsp;For insert: Keys will be specified table's columns.<br>&nbsp;&nbsp;&nbsp;&nbsp;For delete: Keys will be 'before_' followed by specified table's columns. Eg: before_X.<br>&nbsp;&nbsp;&nbsp;&nbsp;For update: Keys will be specified table's columns and 'before_' followed by specified table's columns.<br>For 'polling' mode: Keys will be specified table's columns.<br>See parameter: mode for supported databases and change events.</p></div></li>
+</ul>
 <h2 id="how-to-contribute">How to Contribute<a class="headerlink" href="#how-to-contribute" title="Permanent link">&para;</a></h2>
 <ul>
 <li>
@@ -648,13 +687,13 @@ The test framework initialize a docker container with required configuration bef
       <nav class="md-footer-nav__inner md-grid">
         
         
-          <a href="api/1.0.5/" title="1.0.5" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="api/1.0.6/" title="1.0.6" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                1.0.5
+                1.0.6
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
