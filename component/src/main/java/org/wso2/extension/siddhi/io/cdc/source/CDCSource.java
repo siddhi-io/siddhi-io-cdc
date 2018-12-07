@@ -71,7 +71,7 @@ import java.util.concurrent.Executors;
                 ),
                 @Parameter(
                         name = "mode",
-                        description = "Mode to capture the change data. Mode ‘polling’ uses a polling.column to" +
+                        description = "Mode to capture the change data. Mode 'polling' uses a polling.column to" +
                                 " monitor the given table. Mode 'listening' uses logs to monitor the given table." +
                                 "\nThe required parameters are different for each modes." +
                                 "\nmode 'listening' currently supports only MySQL. INSERT, UPDATE, DELETE events" +
@@ -84,7 +84,7 @@ import java.util.concurrent.Executors;
                 @Parameter(
                         name = "jdbc.driver.name",
                         description = "The driver class name for connecting the database." +
-                                " **Required for ‘polling’ mode.**",
+                                " **Required for 'polling' mode.**",
                         type = DataType.STRING,
                         defaultValue = "<Empty_String>",
                         optional = true
@@ -131,7 +131,7 @@ import java.util.concurrent.Executors;
                                 "\nNumeric auto incremental fields and char fields can be also" +
                                 " used as polling.column. Note that it will only support insert change capturing and" +
                                 " depends on how the char field's data is input." +
-                                "\n**Mandatory when mode is ‘polling’.**"
+                                "\n**Mandatory when mode is 'polling'.**"
                         ,
                         type = DataType.STRING,
                         defaultValue = "<Empty_String>",
