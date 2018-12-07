@@ -1,4 +1,4 @@
-# API Docs - v1.0.5
+# API Docs - v1.0.6-SNAPSHOT
 
 ## Source
 

@@ -10,6 +10,7 @@ Default mode (listening):
 * A MySQL user should be created with SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT privileges on the tables he wants to capture changes.
 
 Polling mode:
+
 * Change data capturing table should be have a polling column. Auto Incremental column or Timestamp can be used.
 
 Please see API docs for more details about change data capturing modes.
@@ -25,12 +26,15 @@ Find some useful links below:
 Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc/api/1.0.5">1.0.5</a>.
 
 ## How to use
+
  **Using the extension in <a target="_blank" href="https://github.com/wso2/product-sp">WSO2 Stream Processor</a>**
+
  * You can use this extension with the latest <a target="_blank" href="https://github.com/wso2/product-sp/releases">WSO2 Stream Processor</a> that is a part of the <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Analytics</a> offering, with editor, debugger and simulation support.
 
 * This extension is shipped by default with WSO2 Stream Processor. If you need to use an alternative version of this extension, you can replace the component <a target="_blank" href="https://github.com/wso2-extensions/siddhi-io-cdc/releases">jar</a> that can be found in the `<STREAM_PROCESSOR_HOME>/lib` directory.
 
 **Using the extension as a <a target="_blank" href="https://wso2.github.io/siddhi/documentation/running-as-a-java-library">java library</a>**
+
  * This extension can be added as a maven dependency along with other Siddhi dependencies to your project.
 
 ```
@@ -46,8 +50,10 @@ The CDC functionality are tested with the docker base integration test framework
 The test framework initialize a docker container with required configuration before execute the test suit.
 
 **Start integration tests**
+
  1. Install and run docker
-2. To run the integration tests, navigate to the siddhi-io-cdc/ directory and issue the following commands.
+
+ 2. To run the integration tests, navigate to the siddhi-io-cdc/ directory and issue the following commands.
 
     * H2 default:
 
@@ -70,12 +76,15 @@ The test framework initialize a docker container with required configuration bef
              mvn verify -P local-oracle -Dskip.surefire.test=true
 
 ## Jenkins Build Status
- ---
- | Branch | Build Status |
-| :------ |:------------ |
+
+
+---
+| Branch | Build Status |
+| :------ |:------------|
 | master  |  [![Build Status](https://wso2.org/jenkins/job/siddhi/job/siddhi-io-cdc/badge/icon)](https://wso2.org/jenkins/job/siddhi/job/siddhi-io-cdc/)  |
- ---
- ## Features
+
+## Features
+
  * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc/api/1.0.4/#cdc-source">cdc</a> *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source">(Source)</a>*<br><div style="padding-left: 1em;"><p>The CDC source receives events when a Database table's change event (INSERT, UPDATE, DELETE) is triggered. The events are received in key-value format.
   <br>The following are key values of the map of a CDC change event and their descriptions.  <br>&nbsp;&nbsp;&nbsp;&nbsp;For insert:For insert: Keys will be specified table's columns.<br>&nbsp;&nbsp;&nbsp;&nbsp;For delete: Keys will be 'before_' followed by specified table's columns. Eg: before_X.  <br>&nbsp;&nbsp;&nbsp;&nbsp;For update:Keys will be specified table's columns and 'before_' followed by specified table's columns.  <br>&nbsp;&nbsp;&nbsp;&nbsp;For 'polling' mode: Keys will be specified table's columns.    <br>See parameter: mode for supported databases and change events.
 </p></div>
