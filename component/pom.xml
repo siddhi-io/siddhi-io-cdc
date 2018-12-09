@@ -497,6 +497,7 @@
                     <suiteXmlFiles>
                         <suiteXmlFile>src/test/resources/testng-suit1.xml</suiteXmlFile>
                     </suiteXmlFiles>
+                    <argLine>${jcoverage.command}</argLine>
                     <useSystemClassLoader>false</useSystemClassLoader>
                     <skip>${skip.surefire.test}</skip>
                 </configuration>
