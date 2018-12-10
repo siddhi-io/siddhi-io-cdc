@@ -53,30 +53,32 @@ import java.util.concurrent.Executors;
 @Extension(
         name = "cdc",
         namespace = "source",
-        description = "The CDC source receives events when a Database table's change event " +
-                "(INSERT, UPDATE, DELETE) is triggered. The events are received in key-value format." +
-                "\nThe following are key values of the map of a CDC change event and their descriptions." +
-                "\n\tFor insert: Keys will be specified table's columns." +
-                "\n\tFor delete: Keys will be 'before_' followed by specified table's columns. Eg: before_X." +
-                "\n\tFor update: Keys will be specified table's columns and 'before_' followed by specified table's " +
-                "columns." +
-                "\nFor 'polling' mode: Keys will be specified table's columns." +
+        description = "The CDC source receives events when change events (i.e., INSERT, UPDATE, DELETE) are triggered" +
+                " for a database table. Events are received in the 'key-value' format." +
+                "\nThe key values of the map of a CDC change event are as follows." +
+                "\n\tFor insert: Keys are specified as columns of the table." +
+                "\n\tFor delete: Keys are followed followed by the specified table columns. This is achieved via " +
+                "'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'." +
+                "\n\tFor update: Keys are followed followed by the specified table columns. This is achieved via " +
+                "'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'." +
+                "\nFor 'polling' mode: Keys are specified as the coloumns of the table." +
                 "\nSee parameter: mode for supported databases and change events.",
         parameters = {
                 @Parameter(name = "url",
-                        description = "Connection url to the database." +
-                                "\nuse format: " +
-                                "jdbc:mysql://<host>:<port>/<database_name> ",
+                        description = "The connection URL to the database." +
+                                "\nF=The format used is: " +
+                                "'jdbc:mysql://<host>:<port>/<database_name>' ",
                         type = DataType.STRING
                 ),
                 @Parameter(
                         name = "mode",
-                        description = "Mode to capture the change data. Mode 'polling' uses a polling.column to" +
-                                " monitor the given table. Mode 'listening' uses logs to monitor the given table." +
-                                "\nThe required parameters are different for each modes." +
-                                "\nmode 'listening' currently supports only MySQL. INSERT, UPDATE, DELETE events" +
-                                " can be received." +
-                                "\nmode 'polling' supports RDBMS. INSERT, UPDATE events can be received.",
+                        description = "Mode to capture the change data. The type of events that can be received, " +
+                                "and the required parameters differ based on the mode. The mode can be one of the " +
+                                "following:\n" +
+                                "'polling': This mode uses a column named 'polling.column' to monitor the given " +
+                                "table. It captures change events of the 'RDBMS', 'INSERT, and 'UPDATE' types.\n" +
+                                "'listening': This mode uses logs to monitor the given table. It currently supports" +
+                                " change events only of the 'MySQL', 'INSERT', 'UPDATE', and 'DELETE' types.",
                         type = DataType.STRING,
                         defaultValue = "listening",
                         optional = true
@@ -84,25 +86,27 @@ import java.util.concurrent.Executors;
                 @Parameter(
                         name = "jdbc.driver.name",
                         description = "The driver class name for connecting the database." +
-                                " **Required for 'polling' mode.**",
+                                " **It is required to specify a value for this parameter when the mode is 'polling'.**",
                         type = DataType.STRING,
                         defaultValue = "<Empty_String>",
                         optional = true
                 ),
                 @Parameter(
                         name = "username",
-                        description = "Username of a user with SELECT, RELOAD, SHOW DATABASES," +
-                                " REPLICATION SLAVE, REPLICATION CLIENT privileges on Change Data Capturing table." +
-                                "\nFor polling mode, a user with SELECT privileges.",
+                        description = "The username to be used for accessing the database. This user needs to have" +
+                                " the 'SELECT', 'RELOAD', 'SHOW DATABASES', 'REPLICATION SLAVE', and " +
+                                "'REPLICATION CLIENT'privileges for the change data capturing table (specified via" +
+                                " the 'table.name' parameter)." +
+                                "\nTo operate in the polling mode, the user needs 'SELECT' privileges.",
                         type = DataType.STRING
                 ),
                 @Parameter(
                         name = "password",
-                        description = "Password for the above user.",
+                        description = "The password of the username you specified for accessing the database.",
                         type = DataType.STRING
                 ),
                 @Parameter(name = "pool.properties",
-                        description = "Any pool parameters for the database connection must be specified as key-value" +
+                        description = "The pool parameters for the database connection can be specified as key-value" +
                                 " pairs.",
                         type = DataType.STRING,
                         optional = true,
@@ -111,27 +115,29 @@ import java.util.concurrent.Executors;
                 @Parameter(
                         name = "datasource.name",
                         description = "Name of the wso2 datasource to connect to the database." +
-                                " When datasource.name is provided, the url, username and password are not needed. " +
-                                "Has a more priority over url based connection." +
-                                "\nAccepted only when mode is set to 'polling'.",
+                                " When datasource name is provided, the URL, username and password are not needed. " +
+                                "A datasource based connection is given more priority over the URL based connection." +
+                                "\n This parameter is applicable only when the mode is set to 'polling', and it can" +
+                                " be applied only when you use this extension with WSO2 Stream Processor.",
                         type = DataType.STRING,
                         defaultValue = "<Empty_String>",
                         optional = true
                 ),
                 @Parameter(
                         name = "table.name",
-                        description = "Name of the table which needs to be monitored for data changes.",
+                        description = "The name of the table that needs to be monitored for data changes.",
                         type = DataType.STRING
                 ),
                 @Parameter(
                         name = "polling.column",
-                        description = "Column name on which the polling is done to capture the change data. " +
-                                "It is recommend to have a TIMESTAMP field as the polling.column in order to capture" +
-                                " inserts and updates." +
-                                "\nNumeric auto incremental fields and char fields can be also" +
-                                " used as polling.column. Note that it will only support insert change capturing and" +
-                                " depends on how the char field's data is input." +
-                                "\n**Mandatory when mode is 'polling'.**"
+                        description = "The column name  that is polled to capture the change data. " +
+                                "It is recommended to have a TIMESTAMP field as the 'polling.column' in order to" +
+                                " capture the inserts and updates." +
+                                "\nNumeric auto-incremental fields and char fields can also be" +
+                                " used as 'polling.column'. However, note that fields of these types only support" +
+                                " insert change capturing, and the possibility of using a char field also depends on" +
+                                " how the data is input." +
+                                "\n**It is required to enter a value for this parameter when the mode is 'polling'.**"
                         ,
                         type = DataType.STRING,
                         defaultValue = "<Empty_String>",
@@ -139,8 +145,8 @@ import java.util.concurrent.Executors;
                 ),
                 @Parameter(
                         name = "polling.interval",
-                        description = "The interval in seconds to poll the given table for changes." +
-                                "\nAccepted only when mode is set to 'polling'."
+                        description = "The time interval (specified in seconds) to poll the given table for changes." +
+                                "\nThis parameter is applicable only when the mode is set to 'polling'."
                         ,
                         type = DataType.INT,
                         defaultValue = "1",
@@ -148,31 +154,33 @@ import java.util.concurrent.Executors;
                 ),
                 @Parameter(
                         name = "operation",
-                        description = "Interested change event operation. 'insert', 'update' or 'delete'. Required" +
-                                " for 'listening' mode." +
-                                "\nNot case sensitive.",
+                        description = "The change event operation you want to carry out. Possible values are" +
+                                " 'insert', 'update' or 'delete'. It is required to specify a value when the mode is" +
+                                " 'listening'." +
+                                "\nThis parameter is not case sensitive.",
                         type = DataType.STRING
                 ),
                 @Parameter(
                         name = "connector.properties",
-                        description = "Debezium connector specified properties as a comma separated string. " +
-                                "\nThis properties will have more priority over the parameters. Only for 'listening'" +
-                                " mode",
+                        description = "Here, you can specify Debezium connector properties as a comma-separated " +
+                                "string. " +
+                                "\nThe properties specified here are given more priority over the parameters. This" +
+                                " parameter is applicable only for the 'listening' mode.",
                         type = DataType.STRING,
                         optional = true,
                         defaultValue = "Empty_String"
                 ),
                 @Parameter(name = "database.server.id",
-                        description = "For MySQL, a unique integer between 1 to 2^32 as the ID," +
-                                " This is used when joining MySQL database cluster to read binlog. Only for" +
-                                " 'listening'mode.",
+                        description = "An ID to be used when joining MySQL database cluster to read the bin log. " +
+                                "This should be a unique integer between 1 to 2^32. This parameter is applicable " +
+                                "only when the mode is 'listening'.",
                         type = DataType.STRING,
                         optional = true,
                         defaultValue = "Random integer between 5400 and 6400"
                 ),
                 @Parameter(name = "database.server.name",
-                        description = "Logical name that identifies and provides a namespace for the " +
-                                "particular database server. Only for 'listening' mode.",
+                        description = "A logical name that identifies and provides a namespace for the database " +
+                                "server. This parameter is applicable only when the mode is 'listening'.",
                         defaultValue = "{host}_{port}",
                         optional = true,
                         type = DataType.STRING
@@ -185,10 +193,9 @@ import java.util.concurrent.Executors;
                                 "\ntable.name = 'students', operation = 'insert', " +
                                 "\n@map(type='keyvalue', @attributes(id = 'id', name = 'name')))" +
                                 "\ndefine stream inputStream (id string, name string);",
-                        description = "In this example, the cdc source starts listening to the row insertions " +
-                                " on students table with columns name and id which is under MySQL" +
-                                " SimpleDB database that" +
-                                " can be accessed with the given url"
+                        description = "In this example, the CDC source listens to the row insertions that are made " +
+                                "in the 'students' table with the column name, and the ID. This table belongs to the " +
+                                "'SimpleDB' MySQL database that can be accessed via the given URL."
                 ),
                 @Example(
                         syntax = "@source(type = 'cdc' , url = 'jdbc:mysql://localhost:3306/SimpleDB', " +
@@ -198,9 +205,9 @@ import java.util.concurrent.Executors;
                                 "\nbefore_id = 'before_id', before_name = 'before_name')))" +
                                 "\ndefine stream inputStream (before_id string, id string, " +
                                 "\nbefore_name string , name string);",
-                        description = "In this example, the cdc source starts listening to the row updates" +
-                                " on students table which is under MySQL SimpleDB database that" +
-                                " can be accessed with the given url."
+                        description = "In this example, the CDC source listens to the row updates that are made in " +
+                                "the 'students' table. This table belongs to the 'SimpleDB' MySQL database that can" +
+                                " be accessed via the given URL."
                 ),
                 @Example(
                         syntax = "@source(type = 'cdc' , url = 'jdbc:mysql://localhost:3306/SimpleDB', " +
@@ -209,9 +216,9 @@ import java.util.concurrent.Executors;
                                 "\n@map(type='keyvalue', @attributes(before_id = 'before_id'," +
                                 " before_name = 'before_name')))" +
                                 "\ndefine stream inputStream (before_id string, before_name string);",
-                        description = "In this example, the cdc source starts listening to the row deletions" +
-                                " on students table which is under MySQL SimpleDB database that" +
-                                " can be accessed with the given url."
+                        description = "In this example, the CDC source listens to the row deletions made in the " +
+                                "'students' table. This table belongs to the 'SimpleDB' database that can be accessed" +
+                                " via the given URL."
                 ),
                 @Example(
                         syntax = "@source(type = 'cdc', mode='polling', polling.column = 'id', " +
@@ -221,9 +228,10 @@ import java.util.concurrent.Executors;
                                 "\ntable.name = 'students', " +
                                 "\n@map(type='keyvalue'), @attributes(id = 'id', name = 'name'))" +
                                 "\ndefine stream inputStream (id int, name string);",
-                        description = "In this example, the cdc source starts polling students table for inserts." +
-                                " polling.column is an auto incremental field. url, username, password, " +
-                                "and jdbc.driver.name are used to connect to the database."
+                        description = "In this example, the CDC source polls the 'students' table for inserts. 'id'" +
+                                " that is specified as the polling colum' is an auto incremental field. The " +
+                                "connection to the database is made via the URL, username, password, and the JDBC" +
+                                " driver name."
                 ),
                 @Example(
                         syntax = "@source(type = 'cdc', mode='polling', polling.column = 'id', " +
@@ -231,10 +239,10 @@ import java.util.concurrent.Executors;
                                 "\ntable.name = 'students', " +
                                 "\n@map(type='keyvalue'), @attributes(id = 'id', name = 'name'))" +
                                 "\ndefine stream inputStream (id int, name string);",
-                        description = "In this example, the cdc source starts polling students table for inserts. " +
-                                "polling.column is a char column with the pattern S001, S002, ... ." +
-                                " datasource.name is used to connect to the database. Note that the" +
-                                " datasource.name works only with the Stream Processor."
+                        description = "In this example, the CDC source polls the 'students' table for inserts. The" +
+                                " given polling column is a char column with the 'S001, S002, ... .' pattern." +
+                                " The connection to the database is made via a data source named 'SimpleDB'. Note " +
+                                "that the 'datasource.name' parameter works only with the Stream Processor."
                 ),
                 @Example(
                         syntax = "@source(type = 'cdc', mode='polling', polling.column = 'last_updated', " +
@@ -242,9 +250,10 @@ import java.util.concurrent.Executors;
                                 "\ntable.name = 'students', " +
                                 "\n@map(type='keyvalue'))" +
                                 "\ndefine stream inputStream (name string);",
-                        description = "In this example, the cdc source starts polling students table for inserts " +
-                                "and updates. polling.column is a timestamp field."
+                        description = "In this example, the CDC source polls the 'students' table for inserts " +
+                                "and updates. The polling column is a timestamp field."
                 ),
+
         }
 )
 
