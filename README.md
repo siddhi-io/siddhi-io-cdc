@@ -23,7 +23,7 @@ Find some useful links below:
 
 ## Latest API Docs
 
-Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc/api/1.0.7">1.0.7</a>.
+Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc/api/1.0.8">1.0.8</a>.
 
 ## How to use
 
@@ -85,7 +85,7 @@ The test framework initialize a docker container with required configuration bef
 
 ## Features
 
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc/api/1.0.7/#cdc-source">cdc</a> *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source">(Source)</a>*<br><div style="padding-left: 1em;"><p>The CDC source receives events when a Database table's change event (INSERT, UPDATE, DELETE) is triggered. The events are received in key-value format.<br>The following are key values of the map of a CDC change event and their descriptions.<br>&nbsp;&nbsp;&nbsp;&nbsp;For insert: Keys will be specified table's columns.<br>&nbsp;&nbsp;&nbsp;&nbsp;For delete: Keys will be 'before_' followed by specified table's columns. Eg: before_X.<br>&nbsp;&nbsp;&nbsp;&nbsp;For update: Keys will be specified table's columns and 'before_' followed by specified table's columns.<br>For 'polling' mode: Keys will be specified table's columns.<br>See parameter: mode for supported databases and change events.</p></div>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc/api/1.0.8/#cdc-source">cdc</a> *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source">(Source)</a>*<br><div style="padding-left: 1em;"><p>The CDC source receives events when change events (i.e., INSERT, UPDATE, DELETE) are triggered for a database table. Events are received in the 'key-value' format.<br>The key values of the map of a CDC change event are as follows.<br>&nbsp;&nbsp;&nbsp;&nbsp;For insert: Keys are specified as columns of the table.<br>&nbsp;&nbsp;&nbsp;&nbsp;For delete: Keys are followed followed by the specified table columns. This is achieved via 'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'.<br>&nbsp;&nbsp;&nbsp;&nbsp;For update: Keys are followed followed by the specified table columns. This is achieved via 'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'.<br>For 'polling' mode: Keys are specified as the coloumns of the table.<br>See parameter: mode for supported databases and change events.</p></div>
 
 ## How to Contribute
 
