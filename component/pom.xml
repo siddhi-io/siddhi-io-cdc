@@ -516,7 +516,9 @@
                         <Private-Package>
                             com.github.shyiko.*,
                             io.debezium.*,
-                            org.apache.kafka.connect*
+                            org.apache.kafka.connect*,
+                            org.apache.kafka.common*,
+                            org.apache.kafka.clients*
                         </Private-Package>
                         <Import-Package>
                             org.wso2.siddhi.*; version="${siddhi.import.version.range}"

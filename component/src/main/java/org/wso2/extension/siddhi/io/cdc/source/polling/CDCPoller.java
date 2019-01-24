@@ -30,10 +30,11 @@ import org.wso2.extension.siddhi.io.cdc.source.config.Database;
 import org.wso2.extension.siddhi.io.cdc.source.config.QueryConfiguration;
 import org.wso2.extension.siddhi.io.cdc.util.CDCPollingUtil;
 import org.wso2.extension.siddhi.io.cdc.util.CDCSourceConstants;
+import org.wso2.extension.siddhi.io.cdc.util.MyYamlConstructor;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 import org.wso2.siddhi.core.util.config.ConfigReader;
+import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -219,7 +220,11 @@ public class CDCPoller implements Runnable {
                 QueryConfiguration queryConfiguration;
                 InputStream inputStream = null;
                 try {
-                    Yaml yaml = new Yaml(new Constructor(QueryConfiguration.class));
+                    MyYamlConstructor constructor = new MyYamlConstructor(QueryConfiguration.class);
+                    TypeDescription queryTypeDescription = new TypeDescription(QueryConfiguration.class);
+                    queryTypeDescription.putListPropertyType("databases", Database.class);
+                    constructor.addTypeDescription(queryTypeDescription);
+                    Yaml yaml = new Yaml(constructor);
                     ClassLoader classLoader = getClass().getClassLoader();
                     inputStream = classLoader.getResourceAsStream(SELECT_QUERY_CONFIG_FILE);
                     if (inputStream == null) {
