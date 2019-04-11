@@ -18,7 +18,7 @@
 
 package org.wso2.extension.siddhi.io.cdc.source.polling;
 
-import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.core.exception.SiddhiAppCreationException;
 
 /**
 * This Exception is to be thrown in the CDC polling mode.
