@@ -18,9 +18,9 @@
 
 package org.wso2.extension.siddhi.io.cdc.util;
 
+import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.wso2.extension.siddhi.io.cdc.source.listening.InMemoryOffsetBackingStore;
 import org.wso2.extension.siddhi.io.cdc.source.listening.WrongConfigurationException;
-import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 import java.util.HashMap;
 import java.util.Map;

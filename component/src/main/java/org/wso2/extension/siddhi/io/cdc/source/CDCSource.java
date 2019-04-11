@@ -19,6 +19,22 @@
 package org.wso2.extension.siddhi.io.cdc.source;
 
 import io.debezium.embedded.EmbeddedEngine;
+import io.siddhi.annotation.Example;
+import io.siddhi.annotation.Extension;
+import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.util.DataType;
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.exception.ConnectionUnavailableException;
+import io.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.core.exception.SiddhiAppRuntimeException;
+import io.siddhi.core.stream.ServiceDeploymentInfo;
+import io.siddhi.core.stream.input.source.Source;
+import io.siddhi.core.stream.input.source.SourceEventListener;
+import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
+import io.siddhi.core.util.transport.OptionHolder;
+import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.apache.log4j.Logger;
 import org.wso2.extension.siddhi.io.cdc.source.listening.CDCSourceObjectKeeper;
 import org.wso2.extension.siddhi.io.cdc.source.listening.ChangeDataCapture;
@@ -26,19 +42,6 @@ import org.wso2.extension.siddhi.io.cdc.source.listening.WrongConfigurationExcep
 import org.wso2.extension.siddhi.io.cdc.source.polling.CDCPoller;
 import org.wso2.extension.siddhi.io.cdc.util.CDCSourceConstants;
 import org.wso2.extension.siddhi.io.cdc.util.CDCSourceUtil;
-import org.wso2.siddhi.annotation.Example;
-import org.wso2.siddhi.annotation.Extension;
-import org.wso2.siddhi.annotation.Parameter;
-import org.wso2.siddhi.annotation.util.DataType;
-import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
-import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
-import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
-import org.wso2.siddhi.core.stream.input.source.Source;
-import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
-import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.siddhi.core.util.transport.OptionHolder;
-import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -257,7 +260,7 @@ import java.util.concurrent.Executors;
         }
 )
 
-public class CDCSource extends Source {
+public class CDCSource extends Source<CDCSource.CdcState> {
     private static final Logger log = Logger.getLogger(CDCSource.class);
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private int pollingInterval;
@@ -271,9 +274,14 @@ public class CDCSource extends Source {
     private CDCPoller cdcPoller;
 
     @Override
-    public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
-                     String[] requestedTransportPropertyNames, ConfigReader configReader,
-                     SiddhiAppContext siddhiAppContext) {
+    protected ServiceDeploymentInfo exposeServiceDeploymentInfo() {
+        return null;
+    }
+
+    @Override
+    public StateFactory<CdcState> init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
+                             String[] requestedTransportPropertyNames, ConfigReader configReader,
+                             SiddhiAppContext siddhiAppContext) {
         //initialize mode
         mode = optionHolder.validateAndGetStaticValue(CDCSourceConstants.MODE, CDCSourceConstants.MODE_LISTENING);
 
@@ -379,6 +387,7 @@ public class CDCSource extends Source {
             default:
                 throw new SiddhiAppValidationException("Unsupported " + CDCSourceConstants.MODE + ": " + mode);
         }
+        return () -> new CdcState(mode);
     }
 
     @Override
@@ -387,8 +396,8 @@ public class CDCSource extends Source {
     }
 
     @Override
-    public void connect(ConnectionCallback connectionCallback) throws ConnectionUnavailableException {
-
+    public void connect(ConnectionCallback connectionCallback, CdcState cdcState)
+            throws ConnectionUnavailableException {
         switch (mode) {
             case CDCSourceConstants.MODE_LISTENING:
                 //keep the object reference in Object keeper
@@ -479,38 +488,6 @@ public class CDCSource extends Source {
         }
     }
 
-    @Override
-    public Map<String, Object> currentState() {
-        Map<String, Object> currentState = new HashMap<>();
-        switch (mode) {
-            case CDCSourceConstants.MODE_POLLING:
-                currentState.put("last.offset", cdcPoller.getLastReadPollingColumnValue());
-                break;
-            case CDCSourceConstants.MODE_LISTENING:
-                currentState.put(CDCSourceConstants.CACHE_OBJECT, offsetData);
-                break;
-            default:
-                break;
-        }
-        return currentState;
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> map) {
-        switch (mode) {
-            case CDCSourceConstants.MODE_POLLING:
-                Object lastOffsetObj = map.get("last.offset");
-                cdcPoller.setLastReadPollingColumnValue((String) lastOffsetObj);
-                break;
-            case CDCSourceConstants.MODE_LISTENING:
-                Object cacheObj = map.get(CDCSourceConstants.CACHE_OBJECT);
-                this.offsetData = (HashMap<byte[], byte[]>) cacheObj;
-                break;
-            default:
-                break;
-        }
-    }
-
     public Map<byte[], byte[]> getOffsetData() {
         try {
             Thread.sleep(50);
@@ -555,6 +532,54 @@ public class CDCSource extends Source {
         if (pollingInterval < 0) {
             throw new SiddhiAppValidationException(CDCSourceConstants.POLLING_INTERVAL + " should be a " +
                     "non negative integer. Current mode: " + CDCSourceConstants.MODE_POLLING);
+        }
+    }
+
+    class CdcState extends State {
+
+        private final String mode;
+
+        private final Map<String, Object> state;
+
+        private CdcState(String mode) {
+            this.mode = mode;
+            state = new HashMap<>();
+        }
+
+        @Override
+        public boolean canDestroy() {
+            return false;
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
+            switch (mode) {
+                case CDCSourceConstants.MODE_POLLING:
+                    state.put("last.offset", cdcPoller.getLastReadPollingColumnValue());
+                    break;
+                case CDCSourceConstants.MODE_LISTENING:
+                    state.put(CDCSourceConstants.CACHE_OBJECT, offsetData);
+                    break;
+                default:
+                    break;
+            }
+            return state;
+        }
+
+        @Override
+        public void restore(Map<String, Object> map) {
+            switch (mode) {
+                case CDCSourceConstants.MODE_POLLING:
+                    Object lastOffsetObj = map.get("last.offset");
+                    cdcPoller.setLastReadPollingColumnValue((String) lastOffsetObj);
+                    break;
+                case CDCSourceConstants.MODE_LISTENING:
+                    Object cacheObj = map.get(CDCSourceConstants.CACHE_OBJECT);
+                    offsetData = (HashMap<byte[], byte[]>) cacheObj;
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }

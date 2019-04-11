@@ -23,6 +23,7 @@ import org.wso2.extension.siddhi.io.cdc.source.config.QueryConfiguration;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.nodes.Node;
+
 import java.util.HashMap;
 import java.util.Map;
 
