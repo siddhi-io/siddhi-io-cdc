@@ -49,6 +49,7 @@ public class CDCSourceConstants {
     public static final String CDC_SOURCE_OBJECT = "cdc.source.object";
     public static final String DATABASE_HISTORY = "database.history";
     public static final String MYSQL_CONNECTOR_CLASS = "io.debezium.connector.mysql.MySqlConnector";
+    public static final String POSTGRESQL_CONNECTOR_CLASS = "io.debezium.connector.postgresql.PostgresConnector";
     public static final String SQLSERVER_CONNECTOR_CLASS = "io.debezium.connector.sqlserver.SqlServerConnector";
     public static final String BEFORE_PREFIX = "before_";
     public static final String CACHE_OBJECT = "cacheObj";

@@ -100,9 +100,36 @@ public class CDCSourceUtil {
                     configMap.put(CDCSourceConstants.CONNECTOR_CLASS, CDCSourceConstants.SQLSERVER_CONNECTOR_CLASS);
                     break;
                 }
+                case "postgresql": {
+                    //Extract url details
+                    String regex = "jdbc:postgresql://(\\w*|[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}):" +
+                            "(\\d++)/(\\w*)";
+                    Pattern p = Pattern.compile(regex);
+                    Matcher matcher = p.matcher(url);
+                    if (matcher.find()) {
+                        host = matcher.group(1);
+                        port = Integer.parseInt(matcher.group(2));
+                        database = matcher.group(3);
+
+                    } else {
+                        throw new WrongConfigurationException("Invalid JDBC url: " + url + " received for stream: " +
+                                siddhiStreamName + ". Expected url format: jdbc:postgresql://<host>:<port>/" +
+                                "<database_name>");
+                    }
+
+                    //Add extracted url details to configMap.
+                    configMap.put(CDCSourceConstants.DATABASE_HOSTNAME, host);
+                    configMap.put(CDCSourceConstants.DATABASE_PORT, port);
+                    configMap.put(CDCSourceConstants.DATABASE_DBNAME, database);
+                    configMap.put(CDCSourceConstants.TABLE_WHITELIST, tableName);
+
+                    //Add other PostgreSQL specific details to configMap.
+                    configMap.put(CDCSourceConstants.CONNECTOR_CLASS, CDCSourceConstants.POSTGRESQL_CONNECTOR_CLASS);
+                    break;
+                }
                 default: {
-                    throw new WrongConfigurationException("Unsupported schema. Expected schema: mysql or sqlserver," +
-                            " Found: " + splittedURL[1]);
+                    throw new WrongConfigurationException("Unsupported schema. Expected schema: mysql, postgresql or" +
+                            " sqlserver, Found: " + splittedURL[1]);
                 }
             }
 
