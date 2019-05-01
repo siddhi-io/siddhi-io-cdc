@@ -45,10 +45,13 @@ public class CDCSourceConstants {
     public static final String DATABASE_HOSTNAME = "database.hostname";
     public static final String DATABASE_USER = "database.user";
     public static final String DATABASE_PASSWORD = "database.password";
+    public static final String DATABASE_PDB_NAME = "database.pdb.name";
+    public static final String DATABASE_OUT_SERVER_NAME = "database.out.server.name";
     public static final String OFFSET_STORAGE = "offset.storage";
     public static final String CDC_SOURCE_OBJECT = "cdc.source.object";
     public static final String DATABASE_HISTORY = "database.history";
     public static final String MYSQL_CONNECTOR_CLASS = "io.debezium.connector.mysql.MySqlConnector";
+    public static final String ORACLE_CONNECTOR_CLASS = "io.debezium.connector.oracle.OracleConnector";
     public static final String POSTGRESQL_CONNECTOR_CLASS = "io.debezium.connector.postgresql.PostgresConnector";
     public static final String SQLSERVER_CONNECTOR_CLASS = "io.debezium.connector.sqlserver.SqlServerConnector";
     public static final String BEFORE_PREFIX = "before_";
