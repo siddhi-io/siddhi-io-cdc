@@ -1,4 +1,4 @@
-# API Docs - v1.0.9
+# API Docs - v1.0.10-SNAPSHOT
 
 ## Source
 
@@ -8,7 +8,7 @@
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
-@source(type="cdc", url="<STRING>", mode="<STRING>", jdbc.driver.name="<STRING>", username="<STRING>", password="<STRING>", pool.properties="<STRING>", datasource.name="<STRING>", table.name="<STRING>", polling.column="<STRING>", polling.interval="<INT>", operation="<STRING>", connector.properties="<STRING>", database.server.id="<STRING>", database.server.name="<STRING>", @map(...)))
+@source(type="cdc", url="<STRING>", mode="<STRING>", jdbc.driver.name="<STRING>", username="<STRING>", password="<STRING>", pool.properties="<STRING>", datasource.name="<STRING>", table.name="<STRING>", polling.column="<STRING>", polling.interval="<INT>", operation="<STRING>", connector.properties="<STRING>", database.server.id="<STRING>", database.server.name="<STRING>", oracle.dbname="<STRING>", oracle.pdb.name="<STRING>", oracle.out.server.name="<STRING>", @map(...)))
 ```
 
 <span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -129,6 +129,30 @@
         <td style="vertical-align: top">database.server.name</td>
         <td style="vertical-align: top; word-wrap: break-word">A logical name that identifies and provides a namespace for the database server. This parameter is applicable only when the mode is 'listening'.</td>
         <td style="vertical-align: top">{host}_{port}</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">oracle.dbname</td>
+        <td style="vertical-align: top; word-wrap: break-word">Name of the database to connect to. Must be the CDB name when working with the CDB + PDB model. This parameter is mandatory and applicable only for oracle when the mode is 'listening'.</td>
+        <td style="vertical-align: top">Empty_String</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">oracle.pdb.name</td>
+        <td style="vertical-align: top; word-wrap: break-word">Name of the PDB to connect to, when working with the CDB + PDB model. This parameter is applicable only for oracle when the mode is 'listening'.</td>
+        <td style="vertical-align: top">Empty_String</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">oracle.out.server.name</td>
+        <td style="vertical-align: top; word-wrap: break-word">Name of the XStream outbound server configured in the database. This parameter is mandatory and applicable only for oracle when the mode is 'listening'.</td>
+        <td style="vertical-align: top">Empty_String</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>

@@ -54,6 +54,9 @@ public class CDCSourceConstants {
     public static final String ORACLE_CONNECTOR_CLASS = "io.debezium.connector.oracle.OracleConnector";
     public static final String POSTGRESQL_CONNECTOR_CLASS = "io.debezium.connector.postgresql.PostgresConnector";
     public static final String SQLSERVER_CONNECTOR_CLASS = "io.debezium.connector.sqlserver.SqlServerConnector";
+    public static final String ORACLE_DBNAME = "oracle.dbname";
+    public static final String ORACLE_PDB_NAME = "oracle.pdb.name";
+    public static final String ORACLE_OUT_SERVER_NAME = "oracle.out.server.name";
     public static final String BEFORE_PREFIX = "before_";
     public static final String CACHE_OBJECT = "cacheObj";
     public static final int DEFAULT_SERVER_ID = -1;

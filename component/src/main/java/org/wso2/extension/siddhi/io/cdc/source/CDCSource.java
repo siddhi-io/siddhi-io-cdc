@@ -324,6 +324,15 @@ public class CDCSource extends Source {
                 serverName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.DATABASE_SERVER_NAME,
                         CDCSourceConstants.EMPTY_STRING);
 
+                //initialize parameters for oracle database
+                String oracleDBName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.ORACLE_DBNAME,
+                        CDCSourceConstants.EMPTY_STRING);
+                String oraclePDBName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.ORACLE_PDB_NAME,
+                        CDCSourceConstants.EMPTY_STRING);
+                String oracleOutServerName = optionHolder.validateAndGetStaticValue(CDCSourceConstants
+                        .ORACLE_OUT_SERVER_NAME, CDCSourceConstants.EMPTY_STRING);
+
+
                 //initialize parameters from connector.properties
                 String connectorProperties = optionHolder.validateAndGetStaticValue(
                         CDCSourceConstants.CONNECTOR_PROPERTIES, CDCSourceConstants.EMPTY_STRING);
@@ -350,7 +359,7 @@ public class CDCSource extends Source {
                 try {
                     Map<String, Object> configMap = CDCSourceUtil.getConfigMap(username, password, url, tableName,
                             historyFileDirectory, siddhiAppName, streamName, serverID, serverName, connectorProperties,
-                            this.hashCode());
+                            oracleDBName, oraclePDBName, oracleOutServerName, this.hashCode());
                     changeDataCapture.setConfig(configMap);
                 } catch (WrongConfigurationException ex) {
                     throw new SiddhiAppCreationException("The cdc source couldn't get started because of invalid" +
