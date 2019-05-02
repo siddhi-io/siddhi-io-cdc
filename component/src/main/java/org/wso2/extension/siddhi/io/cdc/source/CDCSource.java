@@ -184,6 +184,28 @@ import java.util.concurrent.Executors;
                         defaultValue = "{host}_{port}",
                         optional = true,
                         type = DataType.STRING
+                ),
+                @Parameter(name = "oracle.dbname",
+                        description = "Name of the database to connect to. Must be the CDB name when working with the" +
+                                " CDB + PDB model. This parameter is mandatory and applicable only for oracle when " +
+                                "the mode is 'listening'.",
+                        defaultValue = "Empty_String",
+                        optional = true,
+                        type = DataType.STRING
+                ),
+                @Parameter(name = "oracle.pdb.name",
+                        description = "Name of the PDB to connect to, when working with the CDB + PDB model. This " +
+                                "parameter is applicable only for oracle when the mode is 'listening'.",
+                        defaultValue = "Empty_String",
+                        optional = true,
+                        type = DataType.STRING
+                ),
+                @Parameter(name = "oracle.out.server.name",
+                        description = "Name of the XStream outbound server configured in the database. This parameter" +
+                                " is mandatory and applicable only for oracle when the mode is 'listening'.",
+                        defaultValue = "Empty_String",
+                        optional = true,
+                        type = DataType.STRING
                 )
         },
         examples = {
