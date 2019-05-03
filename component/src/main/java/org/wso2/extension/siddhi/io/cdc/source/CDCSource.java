@@ -274,8 +274,7 @@ import java.util.concurrent.Executors;
                                 "\ndefine stream inputStream (name string);",
                         description = "In this example, the CDC source polls the 'students' table for inserts " +
                                 "and updates. The polling column is a timestamp field."
-                ),
-
+                )
         }
 )
 
@@ -331,7 +330,6 @@ public class CDCSource extends Source {
                         CDCSourceConstants.EMPTY_STRING);
                 String oracleOutServerName = optionHolder.validateAndGetStaticValue(CDCSourceConstants
                         .ORACLE_OUT_SERVER_NAME, CDCSourceConstants.EMPTY_STRING);
-
 
                 //initialize parameters from connector.properties
                 String connectorProperties = optionHolder.validateAndGetStaticValue(

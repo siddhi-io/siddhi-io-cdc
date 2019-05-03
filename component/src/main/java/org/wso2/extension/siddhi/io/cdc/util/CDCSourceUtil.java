@@ -116,7 +116,7 @@ public class CDCSourceUtil {
                         configMap.put(CDCSourceConstants.DATABASE_PDB_NAME, oraclePDBName);
                     }
 
-                    configMap.put(CDCSourceConstants.CONNECTOR_CLASS, CDCSourceConstants.MYSQL_CONNECTOR_CLASS);
+                    configMap.put(CDCSourceConstants.CONNECTOR_CLASS, CDCSourceConstants.ORACLE_CONNECTOR_CLASS);
                     break;
                 }
                 case "postgresql": {
