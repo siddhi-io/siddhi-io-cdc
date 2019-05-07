@@ -18,7 +18,7 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>org.wso2.extension.siddhi.io.cdc</groupId>
+        <groupId>io.siddhi.extension.io.cdc</groupId>
         <artifactId>siddhi-io-cdc-parent</artifactId>
         <version>2.0.1-SNAPSHOT</version>
     </parent>
@@ -65,7 +65,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.wso2.extension.siddhi.map.keyvalue</groupId>
+            <groupId>io.siddhi.extension.map.keyvalue</groupId>
             <artifactId>siddhi-map-keyvalue</artifactId>
             <scope>test</scope>
         </dependency>
@@ -74,7 +74,7 @@
             <artifactId>mysql-binlog-connector-java</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.extension.siddhi.store.rdbms</groupId>
+            <groupId>io.siddhi.extension.store.rdbms</groupId>
             <artifactId>siddhi-store-rdbms</artifactId>
             <scope>test</scope>
         </dependency>
@@ -299,7 +299,7 @@
                             </environmentVariables>
                             <argLine>-Duser.timezone=GMT</argLine>
                             <test>
-                                org.wso2.extension.siddhi.io.cdc.source.TestCaseOfCDCPollingMode
+                                io.siddhi.extension.io.cdc.source.TestCaseOfCDCPollingMode
                             </test>
                         </configuration>
                     </plugin>
@@ -382,7 +382,7 @@
                                 <DOCKER_HOST_IP>${docker.container.siddhi-cdc-mssql.ip}</DOCKER_HOST_IP>
                             </environmentVariables>
                             <test>
-                                org.wso2.extension.siddhi.io.cdc.source.TestCaseOfCDCPollingMode
+                                io.siddhi.extension.io.cdc.source.TestCaseOfCDCPollingMode
                             </test>
                         </configuration>
                     </plugin>
@@ -471,7 +471,7 @@
                                 <DOCKER_HOST_IP>${docker.container.siddhi-cdc-postgres.ip}</DOCKER_HOST_IP>
                             </environmentVariables>
                             <test>
-                                org.wso2.extension.siddhi.io.cdc.source.TestCaseOfCDCPollingMode
+                                io.siddhi.extension.io.cdc.source.TestCaseOfCDCPollingMode
                             </test>
                         </configuration>
                     </plugin>
@@ -511,7 +511,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.extension.siddhi.io.cdc.*
+                            io.siddhi.extension.io.cdc.*
                         </Export-Package>
                         <Private-Package>
                             com.github.shyiko.*,

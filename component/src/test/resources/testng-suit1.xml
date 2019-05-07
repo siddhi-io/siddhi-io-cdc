@@ -24,8 +24,8 @@
 <suite name="Siddhi-Io-Cdc-Test-Suite1">
     <test name="Siddhi-io-cdc-tests-1" enabled="true" parallel="false">
         <classes>
-            <class name="org.wso2.extension.siddhi.io.cdc.source.TestCaseOfCDCSourceValidation"/>
-            <class name="org.wso2.extension.siddhi.io.cdc.source.TestCaseOfCDCPollingMode"/>
+            <class name="io.siddhi.extension.io.cdc.source.TestCaseOfCDCSourceValidation"/>
+            <class name="io.siddhi.extension.io.cdc.source.TestCaseOfCDCPollingMode"/>
         </classes>
     </test>
 </suite>

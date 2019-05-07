@@ -24,8 +24,8 @@
 <suite name="Siddhi-Io-Cdc-Test-Suite2">
     <test name="Siddhi-io-cdc-tests-2" enabled="true">
         <classes>
-            <class name="org.wso2.extension.siddhi.io.cdc.source.TestCaseOfCDCPollingMode"/>
-            <class name="org.wso2.extension.siddhi.io.cdc.source.TestCaseOfCDCListeningMode"/>
+            <class name="io.siddhi.extension.io.cdc.source.TestCaseOfCDCPollingMode"/>
+            <class name="io.siddhi.extension.io.cdc.source.TestCaseOfCDCListeningMode"/>
         </classes>
     </test>
 </suite>

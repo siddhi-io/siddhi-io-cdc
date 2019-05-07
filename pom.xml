@@ -27,7 +27,7 @@
     <modules>
         <module>component</module>
     </modules>
-    <groupId>org.wso2.extension.siddhi.io.cdc</groupId>
+    <groupId>io.siddhi.extension.io.cdc</groupId>
     <artifactId>siddhi-io-cdc-parent</artifactId>
     <version>2.0.1-SNAPSHOT</version>
     <name>Siddhi I/O cdc</name>
@@ -74,7 +74,7 @@
                 <version>${hikari.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.extension.siddhi.map.keyvalue</groupId>
+                <groupId>io.siddhi.extension.map.keyvalue</groupId>
                 <artifactId>siddhi-map-keyvalue</artifactId>
                 <version>${siddhi-map-keyvalue.version}</version>
                 <scope>test</scope>
@@ -85,7 +85,7 @@
                 <version>${mysql-binlog-connector-java.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.extension.siddhi.store.rdbms</groupId>
+                <groupId>io.siddhi.extension.store.rdbms</groupId>
                 <artifactId>siddhi-store-rdbms</artifactId>
                 <version>${siddhi-store-rdbms.version}</version>
                 <scope>test</scope>
@@ -184,11 +184,11 @@
         </plugins>
     </build>
     <properties>
-        <siddhi.version>5.0.0-m10</siddhi.version>
+        <siddhi.version>5.0.0</siddhi.version>
         <siddhi.import.version.range>[5.0.0,6.0.0)</siddhi.import.version.range>
         <log4j.version>1.2.17.wso2v1</log4j.version>
         <carbon.transport.version>4.4.15</carbon.transport.version>
-        <siddhi-map-keyvalue.version>2.0.0</siddhi-map-keyvalue.version>
+        <siddhi-map-keyvalue.version>2.0.1</siddhi-map-keyvalue.version>
         <jacoco.plugin.version>0.7.9</jacoco.plugin.version>
         <mysql-binlog-connector-java.version>0.13.0</mysql-binlog-connector-java.version>
         <debezium-connector-mysql.version>0.8.3.Final</debezium-connector-mysql.version>
