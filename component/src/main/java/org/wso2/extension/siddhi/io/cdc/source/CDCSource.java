@@ -184,28 +184,6 @@ import java.util.concurrent.Executors;
                         defaultValue = "{host}_{port}",
                         optional = true,
                         type = DataType.STRING
-                ),
-                @Parameter(name = "oracle.dbname",
-                        description = "Name of the database to connect to. Must be the CDB name when working with the" +
-                                " CDB + PDB model. This parameter is mandatory and applicable only for oracle when " +
-                                "the mode is 'listening'.",
-                        defaultValue = "Empty_String",
-                        optional = true,
-                        type = DataType.STRING
-                ),
-                @Parameter(name = "oracle.pdb.name",
-                        description = "Name of the PDB to connect to, when working with the CDB + PDB model. This " +
-                                "parameter is applicable only for oracle when the mode is 'listening'.",
-                        defaultValue = "Empty_String",
-                        optional = true,
-                        type = DataType.STRING
-                ),
-                @Parameter(name = "oracle.out.server.name",
-                        description = "Name of the XStream outbound server configured in the database. This parameter" +
-                                " is mandatory and applicable only for oracle when the mode is 'listening'.",
-                        defaultValue = "Empty_String",
-                        optional = true,
-                        type = DataType.STRING
                 )
         },
         examples = {
@@ -323,14 +301,6 @@ public class CDCSource extends Source {
                 serverName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.DATABASE_SERVER_NAME,
                         CDCSourceConstants.EMPTY_STRING);
 
-                //initialize parameters for oracle database
-                String oracleDBName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.ORACLE_DBNAME,
-                        CDCSourceConstants.EMPTY_STRING);
-                String oraclePDBName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.ORACLE_PDB_NAME,
-                        CDCSourceConstants.EMPTY_STRING);
-                String oracleOutServerName = optionHolder.validateAndGetStaticValue(CDCSourceConstants
-                        .ORACLE_OUT_SERVER_NAME, CDCSourceConstants.EMPTY_STRING);
-
                 //initialize parameters from connector.properties
                 String connectorProperties = optionHolder.validateAndGetStaticValue(
                         CDCSourceConstants.CONNECTOR_PROPERTIES, CDCSourceConstants.EMPTY_STRING);
@@ -357,7 +327,7 @@ public class CDCSource extends Source {
                 try {
                     Map<String, Object> configMap = CDCSourceUtil.getConfigMap(username, password, url, tableName,
                             historyFileDirectory, siddhiAppName, streamName, serverID, serverName, connectorProperties,
-                            oracleDBName, oraclePDBName, oracleOutServerName, this.hashCode());
+                            this.hashCode());
                     changeDataCapture.setConfig(configMap);
                 } catch (WrongConfigurationException ex) {
                     throw new SiddhiAppCreationException("The cdc source couldn't get started because of invalid" +
