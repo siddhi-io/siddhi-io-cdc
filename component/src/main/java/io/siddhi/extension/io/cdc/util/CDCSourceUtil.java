@@ -125,6 +125,7 @@ public class CDCSourceUtil {
                     //Add other SQLServer specific details to configMap.
                     configMap.put(CDCSourceConstants.CONNECTOR_CLASS, CDCSourceConstants.SQLSERVER_CONNECTOR_CLASS);
                     break;
+                }
                 default: {
                     throw new WrongConfigurationException("Unsupported schema. Expected schema: mysql or postgresql" +
                             "or sqlserver, Found: " + splittedURL[1]);
