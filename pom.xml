@@ -69,6 +69,16 @@
                 <version>${debezium-connector-oracle.version}</version>
             </dependency>
             <dependency>
+                <groupId>io.debezium</groupId>
+                <artifactId>debezium-connector-postgres</artifactId>
+                <version>${debezium-connector-postgres.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.debezium</groupId>
+                <artifactId>debezium-connector-sqlserver</artifactId>
+                <version>${debezium-connector-sqlserver.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.zaxxer</groupId>
                 <artifactId>HikariCP</artifactId>
                 <version>${hikari.version}</version>
@@ -194,6 +204,8 @@
         <debezium-connector-mysql.version>0.9.5.Final</debezium-connector-mysql.version>
         <debezium-embedded.version>0.9.5.Final</debezium-embedded.version>
         <debezium-connector-oracle.version>0.9.5.Final</debezium-connector-oracle.version>
+        <debezium-connector-postgres.version>0.9.5.Final</debezium-connector-postgres.version>
+        <debezium-connector-sqlserver.version>0.9.5.Final</debezium-connector-sqlserver.version>
         <hikari.version>3.2.0</hikari.version>
         <org.testng.version>6.11</org.testng.version>
         <siddhi-store-rdbms.version>6.0.0</siddhi-store-rdbms.version>
