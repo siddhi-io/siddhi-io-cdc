@@ -191,9 +191,9 @@
         <siddhi-map-keyvalue.version>2.0.1</siddhi-map-keyvalue.version>
         <jacoco.plugin.version>0.7.9</jacoco.plugin.version>
         <mysql-binlog-connector-java.version>0.13.0</mysql-binlog-connector-java.version>
-        <debezium-connector-mysql.version>0.8.3.Final</debezium-connector-mysql.version>
-        <debezium-embedded.version>0.8.3.Final</debezium-embedded.version>
-        <debezium-connector-oracle.version>0.8.3.Final</debezium-connector-oracle.version>
+        <debezium-connector-mysql.version>0.9.5.Final</debezium-connector-mysql.version>
+        <debezium-embedded.version>0.9.5.Final</debezium-embedded.version>
+        <debezium-connector-oracle.version>0.9.5.Final</debezium-connector-oracle.version>
         <hikari.version>3.2.0</hikari.version>
         <org.testng.version>6.11</org.testng.version>
         <siddhi-store-rdbms.version>6.0.0</siddhi-store-rdbms.version>
