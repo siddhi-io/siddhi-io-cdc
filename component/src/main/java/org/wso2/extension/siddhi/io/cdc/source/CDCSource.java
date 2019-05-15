@@ -252,8 +252,7 @@ import java.util.concurrent.Executors;
                                 "\ndefine stream inputStream (name string);",
                         description = "In this example, the CDC source polls the 'students' table for inserts " +
                                 "and updates. The polling column is a timestamp field."
-                ),
-
+                )
         }
 )
 
