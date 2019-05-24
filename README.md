@@ -3,7 +3,7 @@
 The **siddhi-io-cdc extension** is an extension to <a target="_blank" href="https://wso2.github.io/siddhi">Siddhi</a>. It receives change data from MySQL, MS SQL Server, Postgresql, H2 and Oracle in the key-value format.
 
 ## Prerequisites
-Default mode (Listening mode):
+**Default mode (Listening mode):**
 
 Currently MySQL, PostgreSQL and SQLServer are supported in Listening Mode.
 To capture the change events, databases have to be configured as shown below.
@@ -11,7 +11,7 @@ To capture the change events, databases have to be configured as shown below.
 * PostgreSQL - https://debezium.io/docs/connectors/postgresql/#setting-up-PostgreSQL
 * SQLServer - https://debezium.io/docs/connectors/sqlserver/#setting-up-sqlserver
 
-Polling mode:
+**Polling mode:**
 
 * Change data capturing table should be have a polling column. Auto Incremental column or Timestamp can be used.
 
