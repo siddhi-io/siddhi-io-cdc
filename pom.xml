@@ -194,8 +194,8 @@
         </plugins>
     </build>
     <properties>
-        <siddhi.version>5.0.0</siddhi.version>
-        <siddhi.import.version.range>[5.0.0,6.0.0)</siddhi.import.version.range>
+        <siddhi.version>5.1.0</siddhi.version>
+        <siddhi.import.version.range>[5.1.0,6.0.0)</siddhi.import.version.range>
         <log4j.version>1.2.17.wso2v1</log4j.version>
         <carbon.transport.version>4.4.15</carbon.transport.version>
         <siddhi-map-keyvalue.version>2.0.1</siddhi-map-keyvalue.version>
