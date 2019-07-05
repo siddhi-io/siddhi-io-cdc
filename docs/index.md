@@ -3,13 +3,15 @@
 The **siddhi-io-cdc extension** is an extension to <a target="_blank" href="https://wso2.github.io/siddhi">Siddhi</a>. It receives change data from MySQL, MS SQL Server, Postgresql, H2 and Oracle in the key-value format.
 
 ## Prerequisites
-Default mode (listening):
+**Default mode (Listening mode):**
 
-* The MySQL server should be configured to use a row-level binary log.
-* WSO2 SP State persistence should be enabled.
-* A MySQL user should be created with SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT privileges on the tables he wants to capture changes.
+Currently MySQL, PostgreSQL and SQLServer are supported in Listening Mode.
+To capture the change events, databases have to be configured as shown below.
+* MySQL - https://debezium.io/docs/connectors/mysql/#setting-up-mysql
+* PostgreSQL - https://debezium.io/docs/connectors/postgresql/#setting-up-PostgreSQL
+* SQLServer - https://debezium.io/docs/connectors/sqlserver/#setting-up-sqlserver
 
-Polling mode:
+**Polling mode:**
 
 * Change data capturing table should be have a polling column. Auto Incremental column or Timestamp can be used.
 
@@ -23,7 +25,7 @@ Find some useful links below:
 
 ## Latest API Docs
 
-Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc/api/2.0.1">2.0.1</a>.
+Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi-io-cdc/api/2.0.2">2.0.2</a>.
 
 ## How to use
 
@@ -85,7 +87,7 @@ The test framework initialize a docker container with required configuration bef
 
 ## Features
 
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc/api/2.0.1/#cdc-source">cdc</a> *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#source">(Source)</a>*<br><div style="padding-left: 1em;"><p>The CDC source receives events when change events (i.e., INSERT, UPDATE, DELETE) are triggered for a database table. Events are received in the 'key-value' format.<br>The key values of the map of a CDC change event are as follows.<br>&nbsp;&nbsp;&nbsp;&nbsp;For insert: Keys are specified as columns of the table.<br>&nbsp;&nbsp;&nbsp;&nbsp;For delete: Keys are followed followed by the specified table columns. This is achieved via 'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'.<br>&nbsp;&nbsp;&nbsp;&nbsp;For update: Keys are followed followed by the specified table columns. This is achieved via 'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'.<br>For 'polling' mode: Keys are specified as the coloumns of the table.<br>See parameter: mode for supported databases and change events.</p></div>
+* <a target="_blank" href="https://siddhi-io.github.io/siddhi-io-cdc/api/2.0.2/#cdc-source">cdc</a> *(<a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#source">Source</a>)*<br> <div style="padding-left: 1em;"><p>The CDC source receives events when change events (i.e., INSERT, UPDATE, DELETE) are triggered for a database table. Events are received in the 'key-value' format.<br>The key values of the map of a CDC change event are as follows.<br>&nbsp;&nbsp;&nbsp;&nbsp;For insert: Keys are specified as columns of the table.<br>&nbsp;&nbsp;&nbsp;&nbsp;For delete: Keys are followed followed by the specified table columns. This is achieved via 'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'.<br>&nbsp;&nbsp;&nbsp;&nbsp;For update: Keys are followed followed by the specified table columns. This is achieved via 'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'.<br>For 'polling' mode: Keys are specified as the coloumns of the table.<br>See parameter: mode for supported databases and change events.</p></div>
 
 ## How to Contribute
 
