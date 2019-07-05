@@ -519,7 +519,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            io.siddhi.extension.io.cdc.*
+                            io.siddhi.extension.io.cdc.*;${project.version}
                         </Export-Package>
                         <Private-Package>
                             com.github.shyiko.*,
@@ -529,7 +529,10 @@
                             org.apache.kafka.clients*
                         </Private-Package>
                         <Import-Package>
-                            io.siddhi.*; version="${siddhi.import.version.range}"
+                            io.siddhi.annotation.*;version="${siddhi.import.version.range}",
+                            io.siddhi.core.*;version="${siddhi.import.version.range}",
+                            io.siddhi.query.*;version="${siddhi.import.version.range}",
+                            *;resolution:=optional
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                         <Include-Resource>
