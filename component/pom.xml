@@ -519,7 +519,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            io.siddhi.extension.io.cdc.*;${project.version}
+                            io.siddhi.extension.io.cdc.*;version="${project.version}"
                         </Export-Package>
                         <Private-Package>
                             com.github.shyiko.*,
