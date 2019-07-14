@@ -1,44 +1,46 @@
-site_name: Siddhi-IO-CDC
-site_description: Siddhi Change Data Capture io Extension
-site_author: WSO2
-site_url: https://wso2-extensions.github.io/siddhi-io-cdc/
-extra_css:
-- stylesheets/extra.css
-extra_javascript:
-- javascripts/extra.js
-repo_name: Siddhi-IO-CDC
-repo_url: https://github.com/wso2-extensions/siddhi-io-cdc
-copyright: Copyright &copy; 2011 - 2018 WSO2
+site_name: Siddhi IO CDC
+site_description: Siddhi IO CDC Extension
+repo_name: Siddhi IO CDC
+repo_url: https://github.com/siddhi-io/siddhi-io-cdc/
+edit_uri: https://github.com/siddhi-io/siddhi-io-cdc/blob/master/
+copyright: Siddhi - Documentation
 theme:
   name: material
-  logo: images/siddhi-logo-w.svg
+  logo: images/siddhi-logo.svg
   favicon: images/favicon.ico
   palette:
     primary: teal
     accent: teal
-google_analytics:
-- UA-103065-28
-- auto
+extra_css:
+  - assets/stylesheets/extra.css
+extra_javascript:
+  - assets/javascripts/extra.js
 extra:
   social:
-  - type: github
-    link: https://github.com/wso2/cdc
-  - type: linkedin
-    link: https://www.linkedin.com/groups/13553064
+    - type: github
+      link: https://github.com/siddhi-io/siddhi
+    - type: medium
+      link: https://medium.com/siddhi-io
+    - type: twitter
+      link: https://twitter.com/siddhi_io
+    - type: linkedin
+      link: https://www.linkedin.com/groups/13553064
+google_analytics:
+  - UA-103065-28
+  - auto
 markdown_extensions:
-- admonition
-- toc(permalink=true)
-- codehilite(guess_lang=false)
+  - markdown.extensions.admonition
 pages:
-- Welcome: index.md
-- API Docs:
-  - latest: api/latest.md
-  - 2.0.2: api/2.0.2.md
-  - 2.0.1: api/2.0.1.md
-  - 2.0.0: api/2.0.0.md
-  - 1.0.9: api/1.0.9.md
-  - 1.0.8: api/1.0.8.md
-  - 1.0.7: api/1.0.7.md
-  - 1.0.6: api/1.0.6.md
-  - 1.0.5: api/1.0.5.md
-- License: license.md
+  - Information: index.md
+  - API Docs:
+      - latest: api/latest.md
+      - 2.0.2: api/2.0.2.md
+      - 2.0.1: api/2.0.1.md
+      - 2.0.0: api/2.0.0.md
+      - 1.0.9: api/1.0.9.md
+      - 1.0.8: api/1.0.8.md
+      - 1.0.7: api/1.0.7.md
+      - 1.0.6: api/1.0.6.md
+      - 1.0.5: api/1.0.5.md
+  - License: license.md
+
