@@ -225,9 +225,9 @@
         <docker.container.siddhi-cdc-postgres.ip>0.0.0.0</docker.container.siddhi-cdc-postgres.ip>
     </properties>
     <scm>
-        <url>https://github.com/wso2-extensions/siddhi-io-cdc.git</url>
-        <developerConnection>scm:git:https://github.com/wso2-extensions/siddhi-io-cdc.git</developerConnection>
-        <connection>scm:git:https://github.com/wso2-extensions/siddhi-io-cdc.git</connection>
+        <url>https://github.com/siddhi-io/siddhi-io-cdc.git</url>
+        <developerConnection>scm:git:https://github.com/siddhi-io/siddhi-io-cdc.git</developerConnection>
+        <connection>scm:git:https://github.com/siddhi-io/siddhi-io-cdc.git</connection>
         <tag>HEAD</tag>
     </scm>
 </project>
