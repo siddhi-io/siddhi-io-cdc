@@ -2,7 +2,7 @@
 
 
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" class="no-js">
   <head>
     
@@ -10,13 +10,9 @@
       <meta name="viewport" content="width=device-width,initial-scale=1">
       <meta http-equiv="x-ua-compatible" content="ie=edge">
       
-        <meta name="description" content="Siddhi Change Data Capture io Extension">
+        <meta name="description" content="Siddhi IO CDC Extension">
       
       
-        <link rel="canonical" href="https://wso2-extensions.github.io/siddhi-io-cdc/">
-      
-      
-        <meta name="author" content="WSO2">
       
       
         <meta name="lang:clipboard.copy" content="Copy to clipboard">
@@ -37,18 +33,18 @@
       
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
-      <link rel="shortcut icon" href="./images/favicon.ico">
-      <meta name="generator" content="mkdocs-0.17.4, mkdocs-material-2.9.2">
+      <link rel="shortcut icon" href="images/favicon.ico">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.4.0">
     
     
       
-        <title>Siddhi-IO-CDC</title>
+        <title>Siddhi IO CDC</title>
       
     
     
-      <link rel="stylesheet" href="./assets/stylesheets/application.ba0fd1a6.css">
+      <link rel="stylesheet" href="assets/stylesheets/application.0284f74d.css">
       
-        <link rel="stylesheet" href="./assets/stylesheets/application-palette.6079476c.css">
+        <link rel="stylesheet" href="assets/stylesheets/application-palette.01803549.css">
       
       
         
@@ -57,18 +53,47 @@
       
     
     
-      <script src="./assets/javascripts/modernizr.1aa3b519.js"></script>
+      <script src="assets/javascripts/modernizr.74668098.js"></script>
     
     
-      <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
       
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
+        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono&display=fallback">
         <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
       
     
-    <link rel="stylesheet" href="./assets/fonts/material-icons.css">
+    <link rel="stylesheet" href="assets/fonts/material-icons.css">
     
-      <link rel="stylesheet" href="./stylesheets/extra.css">
+    
+      <link rel="stylesheet" href="assets/stylesheets/extra.css">
+    
+    
+      
+        
+<script>
+  window.ga = window.ga || function() {
+    (ga.q = ga.q || []).push(arguments)
+  }
+  ga.l = +new Date
+  /* Setup integration and send page view */
+  ga("create", "UA-103065-28", "auto")
+  ga("set", "anonymizeIp", true)
+  ga("send", "pageview")
+  /* Register handler to log search on blur */
+  document.addEventListener("DOMContentLoaded", () => {
+    if (document.forms.search) {
+      var query = document.forms.search.query
+      query.addEventListener("blur", function() {
+        if (this.value) {
+          var path = document.location.pathname;
+          ga("send", "pageview", path + "?q=" + this.value)
+        }
+      })
+    }
+  })
+</script>
+<script async src="https://www.google-analytics.com/analytics.js"></script>
+      
     
     
   </head>
@@ -81,24 +106,7 @@
       <defs>
         
         
-          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448"
-    viewBox="0 0 416 448" id="__github">
-  <path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19-18.125
-        8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19 18.125-8.5
-        18.125 8.5 10.75 19 3.125 20.5zM320 304q0 10-3.125 20.5t-10.75
-        19-18.125 8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19
-        18.125-8.5 18.125 8.5 10.75 19 3.125 20.5zM360
-        304q0-30-17.25-51t-46.75-21q-10.25 0-48.75 5.25-17.75 2.75-39.25
-        2.75t-39.25-2.75q-38-5.25-48.75-5.25-29.5 0-46.75 21t-17.25 51q0 22 8
-        38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0
-        37.25-1.75t35-7.375 30.5-15 20.25-25.75 8-38.375zM416 260q0 51.75-15.25
-        82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5-41.75
-        1.125q-19.5 0-35.5-0.75t-36.875-3.125-38.125-7.5-34.25-12.875-30.25-20.25-21.5-28.75q-15.5-30.75-15.5-82.75
-        0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25
-        30.875q36.75-8.75 77.25-8.75 37 0 70 8 26.25-20.5
-        46.75-30.25t47.25-9.75q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34
-        99.5z" />
-</svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg>
         
       </defs>
     </svg>
@@ -115,9 +123,9 @@
   <nav class="md-header-nav md-grid">
     <div class="md-flex">
       <div class="md-flex__cell md-flex__cell--shrink">
-        <a href="https://wso2-extensions.github.io/siddhi-io-cdc/" title="Siddhi-IO-CDC" class="md-header-nav__button md-logo">
+        <a href="." title="Siddhi IO CDC" class="md-header-nav__button md-logo">
           
-            <img src="./images/siddhi-logo-w.svg" width="24" height="24">
+            <img src="images/siddhi-logo.svg" width="24" height="24">
           
         </a>
       </div>
@@ -127,22 +135,21 @@
       <div class="md-flex__cell md-flex__cell--stretch">
         <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
           
-            
-              <span class="md-header-nav__topic">
-                Siddhi-IO-CDC
-              </span>
-              <span class="md-header-nav__topic">
-                Welcome
-              </span>
-            
+            <span class="md-header-nav__topic">
+              Siddhi IO CDC
+            </span>
+            <span class="md-header-nav__topic">
+              
+                Information
+              
+            </span>
           
         </div>
       </div>
       <div class="md-flex__cell md-flex__cell--shrink">
         
+          <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
           
-            <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
-            
 <div class="md-search" data-md-component="search" role="dialog">
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
@@ -165,7 +172,6 @@
     </div>
   </div>
 </div>
-          
         
       </div>
       
@@ -176,20 +182,18 @@
 
   
 
-
-  <a href="https://github.com/wso2-extensions/siddhi-io-cdc/" title="Go to repository" class="md-source" data-md-source="github">
-    
-      <div class="md-source__icon">
-        <svg viewBox="0 0 24 24" width="24" height="24">
-          <use xlink:href="#__github" width="24" height="24"></use>
-        </svg>
-      </div>
-    
-    <div class="md-source__repository">
-      Siddhi-IO-CDC
+<a href="https://github.com/siddhi-io/siddhi-io-cdc/" title="Go to repository" class="md-source" data-md-source="github">
+  
+    <div class="md-source__icon">
+      <svg viewBox="0 0 24 24" width="24" height="24">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
     </div>
-  </a>
-
+  
+  <div class="md-source__repository">
+    Siddhi IO CDC
+  </div>
+</a>
           </div>
         </div>
       
@@ -211,12 +215,12 @@
                   <div class="md-sidebar__inner">
                     <nav class="md-nav md-nav--primary" data-md-level="0">
   <label class="md-nav__title md-nav__title--site" for="__drawer">
-    <span class="md-nav__button md-logo">
+    <a href="." title="Siddhi IO CDC" class="md-nav__button md-logo">
       
-        <img src="./images/siddhi-logo-w.svg" width="48" height="48">
+        <img src="images/siddhi-logo.svg" width="48" height="48">
       
-    </span>
-    Siddhi-IO-CDC
+    </a>
+    Siddhi IO CDC
   </label>
   
     <div class="md-nav__source">
@@ -225,20 +229,18 @@
 
   
 
-
-  <a href="https://github.com/wso2-extensions/siddhi-io-cdc/" title="Go to repository" class="md-source" data-md-source="github">
-    
-      <div class="md-source__icon">
-        <svg viewBox="0 0 24 24" width="24" height="24">
-          <use xlink:href="#__github" width="24" height="24"></use>
-        </svg>
-      </div>
-    
-    <div class="md-source__repository">
-      Siddhi-IO-CDC
+<a href="https://github.com/siddhi-io/siddhi-io-cdc/" title="Go to repository" class="md-source" data-md-source="github">
+  
+    <div class="md-source__icon">
+      <svg viewBox="0 0 24 24" width="24" height="24">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
     </div>
-  </a>
-
+  
+  <div class="md-source__repository">
+    Siddhi IO CDC
+  </div>
+</a>
     </div>
   
   <ul class="md-nav__list" data-md-scrollfix>
@@ -258,11 +260,11 @@
     
     
       <label class="md-nav__link md-nav__link--active" for="__toc">
-        Welcome
+        Information
       </label>
     
-    <a href="." title="Welcome" class="md-nav__link md-nav__link--active">
-      Welcome
+    <a href="." title="Information" class="md-nav__link md-nav__link--active">
+      Information
     </a>
     
       
@@ -276,8 +278,8 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#prerequisites" title="Prerequisites" class="md-nav__link">
-    Prerequisites
+  <a href="#download" title="Download" class="md-nav__link">
+    Download
   </a>
   
 </li>
@@ -290,27 +292,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-to-use" title="How to use" class="md-nav__link">
-    How to use
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#running-integration-tests-in-docker-containersoptional" title="Running Integration tests in docker containers(Optional)" class="md-nav__link">
-    Running Integration tests in docker containers(Optional)
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#jenkins-build-status" title="Jenkins Build Status" class="md-nav__link">
-    Jenkins Build Status
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#features" title="Features" class="md-nav__link">
     Features
   </a>
@@ -318,22 +299,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-to-contribute" title="How to Contribute" class="md-nav__link">
-    How to Contribute
+  <a href="#dependencies" title="Dependencies" class="md-nav__link">
+    Dependencies
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#contact-us" title="Contact us" class="md-nav__link">
-    Contact us
+  <a href="#installation" title="Installation" class="md-nav__link">
+    Installation
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#support" title="Support" class="md-nav__link">
-    Support
+  <a href="#support-and-contribution" title="Support and Contribution" class="md-nav__link">
+    Support and Contribution
   </a>
   
 </li>
@@ -374,8 +355,44 @@
 
 
   <li class="md-nav__item">
-    <a href="api/1.0.10/" title="1.0.10" class="md-nav__link">
-      1.0.10
+    <a href="api/latest/" title="latest" class="md-nav__link">
+      latest
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="api/2.0.2/" title="2.0.2" class="md-nav__link">
+      2.0.2
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="api/2.0.1/" title="2.0.1" class="md-nav__link">
+      2.0.1
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="api/2.0.0/" title="2.0.0" class="md-nav__link">
+      2.0.0
     </a>
   </li>
 
@@ -440,18 +457,6 @@
   </li>
 
         
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="api/latest/" title="latest" class="md-nav__link">
-      latest
-    </a>
-  </li>
-
-        
       </ul>
     </nav>
   </li>
@@ -490,8 +495,8 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#prerequisites" title="Prerequisites" class="md-nav__link">
-    Prerequisites
+  <a href="#download" title="Download" class="md-nav__link">
+    Download
   </a>
   
 </li>
@@ -504,27 +509,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-to-use" title="How to use" class="md-nav__link">
-    How to use
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#running-integration-tests-in-docker-containersoptional" title="Running Integration tests in docker containers(Optional)" class="md-nav__link">
-    Running Integration tests in docker containers(Optional)
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#jenkins-build-status" title="Jenkins Build Status" class="md-nav__link">
-    Jenkins Build Status
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#features" title="Features" class="md-nav__link">
     Features
   </a>
@@ -532,22 +516,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-to-contribute" title="How to Contribute" class="md-nav__link">
-    How to Contribute
+  <a href="#dependencies" title="Dependencies" class="md-nav__link">
+    Dependencies
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#contact-us" title="Contact us" class="md-nav__link">
-    Contact us
+  <a href="#installation" title="Installation" class="md-nav__link">
+    Installation
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#support" title="Support" class="md-nav__link">
-    Support
+  <a href="#support-and-contribution" title="Support and Contribution" class="md-nav__link">
+    Support and Contribution
   </a>
   
 </li>
@@ -568,150 +552,56 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/wso2-extensions/siddhi-io-cdc/edit/master/docs/index.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                  <a href="https://github.com/siddhi-io/siddhi-io-cdc/blob/master/index.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="siddhi-io-cdc">Siddhi-io-cdc<a class="headerlink" href="#siddhi-io-cdc" title="Permanent link">&para;</a></h1>
-<p>The <strong>siddhi-io-cdc extension</strong> is an extension to <a target="_blank" href="https://wso2.github.io/siddhi">Siddhi</a>. It receives change data from MySQL, MS SQL Server, Postgresql, H2 and Oracle in the key-value format.</p>
-<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
-<p>Default mode (listening):</p>
+                <h1 id="siddhi-io-cdc">Siddhi IO CDC</h1>
+<p><a href="https://wso2.org/jenkins/job/siddhi/job/siddhi-io-cdc/"><img alt="Jenkins Build Status" src="https://wso2.org/jenkins/job/siddhi/job/siddhi-io-cdc/badge/icon" /></a>
+  <a href="https://github.com/siddhi-io/siddhi-io-cdc/releases"><img alt="GitHub Release" src="https://img.shields.io/github/release/siddhi-io/siddhi-io-cdc.svg" /></a>
+  <a href="https://github.com/siddhi-io/siddhi-io-cdc/releases"><img alt="GitHub Release Date" src="https://img.shields.io/github/release-date/siddhi-io/siddhi-io-cdc.svg" /></a>
+  <a href="https://github.com/siddhi-io/siddhi-io-cdc/issues"><img alt="GitHub Open Issues" src="https://img.shields.io/github/issues-raw/siddhi-io/siddhi-io-cdc.svg" /></a>
+  <a href="https://github.com/siddhi-io/siddhi-io-cdc/commits/master"><img alt="GitHub Last Commit" src="https://img.shields.io/github/last-commit/siddhi-io/siddhi-io-cdc.svg" /></a>
+  <a href="https://opensource.org/licenses/Apache-2.0"><img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" /></a></p>
+<p>The <strong>siddhi-io-cdc extension</strong> is an extension to <a target="_blank" href="https://wso2.github.io/siddhi">Siddhi</a> that captures change data from databases such as MySQL, MS SQL, Postgresql, H2 and Oracle.</p>
+<p>For information on <a target="_blank" href="https://siddhi.io/">Siddhi</a> and it's features refer <a target="_blank" href="https://siddhi.io/redirect/docs.html">Siddhi Documentation</a>. </p>
+<h2 id="download">Download</h2>
 <ul>
-<li>The MySQL server should be configured to use a row-level binary log.</li>
-<li>WSO2 SP State persistence should be enabled.</li>
-<li>A MySQL user should be created with SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT privileges on the tables he wants to capture changes.</li>
+<li>Versions 3.x and above with group id <code>io.siddhi.extension.*</code> from <a target="_blank" href="https://mvnrepository.com/artifact/io.siddhi.extension.io.cdc/siddhi-io-cdc/">here</a>.</li>
+<li>Versions 2.x and lower with group id <code>org.wso2.extension.siddhi.*</code> from <a target="_blank" href="https://mvnrepository.com/artifact/org.wso2.extension.siddhi.io.cdc/siddhi-io-cdc">here</a>.</li>
 </ul>
-<p>Polling mode:</p>
+<h2 id="latest-api-docs">Latest API Docs</h2>
+<p>Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi-io-cdc/api/2.0.2">2.0.2</a>.</p>
+<h2 id="features">Features</h2>
+<ul>
+<li><a target="_blank" href="https://siddhi-io.github.io/siddhi-io-cdc/api/2.0.2/#cdc-source">cdc</a> <em>(<a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#source">Source</a>)</em><br> <div style="padding-left: 1em;"><p>The CDC source receives events when change events (i.e., INSERT, UPDATE, DELETE) are triggered for a database table. Events are received in the 'key-value' format.<br>The key values of the map of a CDC change event are as follows.<br>&nbsp;&nbsp;&nbsp;&nbsp;For insert: Keys are specified as columns of the table.<br>&nbsp;&nbsp;&nbsp;&nbsp;For delete: Keys are followed followed by the specified table columns. This is achieved via 'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'.<br>&nbsp;&nbsp;&nbsp;&nbsp;For update: Keys are followed followed by the specified table columns. This is achieved via 'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'.<br>For 'polling' mode: Keys are specified as the coloumns of the table.<br>See parameter: mode for supported databases and change events.</p></div></li>
+</ul>
+<h2 id="dependencies">Dependencies</h2>
+<p>There are some prerequisites that need to meet based on the CDC mode used. Please find them below.</p>
+<p><strong>Default mode (Listening mode):</strong></p>
+<p>Currently MySQL, PostgreSQL and SQLServer are supported in Listening Mode.
+To capture the change events, databases have to be configured as shown below.</p>
+<ul>
+<li>MySQL - https://debezium.io/docs/connectors/mysql/#setting-up-mysql</li>
+<li>PostgreSQL - https://debezium.io/docs/connectors/postgresql/#setting-up-PostgreSQL</li>
+<li>SQLServer - https://debezium.io/docs/connectors/sqlserver/#setting-up-sqlserver</li>
+</ul>
+<p><strong>Polling mode:</strong></p>
 <ul>
 <li>Change data capturing table should be have a polling column. Auto Incremental column or Timestamp can be used.</li>
 </ul>
 <p>Please see API docs for more details about change data capturing modes.</p>
-<p>Find some useful links below:</p>
-<ul>
-<li><a target="_blank" href="https://github.com/wso2-extensions/siddhi-io-cdc">Source code</a></li>
-<li><a target="_blank" href="https://github.com/wso2-extensions/siddhi-io-cdc/releases">Releases</a></li>
-<li><a target="_blank" href="https://github.com/wso2-extensions/siddhi-io-cdc/issues">Issue tracker</a></li>
-</ul>
-<h2 id="latest-api-docs">Latest API Docs<a class="headerlink" href="#latest-api-docs" title="Permanent link">&para;</a></h2>
-<p>Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc/api/1.0.10">1.0.10</a>.</p>
-<h2 id="how-to-use">How to use<a class="headerlink" href="#how-to-use" title="Permanent link">&para;</a></h2>
-<p><strong>Using the extension in <a target="_blank" href="https://github.com/wso2/product-sp">WSO2 Stream Processor</a></strong></p>
+<h2 id="installation">Installation</h2>
+<p>For installing this extension on various siddhi execution environments refer Siddhi documentation section on <a target="_blank" href="https://siddhi.io/redirect/add-extensions.html">adding extensions</a>.</p>
+<h2 id="support-and-contribution">Support and Contribution</h2>
 <ul>
 <li>
-<p>You can use this extension with the latest <a target="_blank" href="https://github.com/wso2/product-sp/releases">WSO2 Stream Processor</a> that is a part of the <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Analytics</a> offering, with editor, debugger and simulation support.</p>
+<p>We encourage users to ask questions and get support via <a target="_blank" href="https://stackoverflow.com/questions/tagged/siddhi">StackOverflow</a>, make sure to add the <code>siddhi</code> tag to the issue for better response.</p>
 </li>
 <li>
-<p>This extension is shipped by default with WSO2 Stream Processor. If you need to use an alternative version of this extension, you can replace the component <a target="_blank" href="https://github.com/wso2-extensions/siddhi-io-cdc/releases">jar</a> that can be found in the <code>&lt;STREAM_PROCESSOR_HOME&gt;/lib</code> directory.</p>
-</li>
-</ul>
-<p><strong>Using the extension as a <a target="_blank" href="https://wso2.github.io/siddhi/documentation/running-as-a-java-library">java library</a></strong></p>
-<ul>
-<li>This extension can be added as a maven dependency along with other Siddhi dependencies to your project.</li>
-</ul>
-<div class="codehilite"><pre><span></span>&lt;dependency&gt;
-  &lt;groupId&gt;org.wso2.extension.siddhi.io.cdc&lt;/groupId&gt;
-  &lt;artifactId&gt;siddhi-io-cdc&lt;/artifactId&gt;
-  &lt;version&gt;x.x.x&lt;/version&gt;
- &lt;/dependency&gt;
-</pre></div>
-
-
-<h2 id="running-integration-tests-in-docker-containersoptional">Running Integration tests in docker containers(Optional)<a class="headerlink" href="#running-integration-tests-in-docker-containersoptional" title="Permanent link">&para;</a></h2>
-<p>The CDC functionality are tested with the docker base integration test framework.
-The test framework initialize a docker container with required configuration before execute the test suit.</p>
-<p><strong>Start integration tests</strong></p>
-<ol>
-<li>
-<p>Install and run docker</p>
+<p>If you find any issues related to the extension please report them on <a target="_blank" href="https://github.com/siddhi-io/siddhi-execution-string/issues">the issue tracker</a>.</p>
 </li>
 <li>
-<p>To run the integration tests, navigate to the siddhi-io-cdc/ directory and issue the following commands.</p>
-<ul>
-<li>
-<p>H2 default:</p>
-<div class="codehilite"><pre><span></span>mvn clean install
-</pre></div>
-
-
-</li>
-<li>
-<p>MySQL 5.7:</p>
-<div class="codehilite"><pre><span></span> mvn verify -P local-mysql -Dskip.surefire.test=true
-</pre></div>
-
-
-</li>
-<li>
-<p>Postgres 9.6:</p>
-<div class="codehilite"><pre><span></span> mvn verify -P local-postgres -Dskip.surefire.test=true
-</pre></div>
-
-
-</li>
-<li>
-<p>MSSQL:</p>
-<div class="codehilite"><pre><span></span> mvn verify -P local-mssql -Dskip.surefire.test=true
-</pre></div>
-
-
-</li>
-<li>
-<p>Oracle 11.2.0.2-xe:</p>
-<div class="codehilite"><pre><span></span> mvn verify -P local-oracle -Dskip.surefire.test=true
-</pre></div>
-
-
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="jenkins-build-status">Jenkins Build Status<a class="headerlink" href="#jenkins-build-status" title="Permanent link">&para;</a></h2>
-<hr />
-<table>
-<thead>
-<tr>
-<th align="left">Branch</th>
-<th align="left">Build Status</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td align="left">master</td>
-<td align="left"><a href="https://wso2.org/jenkins/job/siddhi/job/siddhi-io-cdc/"><img alt="Build Status" src="https://wso2.org/jenkins/job/siddhi/job/siddhi-io-cdc/badge/icon" /></a></td>
-</tr>
-</tbody>
-</table>
-<h2 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h2>
-<ul>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc/api/1.0.10/#cdc-source">cdc</a> <em><a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source">(Source)</a></em><br><div style="padding-left: 1em;"><p>The CDC source receives events when change events (i.e., INSERT, UPDATE, DELETE) are triggered for a database table. Events are received in the 'key-value' format.<br>The key values of the map of a CDC change event are as follows.<br>&nbsp;&nbsp;&nbsp;&nbsp;For insert: Keys are specified as columns of the table.<br>&nbsp;&nbsp;&nbsp;&nbsp;For delete: Keys are followed followed by the specified table columns. This is achieved via 'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'.<br>&nbsp;&nbsp;&nbsp;&nbsp;For update: Keys are followed followed by the specified table columns. This is achieved via 'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'.<br>For 'polling' mode: Keys are specified as the coloumns of the table.<br>See parameter: mode for supported databases and change events.</p></div></li>
-</ul>
-<h2 id="how-to-contribute">How to Contribute<a class="headerlink" href="#how-to-contribute" title="Permanent link">&para;</a></h2>
-<ul>
-<li>
-<p>Report issues at <a target="_blank" href="https://github.com/wso2-extensions/siddhi-io-cdc/issues">GitHub Issue Tracker</a>.</p>
-</li>
-<li>
-<p>Send your contributions as pull requests to the <a target="_blank" href="https://github
-  .com/wso2-extensions/siddhi-io-cdc/tree/master">master branch</a>.</p>
-</li>
-</ul>
-<h2 id="contact-us">Contact us<a class="headerlink" href="#contact-us" title="Permanent link">&para;</a></h2>
-<ul>
-<li>
-<p>Post your questions with the <a target="_blank" href="http://stackoverflow.com/search?q=siddhi">"Siddhi"</a> tag in <a target="_blank" href="http://stackoverflow.com/search?q=siddhi">Stackoverflow</a>.</p>
-</li>
-<li>
-<p>Siddhi developers can be contacted via the following mailing lists:</p>
-<p>Developers List   : <a href="mailto:dev@wso2.org">dev@wso2.org</a></p>
-<p>Architecture List : <a href="mailto:architecture@wso2.org">architecture@wso2.org</a></p>
-</li>
-</ul>
-<h2 id="support">Support<a class="headerlink" href="#support" title="Permanent link">&para;</a></h2>
-<ul>
-<li>
-<p>We are committed to ensuring support for this extension in production. Our unique approach ensures that all support leverages our open development methodology and is provided by the very same engineers who build the technology.</p>
-</li>
-<li>
-<p>For more details and to take advantage of this unique opportunity contact us via <a target="_blank" href="http://wso2.com/support?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">http://wso2.com/support/</a>.</p>
+<p>For production support and other contribution related information refer <a target="_blank" href="https://siddhi.io/community/">Siddhi Community</a> documentation.</p>
 </li>
 </ul>
                 
@@ -735,13 +625,13 @@ The test framework initialize a docker container with required configuration bef
       <nav class="md-footer-nav__inner md-grid">
         
         
-          <a href="api/1.0.10/" title="1.0.10" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="api/latest/" title="latest" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                1.0.10
+                latest
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
@@ -757,7 +647,7 @@ The test framework initialize a docker container with required configuration bef
       <div class="md-footer-copyright">
         
           <div class="md-footer-copyright__highlight">
-            Copyright &copy; 2011 - 2018 WSO2
+            Siddhi - Documentation
           </div>
         
         powered by
@@ -767,33 +657,30 @@ The test framework initialize a docker container with required configuration bef
           Material for MkDocs</a>
       </div>
       
-        
   <div class="md-footer-social">
-    <link rel="stylesheet" href="./assets/fonts/font-awesome.css">
+    <link rel="stylesheet" href="assets/fonts/font-awesome.css">
     
-      <a href="https://github.com/wso2/cdc" class="md-footer-social__link fa fa-github"></a>
+      <a href="https://github.com/siddhi-io/siddhi" class="md-footer-social__link fa fa-github"></a>
+    
+      <a href="https://medium.com/siddhi-io" class="md-footer-social__link fa fa-medium"></a>
+    
+      <a href="https://twitter.com/siddhi_io" class="md-footer-social__link fa fa-twitter"></a>
     
       <a href="https://www.linkedin.com/groups/13553064" class="md-footer-social__link fa fa-linkedin"></a>
     
   </div>
 
-      
     </div>
   </div>
 </footer>
       
     </div>
     
-      <script src="./assets/javascripts/application.a59e2a89.js"></script>
+      <script src="assets/javascripts/application.245445c6.js"></script>
       
-      <script>app.initialize({version:"0.17.4",url:{base:"."}})</script>
+      <script>app.initialize({version:"1.0.4",url:{base:"."}})</script>
       
-        <script src="./javascripts/extra.js"></script>
-      
-    
-    
-      
-        <script>!function(e,a,t,n,o,c,i){e.GoogleAnalyticsObject=o,e.ga=e.ga||function(){(e.ga.q=e.ga.q||[]).push(arguments)},e.ga.l=1*new Date,c=a.createElement(t),i=a.getElementsByTagName(t)[0],c.async=1,c.src="https://www.google-analytics.com/analytics.js",i.parentNode.insertBefore(c,i)}(window,document,"script",0,"ga"),ga("create","UA-103065-28","auto"),ga("set","anonymizeIp",!0),ga("send","pageview");var links=document.getElementsByTagName("a");if(Array.prototype.map.call(links,function(e){e.host!=document.location.host&&e.addEventListener("click",function(){var a=e.getAttribute("data-md-action")||"follow";ga("send","event","outbound",a,e.href)})}),document.forms.search){var query=document.forms.search.query;query.addEventListener("blur",function(){if(this.value){var e=document.location.pathname;ga("send","pageview",e+"?q="+this.value)}})}</script>
+        <script src="assets/javascripts/extra.js"></script>
       
     
   </body>
