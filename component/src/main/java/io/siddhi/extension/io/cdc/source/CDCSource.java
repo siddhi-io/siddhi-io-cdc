@@ -57,15 +57,31 @@ import java.util.concurrent.Executors;
         name = "cdc",
         namespace = "source",
         description = "The CDC source receives events when change events (i.e., INSERT, UPDATE, DELETE) are triggered" +
-                " for a database table. Events are received in the 'key-value' format." +
-                "\nThe key values of the map of a CDC change event are as follows." +
-                "\n\tFor insert: Keys are specified as columns of the table." +
-                "\n\tFor delete: Keys are followed followed by the specified table columns. This is achieved via " +
+                " for a database table. Events are received in the 'key-value' format.\n\n" +
+
+                "There are two modes you could perform CDC: " +
+                "Listening mode and Polling mode.\n\n" +
+
+                "In polling mode, the datasource is periodically polled for capturing the changes. " +
+                "The polling period can be configured.\n" +
+                "In polling mode, you can only capture INSERT and UPDATE changes.\n\n" +
+
+                "On listening mode, the Streaming Integrator will keep listening to the Change Log of the database" +
+                " and notify in case a change has taken place. Here, you are immediately notified about the change, " +
+                "compared to polling mode.\n\n" +
+
+                "The key values of the map of a CDC change event are as follows.\n\n" +
+
+                "For 'listening' mode: \n" +
+                "\tFor insert: Keys are specified as columns of the table.\n" +
+                "\tFor delete: Keys are followed by the specified table columns. This is achieved via " +
+                "'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'.\n" +
+                "\tFor update: Keys are followed followed by the specified table columns. This is achieved via " +
                 "'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'." +
-                "\n\tFor update: Keys are followed followed by the specified table columns. This is achieved via " +
-                "'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'." +
-                "\nFor 'polling' mode: Keys are specified as the coloumns of the table." +
-                "\nSee parameter: mode for supported databases and change events.",
+
+                "\n\nFor 'polling' mode: Keys are specified as the columns of the table." +
+
+                "\n\nSee parameter: mode for supported databases and change events.",
         parameters = {
                 @Parameter(name = "url",
                         description = "The connection URL to the database." +
