@@ -59,7 +59,7 @@ import java.util.concurrent.Executors;
         description = "The CDC source receives events when change events (i.e., INSERT, UPDATE, DELETE) are triggered" +
                 " for a database table. Events are received in the 'key-value' format.\n\n" +
 
-                "There are two modes you could perform CDC using the Streaming Integrator: " +
+                "There are two modes you could perform CDC: " +
                 "Listening mode and Polling mode.\n\n" +
 
                 "In polling mode, the datasource is periodically polled for capturing the changes. " +
