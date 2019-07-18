@@ -58,14 +58,14 @@ import java.util.concurrent.Executors;
         namespace = "source",
         description = "The CDC source receives events when change events (i.e., INSERT, UPDATE, DELETE) are triggered" +
                 " for a database table. Events are received in the 'key-value' format." +
-                "\nThe key values of the map of a CDC change event are as follows." +
-                "\n\tFor insert: Keys are specified as columns of the table." +
-                "\n\tFor delete: Keys are followed followed by the specified table columns. This is achieved via " +
+                "\n\nThe key values of the map of a CDC change event are as follows." +
+                "\n\n\tFor insert: Keys are specified as columns of the table." +
+                "\n\n\tFor delete: Keys are followed followed by the specified table columns. This is achieved via " +
                 "'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'." +
-                "\n\tFor update: Keys are followed followed by the specified table columns. This is achieved via " +
+                "\n\n\tFor update: Keys are followed followed by the specified table columns. This is achieved via " +
                 "'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'." +
-                "\nFor 'polling' mode: Keys are specified as the coloumns of the table." +
-                "\nSee parameter: mode for supported databases and change events.",
+                "\n\nFor 'polling' mode: Keys are specified as the coloumns of the table." +
+                "\n\nSee parameter: mode for supported databases and change events.",
         parameters = {
                 @Parameter(name = "url",
                         description = "The connection URL to the database." +
