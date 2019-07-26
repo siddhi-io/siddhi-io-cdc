@@ -66,7 +66,7 @@ import java.util.concurrent.Executors;
                 "The polling period can be configured.\n" +
                 "In polling mode, you can only capture INSERT and UPDATE changes.\n\n" +
 
-                "On listening mode, the Streaming Integrator will keep listening to the Change Log of the database" +
+                "On listening mode, the Source will keep listening to the Change Log of the database" +
                 " and notify in case a change has taken place. Here, you are immediately notified about the change, " +
                 "compared to polling mode.\n\n" +
 
