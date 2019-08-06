@@ -313,6 +313,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#running-integration-tests-in-docker-containersoptional" title="Running Integration tests in docker containers(Optional)" class="md-nav__link">
+    Running Integration tests in docker containers(Optional)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#support-and-contribution" title="Support and Contribution" class="md-nav__link">
     Support and Contribution
   </a>
@@ -357,6 +364,18 @@
   <li class="md-nav__item">
     <a href="api/latest/" title="latest" class="md-nav__link">
       latest
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="api/2.0.3/" title="2.0.3" class="md-nav__link">
+      2.0.3
     </a>
   </li>
 
@@ -530,6 +549,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#running-integration-tests-in-docker-containersoptional" title="Running Integration tests in docker containers(Optional)" class="md-nav__link">
+    Running Integration tests in docker containers(Optional)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#support-and-contribution" title="Support and Contribution" class="md-nav__link">
     Support and Contribution
   </a>
@@ -570,13 +596,15 @@
 <li>Versions 2.x and lower with group id <code>org.wso2.extension.siddhi.*</code> from <a target="_blank" href="https://mvnrepository.com/artifact/org.wso2.extension.siddhi.io.cdc/siddhi-io-cdc">here</a>.</li>
 </ul>
 <h2 id="latest-api-docs">Latest API Docs</h2>
-<p>Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi-io-cdc/api/2.0.2">2.0.2</a>.</p>
+<p>Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi-io-cdc/api/2.0.3">2.0.3</a>.</p>
 <h2 id="features">Features</h2>
 <ul>
-<li><a target="_blank" href="https://siddhi-io.github.io/siddhi-io-cdc/api/2.0.2/#cdc-source">cdc</a> <em>(<a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#source">Source</a>)</em><br> <div style="padding-left: 1em;"><p>The CDC source receives events when change events (i.e., INSERT, UPDATE, DELETE) are triggered for a database table. Events are received in the 'key-value' format.<br>The key values of the map of a CDC change event are as follows.<br>&nbsp;&nbsp;&nbsp;&nbsp;For insert: Keys are specified as columns of the table.<br>&nbsp;&nbsp;&nbsp;&nbsp;For delete: Keys are followed followed by the specified table columns. This is achieved via 'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'.<br>&nbsp;&nbsp;&nbsp;&nbsp;For update: Keys are followed followed by the specified table columns. This is achieved via 'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'.<br>For 'polling' mode: Keys are specified as the coloumns of the table.<br>See parameter: mode for supported databases and change events.</p></div></li>
+<li><a target="_blank" href="https://siddhi-io.github.io/siddhi-io-cdc/api/2.0.3/#cdc-source">cdc</a> <em>(<a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#source">Source</a>)</em><br> <div style="padding-left: 1em;"><p>The CDC source receives events when change events (i.e., INSERT, UPDATE, DELETE) are triggered for a database table. Events are received in the 'key-value' format.<br><br>There are two modes you could perform CDC: Listening mode and Polling mode.<br><br>In polling mode, the datasource is periodically polled for capturing the changes. The polling period can be configured.<br>In polling mode, you can only capture INSERT and UPDATE changes.<br><br>On listening mode, the Source will keep listening to the Change Log of the database and notify in case a change has taken place. Here, you are immediately notified about the change, compared to polling mode.<br><br>The key values of the map of a CDC change event are as follows.<br><br>For 'listening' mode: <br>&nbsp;&nbsp;&nbsp;&nbsp;For insert: Keys are specified as columns of the table.<br>&nbsp;&nbsp;&nbsp;&nbsp;For delete: Keys are followed by the specified table columns. This is achieved via 'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'.<br>&nbsp;&nbsp;&nbsp;&nbsp;For update: Keys are followed followed by the specified table columns. This is achieved via 'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'.<br><br>For 'polling' mode: Keys are specified as the columns of the table.<br><br>See parameter: mode for supported databases and change events.</p></div></li>
 </ul>
 <h2 id="dependencies">Dependencies</h2>
-<p>There are some prerequisites that need to meet based on the CDC mode used. Please find them below.</p>
+<p>JDBC connector jar should be added to the runtime. Download the JDBC connector jar based on the database type that is being used.</p>
+<p>For MySQL, use connector version 5.1.xx.</p>
+<p>In addition to that, there are some prerequisites that need to be met based on the CDC mode used. Please find them below.</p>
 <p><strong>Default mode (Listening mode):</strong></p>
 <p>Currently MySQL, PostgreSQL and SQLServer are supported in Listening Mode.
 To capture the change events, databases have to be configured as shown below.</p>
@@ -592,6 +620,45 @@ To capture the change events, databases have to be configured as shown below.</p
 <p>Please see API docs for more details about change data capturing modes.</p>
 <h2 id="installation">Installation</h2>
 <p>For installing this extension on various siddhi execution environments refer Siddhi documentation section on <a target="_blank" href="https://siddhi.io/redirect/add-extensions.html">adding extensions</a>.</p>
+<h2 id="running-integration-tests-in-docker-containersoptional">Running Integration tests in docker containers(Optional)</h2>
+<p>The CDC functionality are tested with the docker base integration test framework.
+The test framework initialize a docker container with required configuration before execute the test suit.</p>
+<p><strong>Start integration tests</strong></p>
+<ol>
+<li>
+<p>Install and run docker</p>
+</li>
+<li>
+<p>To run the integration tests, navigate to the siddhi-io-cdc/ directory and issue the following commands.</p>
+<ul>
+<li>
+<p>H2 default:</p>
+<pre><code>mvn clean install
+</code></pre>
+</li>
+<li>
+<p>MySQL 5.7:</p>
+<pre><code> mvn verify -P local-mysql -Dskip.surefire.test=true
+</code></pre>
+</li>
+<li>
+<p>Postgres 9.6:</p>
+<pre><code> mvn verify -P local-postgres -Dskip.surefire.test=true
+</code></pre>
+</li>
+<li>
+<p>MSSQL:</p>
+<pre><code> mvn verify -P local-mssql -Dskip.surefire.test=true
+</code></pre>
+</li>
+<li>
+<p>Oracle 11.2.0.2-xe:</p>
+<pre><code> mvn verify -P local-oracle -Dskip.surefire.test=true
+</code></pre>
+</li>
+</ul>
+</li>
+</ol>
 <h2 id="support-and-contribution">Support and Contribution</h2>
 <ul>
 <li>
