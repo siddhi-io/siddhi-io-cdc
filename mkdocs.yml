@@ -12,35 +12,35 @@ theme:
     primary: teal
     accent: teal
 extra_css:
-  - assets/stylesheets/extra.css
+- assets/stylesheets/extra.css
 extra_javascript:
-  - assets/javascripts/extra.js
+- assets/javascripts/extra.js
 extra:
   social:
-    - type: github
-      link: https://github.com/siddhi-io/siddhi
-    - type: medium
-      link: https://medium.com/siddhi-io
-    - type: twitter
-      link: https://twitter.com/siddhi_io
-    - type: linkedin
-      link: https://www.linkedin.com/groups/13553064
+  - type: github
+    link: https://github.com/siddhi-io/siddhi
+  - type: medium
+    link: https://medium.com/siddhi-io
+  - type: twitter
+    link: https://twitter.com/siddhi_io
+  - type: linkedin
+    link: https://www.linkedin.com/groups/13553064
 google_analytics:
-  - UA-103065-28
-  - auto
+- UA-103065-28
+- auto
 markdown_extensions:
-  - markdown.extensions.admonition
+- markdown.extensions.admonition
 pages:
-  - Information: index.md
-  - API Docs:
-      - latest: api/latest.md
-      - 2.0.2: api/2.0.2.md
-      - 2.0.1: api/2.0.1.md
-      - 2.0.0: api/2.0.0.md
-      - 1.0.9: api/1.0.9.md
-      - 1.0.8: api/1.0.8.md
-      - 1.0.7: api/1.0.7.md
-      - 1.0.6: api/1.0.6.md
-      - 1.0.5: api/1.0.5.md
-  - License: license.md
-
+- Information: index.md
+- API Docs:
+  - latest: api/latest.md
+  - 2.0.3: api/2.0.3.md
+  - 2.0.2: api/2.0.2.md
+  - 2.0.1: api/2.0.1.md
+  - 2.0.0: api/2.0.0.md
+  - 1.0.9: api/1.0.9.md
+  - 1.0.8: api/1.0.8.md
+  - 1.0.7: api/1.0.7.md
+  - 1.0.6: api/1.0.6.md
+  - 1.0.5: api/1.0.5.md
+- License: license.md
