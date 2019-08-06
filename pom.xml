@@ -205,7 +205,7 @@
         <debezium-embedded.version>0.8.3.Final</debezium-embedded.version>
         <debezium-connector-oracle.version>0.8.3.Final</debezium-connector-oracle.version>
         <debezium-connector-postgres.version>0.8.3.Final</debezium-connector-postgres.version>
-        <debezium-connector-sqlserver.version>0.8.3.Final</debezium-connector-sqlserver.version>
+        <debezium-connector-sqlserver.version>0.9.5.Final</debezium-connector-sqlserver.version>
         <hikari.version>3.2.0</hikari.version>
         <org.testng.version>6.11</org.testng.version>
         <siddhi-store-rdbms.version>6.0.1</siddhi-store-rdbms.version>
