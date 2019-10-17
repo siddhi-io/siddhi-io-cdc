@@ -184,6 +184,38 @@ import java.util.concurrent.Executors;
                         defaultValue = "{host}_{port}",
                         optional = true,
                         type = DataType.STRING
+                ),
+                @Parameter(
+                        name = "wait.on.missed.record",
+                        description = "Indicates whether you need to wait on missing/out-of-order records. When " +
+                                "this flag is set to true the process will be hold once it identifies a missing " +
+                                "record. The missing record is identified by the sequence of the polling.column. " +
+                                "\nThis can be used only with a number field and should not be used with time values " +
+                                "as it will not be an incremental value." +
+                                "\nThis should be enabled ONLY in a situation where the records are written out of " +
+                                "order, e.g. in a concurrent system as this degrades the performance.",
+                        type = DataType.BOOL,
+                        optional = true,
+                        defaultValue = "false"
+                ),
+                @Parameter(
+                        name = "missed.record.retry.interval",
+                        description = "The time interval (specified in milliseconds) to wait and retry if the " +
+                                "process identifies a missing/out-of-order record. This should be used along with " +
+                                "the wait.on.missed.record parameter.",
+                        type = DataType.INT,
+                        optional = true,
+                        defaultValue = "-1"
+                ),
+                @Parameter(
+                        name = "missed.record.waiting.timeout",
+                        description = "The timeout (specified in milliseconds) to retry for missing/out-of-order " +
+                                "record. This should be used along with the wait.on.missed.record parameter. If the " +
+                                "parameter is not set, the process will indefinitely wait for the record without " +
+                                "proceeding.",
+                        type = DataType.INT,
+                        optional = true,
+                        defaultValue = "-1"
                 )
         },
         examples = {
@@ -341,23 +373,33 @@ public class CDCSource extends Source {
                 String pollingColumn = optionHolder.validateAndGetStaticValue(CDCSourceConstants.POLLING_COLUMN);
                 boolean isDatasourceNameAvailable = optionHolder.isOptionExists(CDCSourceConstants.DATASOURCE_NAME);
                 boolean isJndiResourceAvailable = optionHolder.isOptionExists(CDCSourceConstants.JNDI_RESOURCE);
-                pollingInterval = Integer.parseInt(
+                int pollingInterval = Integer.parseInt(
                         optionHolder.validateAndGetStaticValue(CDCSourceConstants.POLLING_INTERVAL,
                                 Integer.toString(CDCSourceConstants.DEFAULT_POLLING_INTERVAL_SECONDS)));
                 validatePollingModeParameters();
                 String poolPropertyString = optionHolder.validateAndGetStaticValue(CDCSourceConstants.POOL_PROPERTIES,
                         null);
+                boolean waitOnMissedRecord = Boolean.parseBoolean(
+                        optionHolder.validateAndGetStaticValue(CDCSourceConstants.WAIT_ON_MISSED_RECORD, "false"));
+                int missedRecordRetryIntervalMS = Integer.parseInt(
+                        optionHolder.validateAndGetStaticValue(CDCSourceConstants.MISSED_RECORD_RETRY_INTERVAL_MS,
+                                "-1"));
+                int missedRecordWaitingTimeoutMS = Integer.parseInt(
+                        optionHolder.validateAndGetStaticValue(
+                                CDCSourceConstants.MISSED_RECORD_WAITING_TIMEOUT_MS, "-1"));
 
                 if (isDatasourceNameAvailable) {
                     String datasourceName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.DATASOURCE_NAME);
                     cdcPoller = new CDCPoller(null, null, null, tableName, null,
                             datasourceName, null, pollingColumn, pollingInterval,
-                            poolPropertyString, sourceEventListener, configReader);
+                            poolPropertyString, sourceEventListener, configReader, waitOnMissedRecord,
+                            missedRecordRetryIntervalMS, missedRecordWaitingTimeoutMS);
                 } else if (isJndiResourceAvailable) {
                     String jndiResource = optionHolder.validateAndGetStaticValue(CDCSourceConstants.JNDI_RESOURCE);
                     cdcPoller = new CDCPoller(null, null, null, tableName, null,
                             null, jndiResource, pollingColumn, pollingInterval, poolPropertyString,
-                            sourceEventListener, configReader);
+                            sourceEventListener, configReader, waitOnMissedRecord, missedRecordRetryIntervalMS,
+                            missedRecordWaitingTimeoutMS);
                 } else {
                     String driverClassName;
                     try {
@@ -372,7 +414,8 @@ public class CDCSource extends Source {
                     }
                     cdcPoller = new CDCPoller(url, username, password, tableName, driverClassName,
                             null, null, pollingColumn, pollingInterval, poolPropertyString,
-                            sourceEventListener, configReader);
+                            sourceEventListener, configReader, waitOnMissedRecord, missedRecordRetryIntervalMS,
+                            missedRecordWaitingTimeoutMS);
                 }
                 break;
             default:
