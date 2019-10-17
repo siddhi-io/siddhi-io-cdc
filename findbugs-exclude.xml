@@ -19,9 +19,9 @@
   -->
 
 <FindBugsFilter>
-    <!-- SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING : SQL statement will different for each event -->
+    <!-- SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING: SQL statement will different for each event -->
     <Match>
-        <Class name="io.siddhi.extension.io.cdc.source.polling.CDCPoller"/>
+        <Package name="io.siddhi.extension.io.cdc.source.polling.strategies"/>
         <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING"/>
     </Match>
 
