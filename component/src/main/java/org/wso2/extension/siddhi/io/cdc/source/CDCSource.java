@@ -309,11 +309,14 @@ public class CDCSource extends Source {
     public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
                      String[] requestedTransportPropertyNames, ConfigReader configReader,
                      SiddhiAppContext siddhiAppContext) {
+
+
         //initialize mode
         mode = optionHolder.validateAndGetStaticValue(CDCSourceConstants.MODE, CDCSourceConstants.MODE_LISTENING);
 
         //initialize common mandatory parameters
         String tableName = optionHolder.validateAndGetOption(CDCSourceConstants.TABLE_NAME).getValue();
+        String siddhiAppName = siddhiAppContext.getName();
 
         switch (mode) {
             case CDCSourceConstants.MODE_LISTENING:
@@ -321,8 +324,6 @@ public class CDCSource extends Source {
                 String url = optionHolder.validateAndGetOption(CDCSourceConstants.DATABASE_CONNECTION_URL).getValue();
                 String username = optionHolder.validateAndGetOption(CDCSourceConstants.USERNAME).getValue();
                 String password = optionHolder.validateAndGetOption(CDCSourceConstants.PASSWORD).getValue();
-
-                String siddhiAppName = siddhiAppContext.getName();
                 String streamName = sourceEventListener.getStreamDefinition().getId();
 
                 //initialize mandatory parameters
@@ -394,12 +395,13 @@ public class CDCSource extends Source {
                     cdcPoller = new CDCPoller(null, null, null, tableName, null,
                             datasourceName, null, pollingColumn, pollingInterval,
                             poolPropertyString, sourceEventListener, configReader, waitOnMissedRecord,
-                            missedRecordWaitingTimeout);
+                            missedRecordWaitingTimeout, siddhiAppName);
                 } else if (isJndiResourceAvailable) {
                     String jndiResource = optionHolder.validateAndGetStaticValue(CDCSourceConstants.JNDI_RESOURCE);
                     cdcPoller = new CDCPoller(null, null, null, tableName, null,
                             null, jndiResource, pollingColumn, pollingInterval, poolPropertyString,
-                            sourceEventListener, configReader, waitOnMissedRecord, missedRecordWaitingTimeout);
+                            sourceEventListener, configReader, waitOnMissedRecord, missedRecordWaitingTimeout,
+                            siddhiAppName);
                 } else {
                     String driverClassName;
                     try {
@@ -414,7 +416,8 @@ public class CDCSource extends Source {
                     }
                     cdcPoller = new CDCPoller(url, username, password, tableName, driverClassName,
                             null, null, pollingColumn, pollingInterval, poolPropertyString,
-                            sourceEventListener, configReader, waitOnMissedRecord, missedRecordWaitingTimeout);
+                            sourceEventListener, configReader, waitOnMissedRecord, missedRecordWaitingTimeout,
+                            siddhiAppName);
                 }
                 break;
             default:

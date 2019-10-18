@@ -55,6 +55,8 @@ public abstract class PollingStrategy {
     private String selectQueryStructure = "";
     private ConfigReader configReader;
     private SourceEventListener sourceEventListener;
+    private String appName;
+    private String streamName;
 
     protected boolean paused = false;
     protected ReentrantLock pauseLock = new ReentrantLock();
@@ -62,11 +64,13 @@ public abstract class PollingStrategy {
     protected String tableName;
 
     public PollingStrategy(HikariDataSource dataSource, ConfigReader configReader,
-                           SourceEventListener sourceEventListener, String tableName) {
+                           SourceEventListener sourceEventListener, String tableName, String appName) {
         this.dataSource = dataSource;
         this.configReader = configReader;
         this.sourceEventListener = sourceEventListener;
         this.tableName = tableName;
+        this.appName = appName;
+        this.streamName = sourceEventListener.getStreamDefinition().getId();
     }
 
     public abstract void poll();
@@ -93,12 +97,9 @@ public abstract class PollingStrategy {
         Connection conn;
         try {
             conn = this.dataSource.getConnection();
-            if (log.isDebugEnabled()) {
-                log.debug("A connection is initialized ");
-            }
+            log.debug("A connection is initialized.");
         } catch (SQLException e) {
-            throw new CDCPollingModeException("Error initializing datasource connection. Current mode: " +
-                    CDCSourceConstants.MODE_POLLING, e);
+            throw new CDCPollingModeException(buildError("Error initializing datasource connection."), e);
         }
         return conn;
     }
@@ -114,8 +115,7 @@ public abstract class PollingStrategy {
                 DatabaseMetaData dmd = conn.getMetaData();
                 databaseName = dmd.getDatabaseProductName();
             } catch (SQLException e) {
-                throw new CDCPollingModeException("Error in looking up database type. Current mode: " +
-                        CDCSourceConstants.MODE_POLLING, e);
+                throw new CDCPollingModeException(buildError("Error in looking up database type."), e);
             } finally {
                 CDCPollingUtil.cleanupConnection(null, null, conn);
             }
@@ -136,8 +136,8 @@ public abstract class PollingStrategy {
                     ClassLoader classLoader = getClass().getClassLoader();
                     inputStream = classLoader.getResourceAsStream(SELECT_QUERY_CONFIG_FILE);
                     if (inputStream == null) {
-                        throw new CDCPollingModeException(SELECT_QUERY_CONFIG_FILE
-                                + " is not found in the classpath. Current mode: " + CDCSourceConstants.MODE_POLLING);
+                        throw new CDCPollingModeException(buildError("%s is not found in the classpath",
+                                SELECT_QUERY_CONFIG_FILE));
                     }
                     queryConfiguration = (QueryConfiguration) yaml.load(inputStream);
                 } finally {
@@ -145,8 +145,7 @@ public abstract class PollingStrategy {
                         try {
                             inputStream.close();
                         } catch (IOException e) {
-                            log.error("Failed to close the input stream for " + SELECT_QUERY_CONFIG_FILE + ". " +
-                                    "Current mode: " + CDCSourceConstants.MODE_POLLING);
+                            log.error(buildError("Failed to close the input stream for %s.", SELECT_QUERY_CONFIG_FILE));
                         }
                     }
                 }
@@ -163,9 +162,8 @@ public abstract class PollingStrategy {
             }
 
             if (selectQueryStructure.isEmpty()) {
-                throw new CDCPollingModeException("Unsupported database: " + databaseName + ". Configure system" +
-                        " parameter: " + databaseName + "." + RECORD_SELECT_QUERY + ". Current mode: " +
-                        CDCSourceConstants.MODE_POLLING);
+                throw new CDCPollingModeException(buildError("Unsupported database: %s. Configure system " +
+                                "parameter: %s.%s.", databaseName, databaseName, RECORD_SELECT_QUERY));
             }
         }
         //create the select query with given constraints
@@ -178,5 +176,10 @@ public abstract class PollingStrategy {
 
     protected void handleEvent(Map detailsMap) {
         sourceEventListener.onEvent(detailsMap, null);
+    }
+
+    protected String buildError(String message, Object... args) {
+        return String.format(message, args) + " {mode=" + CDCSourceConstants.MODE_POLLING + ", app=" + appName +
+                ", stream=" + streamName + "}";
     }
 }

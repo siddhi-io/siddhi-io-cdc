@@ -22,7 +22,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.apache.log4j.Logger;
 import org.wso2.extension.siddhi.io.cdc.source.polling.CDCPollingModeException;
 import org.wso2.extension.siddhi.io.cdc.util.CDCPollingUtil;
-import org.wso2.extension.siddhi.io.cdc.util.CDCSourceConstants;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 
@@ -48,8 +47,8 @@ public class DefaultPollingStrategy extends PollingStrategy {
 
     public DefaultPollingStrategy(HikariDataSource dataSource, ConfigReader configReader,
                                   SourceEventListener sourceEventListener, String tableName, String pollingColumn,
-                                  int pollingInterval) {
-        super(dataSource, configReader, sourceEventListener, tableName);
+                                  int pollingInterval, String appName) {
+        super(dataSource, configReader, sourceEventListener, tableName, appName);
         this.pollingColumn = pollingColumn;
         this.pollingInterval = pollingInterval;
     }
@@ -109,19 +108,18 @@ public class DefaultPollingStrategy extends PollingStrategy {
                         handleEvent(detailsMap);
                     }
                 } catch (SQLException ex) {
-                    log.error(ex);
+                    log.error(buildError("Error occurred while processing records in table %s.", tableName), ex);
                 } finally {
                     CDCPollingUtil.cleanupConnection(resultSet, null, null);
                 }
                 try {
                     Thread.sleep((long) pollingInterval * 1000);
                 } catch (InterruptedException e) {
-                    log.error("Error while polling. Current mode: " + CDCSourceConstants.MODE_POLLING, e);
+                    log.error(buildError("Error while polling the table %s.", tableName), e);
                 }
             }
         } catch (SQLException ex) {
-            throw new CDCPollingModeException("Error in polling for changes on " + tableName + ". Current mode: " +
-                    CDCSourceConstants.MODE_POLLING, ex);
+            throw new CDCPollingModeException(buildError("Error in polling for changes on %s.", tableName), ex);
         } finally {
             CDCPollingUtil.cleanupConnection(resultSet, statement, connection);
         }

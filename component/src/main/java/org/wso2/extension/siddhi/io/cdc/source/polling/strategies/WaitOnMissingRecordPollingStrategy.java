@@ -22,7 +22,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.apache.log4j.Logger;
 import org.wso2.extension.siddhi.io.cdc.source.polling.CDCPollingModeException;
 import org.wso2.extension.siddhi.io.cdc.util.CDCPollingUtil;
-import org.wso2.extension.siddhi.io.cdc.util.CDCSourceConstants;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 
@@ -51,8 +50,9 @@ public class WaitOnMissingRecordPollingStrategy extends PollingStrategy {
 
     public WaitOnMissingRecordPollingStrategy(HikariDataSource dataSource, ConfigReader configReader,
                                               SourceEventListener sourceEventListener, String tableName,
-                                              String pollingColumn, int pollingInterval, int waitTimeout) {
-        super(dataSource, configReader, sourceEventListener, tableName);
+                                              String pollingColumn, int pollingInterval, int waitTimeout,
+                                              String appName) {
+        super(dataSource, configReader, sourceEventListener, tableName, appName);
         this.pollingColumn = pollingColumn;
         this.pollingInterval = pollingInterval;
         this.waitTimeout = waitTimeout;
@@ -117,18 +117,20 @@ public class WaitOnMissingRecordPollingStrategy extends PollingStrategy {
 
                             isTimedout = waitTimeout > -1 && waitingFrom + waitTimeout < System.currentTimeMillis();
                             if (!isTimedout) {
-                                log.debug("Missing record found at " + waitingFor + ". Hence pausing the process and " +
-                                        "retry in " + pollingInterval + " seconds.");
+                                log.debug("Missed record found at " + waitingFor + " in table " + tableName +
+                                        ". Hence pausing the process and " + "retry in " + pollingInterval +
+                                        " seconds.");
                                 breakOnMissingRecord = true;
                                 break;
                             }
                         }
                         if (waitingFor > -1) {
                             if (isTimedout) {
-                                log.debug("Waiting for missed record " + waitingFor + " timed-out. Hence resuming " +
-                                        "the process.");
+                                log.debug("Waiting for missed record " + waitingFor + " in table " + tableName +
+                                        " timed-out. Hence resuming the process.");
                             } else {
-                                log.debug("Received the missed record " + waitingFor + ". Hence resuming the process.");
+                                log.debug("Received the missed record " + waitingFor + " in table " + tableName +
+                                        ". Hence resuming the process.");
                             }
                             waitingFor = -1;
                             waitingFrom = -1;
@@ -142,8 +144,8 @@ public class WaitOnMissingRecordPollingStrategy extends PollingStrategy {
                         lastReadPollingColumnValue = resultSet.getInt(pollingColumn);
                         handleEvent(detailsMap);
                     }
-                } catch (SQLException ex) {
-                    log.error(ex);
+                } catch (SQLException e) {
+                    log.error(buildError("Error occurred while processing records in table %s.", tableName), e);
                 } finally {
                     CDCPollingUtil.cleanupConnection(resultSet, null, null);
                 }
@@ -153,12 +155,11 @@ public class WaitOnMissingRecordPollingStrategy extends PollingStrategy {
                     }
                     Thread.sleep((long) pollingInterval * 1000);
                 } catch (InterruptedException e) {
-                    log.error("Error while polling. Current mode: " + CDCSourceConstants.MODE_POLLING, e);
+                    log.error(buildError("Error while polling the table %s.", tableName), e);
                 }
             }
         } catch (SQLException ex) {
-            throw new CDCPollingModeException("Error in polling for changes on " + tableName + ". Current mode: " +
-                    CDCSourceConstants.MODE_POLLING, ex);
+            throw new CDCPollingModeException(buildError("Error in polling for changes on %s.", tableName), ex);
         } finally {
             CDCPollingUtil.cleanupConnection(resultSet, statement, connection);
         }

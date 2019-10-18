@@ -57,6 +57,8 @@ public class CDCPoller implements Runnable {
     private String poolPropertyString;
     private String jndiResource;
     private boolean isLocalDataSource = false;
+    private String appName;
+    private String streamName;
 
     private PollingStrategy pollingStrategy;
 
@@ -64,7 +66,7 @@ public class CDCPoller implements Runnable {
                      String datasourceName, String jndiResource,
                      String pollingColumn, int pollingInterval, String poolPropertyString,
                      SourceEventListener sourceEventListener, ConfigReader configReader, boolean waitOnMissedRecord,
-                     int missedRecordWaitingTimeout) {
+                     int missedRecordWaitingTimeout, String appName) {
         this.url = url;
         this.tableName = tableName;
         this.username = username;
@@ -73,22 +75,24 @@ public class CDCPoller implements Runnable {
         this.poolPropertyString = poolPropertyString;
         this.datasourceName = datasourceName;
         this.jndiResource = jndiResource;
+        this.appName = appName;
+        this.streamName = sourceEventListener.getStreamDefinition().getId();
 
         try {
             initializeDatasource();
         } catch (NamingException e) {
-            throw new CDCPollingModeException("Error in initializing connection for " + tableName + ". " +
-                    "Current mode: " + CDCSourceConstants.MODE_POLLING, e);
+            throw new CDCPollingModeException("Error in initializing connection for " + tableName + ". {mode=" +
+                    CDCSourceConstants.MODE_POLLING + ", app=" + appName + ", stream=" + streamName + "}", e);
         }
 
         if (waitOnMissedRecord) {
             log.debug(WaitOnMissingRecordPollingStrategy.class + " is selected as the polling strategy.");
             this.pollingStrategy = new WaitOnMissingRecordPollingStrategy(dataSource, configReader, sourceEventListener,
-                    tableName, pollingColumn, pollingInterval, missedRecordWaitingTimeout);
+                    tableName, pollingColumn, pollingInterval, missedRecordWaitingTimeout, appName);
         } else {
-            log.debug(DefaultPollingStrategy.class + " is selected as the polling strategy");
+            log.debug(DefaultPollingStrategy.class + " is selected as the polling strategy.");
             this.pollingStrategy = new DefaultPollingStrategy(dataSource, configReader, sourceEventListener,
-                    tableName, pollingColumn, pollingInterval);
+                    tableName, pollingColumn, pollingInterval, appName);
         }
     }
 
