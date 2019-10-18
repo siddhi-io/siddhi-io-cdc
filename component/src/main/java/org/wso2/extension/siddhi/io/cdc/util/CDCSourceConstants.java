@@ -71,6 +71,5 @@ public class CDCSourceConstants {
     public static final String DATASOURCE_NAME = "datasource.name";
     public static final String JNDI_RESOURCE = "jndi.resource";
     public static final String WAIT_ON_MISSED_RECORD = "wait.on.missed.record";
-    public static final String MISSED_RECORD_RETRY_INTERVAL_MS = "missed.record.retry.interval";
-    public static final String MISSED_RECORD_WAITING_TIMEOUT_MS = "missed.record.waiting.timeout";
+    public static final String MISSED_RECORD_WAITING_TIMEOUT = "missed.record.waiting.timeout";
 }

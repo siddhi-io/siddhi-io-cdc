@@ -45,20 +45,17 @@ public class WaitOnMissingRecordPollingStrategy extends PollingStrategy {
 
     private String pollingColumn;
     private int pollingInterval;
-    private int retryIntervalMS;
-    private int waitingTimeoutMS;
+    private int waitTimeout;
     // The 'wait on missed records' events only work with numeric type. Hence assuming the polling.column is a number.
     private Integer lastReadPollingColumnValue;
 
     public WaitOnMissingRecordPollingStrategy(HikariDataSource dataSource, ConfigReader configReader,
                                               SourceEventListener sourceEventListener, String tableName,
-                                              String pollingColumn, int pollingInterval,
-                                              int retryIntervalMS, int waitingTimeoutMS) {
+                                              String pollingColumn, int pollingInterval, int waitTimeout) {
         super(dataSource, configReader, sourceEventListener, tableName);
         this.pollingColumn = pollingColumn;
         this.pollingInterval = pollingInterval;
-        this.retryIntervalMS = retryIntervalMS;
-        this.waitingTimeoutMS = waitingTimeoutMS;
+        this.waitTimeout = waitTimeout;
     }
 
     @Override
@@ -70,10 +67,8 @@ public class WaitOnMissingRecordPollingStrategy extends PollingStrategy {
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         boolean breakOnMissingRecord = false;
-        if (retryIntervalMS <= 0) {
-            retryIntervalMS = pollingInterval * 1000;
-            log.debug("Missed record retry interval is set to " + retryIntervalMS + "ms.");
-        }
+        int waitingFor = -1;
+        long waitingFrom = -1;
         try {
             // If lastReadPollingColumnValue is null, assign it with last record of the table.
             if (lastReadPollingColumnValue == null) {
@@ -91,9 +86,6 @@ public class WaitOnMissingRecordPollingStrategy extends PollingStrategy {
 
             selectQuery = getSelectQuery("*", "WHERE " + pollingColumn + " > ?");
             statement = connection.prepareStatement(selectQuery);
-
-            int waitingFor = -1;
-            long waitingFrom = -1;
 
             while (true) {
                 if (paused) {
@@ -113,25 +105,31 @@ public class WaitOnMissingRecordPollingStrategy extends PollingStrategy {
                     resultSet = statement.executeQuery();
                     metadata = resultSet.getMetaData();
                     while (resultSet.next()) {
+                        boolean isTimedout = false;
                         int currentPollingColumnValue = resultSet.getInt(pollingColumn);
                         if (currentPollingColumnValue - lastReadPollingColumnValue > 1) {
                             if (waitingFor == -1) {
                                 // This is the first time to wait for the current record. Hence set the expected record
-                                // id and the starting timestamp.
+                                // id and the current timestamp.
                                 waitingFor = lastReadPollingColumnValue + 1;
                                 waitingFrom = System.currentTimeMillis();
                             }
 
-                            if ((waitingTimeoutMS == -1) ||
-                                    (waitingFrom + waitingTimeoutMS >= System.currentTimeMillis())) {
+                            isTimedout = waitTimeout > -1 && waitingFrom + waitTimeout < System.currentTimeMillis();
+                            if (!isTimedout) {
                                 log.debug("Missing record found at " + waitingFor + ". Hence pausing the process and " +
-                                        "retry in " + retryIntervalMS + "ms.");
+                                        "retry in " + pollingInterval + " seconds.");
                                 breakOnMissingRecord = true;
                                 break;
                             }
                         }
                         if (waitingFor > -1) {
-                            log.debug("Missed record received or timed-out. Hence resuming the process.");
+                            if (isTimedout) {
+                                log.debug("Waiting for missed record " + waitingFor + " timed-out. Hence resuming " +
+                                        "the process.");
+                            } else {
+                                log.debug("Received the missed record " + waitingFor + ". Hence resuming the process.");
+                            }
                             waitingFor = -1;
                             waitingFrom = -1;
                         }
@@ -151,11 +149,9 @@ public class WaitOnMissingRecordPollingStrategy extends PollingStrategy {
                 }
                 try {
                     if (breakOnMissingRecord) {
-                        Thread.sleep(retryIntervalMS);
                         breakOnMissingRecord = false;
-                    } else {
-                        Thread.sleep((long) pollingInterval * 1000);
                     }
+                    Thread.sleep((long) pollingInterval * 1000);
                 } catch (InterruptedException e) {
                     log.error("Error while polling. Current mode: " + CDCSourceConstants.MODE_POLLING, e);
                 }

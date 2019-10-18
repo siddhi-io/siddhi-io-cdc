@@ -64,7 +64,7 @@ public class CDCPoller implements Runnable {
                      String datasourceName, String jndiResource,
                      String pollingColumn, int pollingInterval, String poolPropertyString,
                      SourceEventListener sourceEventListener, ConfigReader configReader, boolean waitOnMissedRecord,
-                     int missedRecordRetryIntervalMS, int missedRecordWaitingTimeoutMS) {
+                     int missedRecordWaitingTimeout) {
         this.url = url;
         this.tableName = tableName;
         this.username = username;
@@ -84,8 +84,7 @@ public class CDCPoller implements Runnable {
         if (waitOnMissedRecord) {
             log.debug(WaitOnMissingRecordPollingStrategy.class + " is selected as the polling strategy.");
             this.pollingStrategy = new WaitOnMissingRecordPollingStrategy(dataSource, configReader, sourceEventListener,
-                    tableName, pollingColumn, pollingInterval, missedRecordRetryIntervalMS,
-                    missedRecordWaitingTimeoutMS);
+                    tableName, pollingColumn, pollingInterval, missedRecordWaitingTimeout);
         } else {
             log.debug(DefaultPollingStrategy.class + " is selected as the polling strategy");
             this.pollingStrategy = new DefaultPollingStrategy(dataSource, configReader, sourceEventListener,

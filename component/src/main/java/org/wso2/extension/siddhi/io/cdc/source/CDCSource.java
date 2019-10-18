@@ -187,32 +187,22 @@ import java.util.concurrent.Executors;
                 ),
                 @Parameter(
                         name = "wait.on.missed.record",
-                        description = "Indicates whether you need to wait on missing/out-of-order records. When " +
-                                "this flag is set to true the process will be hold once it identifies a missing " +
-                                "record. The missing record is identified by the sequence of the polling.column. " +
-                                "\nThis can be used only with a number field and should not be used with time values " +
-                                "as it will not be an incremental value." +
-                                "\nThis should be enabled ONLY in a situation where the records are written out of " +
-                                "order, e.g. in a concurrent system as this degrades the performance.",
+                        description = "Indicates whether the process needs to wait on missing/out-of-order records. " +
+                                "\nWhen this flag is set to 'true' the process will be held once it identifies a " +
+                                "missing record. The missing recrod is identified by the sequence of the " +
+                                "polling.column value. This can be used only with number fields and not recommended " +
+                                "to use with time values as it will not be sequential." +
+                                "\nThis should be enabled ONLY where the records can be written out-of-order, (eg. " +
+                                "concurrent writers) as this degrades the performance.",
                         type = DataType.BOOL,
                         optional = true,
                         defaultValue = "false"
                 ),
                 @Parameter(
-                        name = "missed.record.retry.interval",
-                        description = "The time interval (specified in milliseconds) to wait and retry if the " +
-                                "process identifies a missing/out-of-order record. This should be used along with " +
-                                "the wait.on.missed.record parameter.",
-                        type = DataType.INT,
-                        optional = true,
-                        defaultValue = "-1"
-                ),
-                @Parameter(
                         name = "missed.record.waiting.timeout",
-                        description = "The timeout (specified in milliseconds) to retry for missing/out-of-order " +
-                                "record. This should be used along with the wait.on.missed.record parameter. If the " +
-                                "parameter is not set, the process will indefinitely wait for the record without " +
-                                "proceeding.",
+                        description = "The timeout (specified in seconds) to retry for missing/out-of-order record. " +
+                                "This should be used along with the wait.on.missed.record parameter. If the " +
+                                "parameter is not set, the process will indefinitely wait for the missing record.",
                         type = DataType.INT,
                         optional = true,
                         defaultValue = "-1"
@@ -284,6 +274,20 @@ import java.util.concurrent.Executors;
                                 "\ndefine stream inputStream (name string);",
                         description = "In this example, the CDC source polls the 'students' table for inserts " +
                                 "and updates. The polling column is a timestamp field."
+                ),
+                @Example(
+                        syntax = "@source(type='cdc', jdbc.driver.name='com.mysql.jdbc.Driver', " +
+                                "url='jdbc:mysql://localhost:3306/SimpleDB', username='cdcuser', " +
+                                "password='pswd4cdc', table.name='students', mode='polling', polling.column='id', " +
+                                "operation='insert', wait.on.missed.record='true', " +
+                                "missed.record.waiting.timeout='10'," +
+                                "\n@map(type='keyvalue'), " +
+                                "\n@attributes(batch_no='batch_no', item='item', qty='qty'))" +
+                                "\ndefine stream inputStream (id int, name string);",
+                        description = "In this example, the CDC source polls the 'students' table for inserts. The " +
+                                "polling column is a numeric field. This source expects the records in the database " +
+                                "to be written concurrently/out-of-order so it waits if it encounters a missing " +
+                                "record. If the record doesn't appear within 10 seconds it resumes the process."
                 )
         }
 )
@@ -373,7 +377,7 @@ public class CDCSource extends Source {
                 String pollingColumn = optionHolder.validateAndGetStaticValue(CDCSourceConstants.POLLING_COLUMN);
                 boolean isDatasourceNameAvailable = optionHolder.isOptionExists(CDCSourceConstants.DATASOURCE_NAME);
                 boolean isJndiResourceAvailable = optionHolder.isOptionExists(CDCSourceConstants.JNDI_RESOURCE);
-                int pollingInterval = Integer.parseInt(
+                pollingInterval = Integer.parseInt(
                         optionHolder.validateAndGetStaticValue(CDCSourceConstants.POLLING_INTERVAL,
                                 Integer.toString(CDCSourceConstants.DEFAULT_POLLING_INTERVAL_SECONDS)));
                 validatePollingModeParameters();
@@ -381,25 +385,21 @@ public class CDCSource extends Source {
                         null);
                 boolean waitOnMissedRecord = Boolean.parseBoolean(
                         optionHolder.validateAndGetStaticValue(CDCSourceConstants.WAIT_ON_MISSED_RECORD, "false"));
-                int missedRecordRetryIntervalMS = Integer.parseInt(
-                        optionHolder.validateAndGetStaticValue(CDCSourceConstants.MISSED_RECORD_RETRY_INTERVAL_MS,
-                                "-1"));
-                int missedRecordWaitingTimeoutMS = Integer.parseInt(
+                int missedRecordWaitingTimeout = Integer.parseInt(
                         optionHolder.validateAndGetStaticValue(
-                                CDCSourceConstants.MISSED_RECORD_WAITING_TIMEOUT_MS, "-1"));
+                                CDCSourceConstants.MISSED_RECORD_WAITING_TIMEOUT, "-1"));
 
                 if (isDatasourceNameAvailable) {
                     String datasourceName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.DATASOURCE_NAME);
                     cdcPoller = new CDCPoller(null, null, null, tableName, null,
                             datasourceName, null, pollingColumn, pollingInterval,
                             poolPropertyString, sourceEventListener, configReader, waitOnMissedRecord,
-                            missedRecordRetryIntervalMS, missedRecordWaitingTimeoutMS);
+                            missedRecordWaitingTimeout);
                 } else if (isJndiResourceAvailable) {
                     String jndiResource = optionHolder.validateAndGetStaticValue(CDCSourceConstants.JNDI_RESOURCE);
                     cdcPoller = new CDCPoller(null, null, null, tableName, null,
                             null, jndiResource, pollingColumn, pollingInterval, poolPropertyString,
-                            sourceEventListener, configReader, waitOnMissedRecord, missedRecordRetryIntervalMS,
-                            missedRecordWaitingTimeoutMS);
+                            sourceEventListener, configReader, waitOnMissedRecord, missedRecordWaitingTimeout);
                 } else {
                     String driverClassName;
                     try {
@@ -414,8 +414,7 @@ public class CDCSource extends Source {
                     }
                     cdcPoller = new CDCPoller(url, username, password, tableName, driverClassName,
                             null, null, pollingColumn, pollingInterval, poolPropertyString,
-                            sourceEventListener, configReader, waitOnMissedRecord, missedRecordRetryIntervalMS,
-                            missedRecordWaitingTimeoutMS);
+                            sourceEventListener, configReader, waitOnMissedRecord, missedRecordWaitingTimeout);
                 }
                 break;
             default:
