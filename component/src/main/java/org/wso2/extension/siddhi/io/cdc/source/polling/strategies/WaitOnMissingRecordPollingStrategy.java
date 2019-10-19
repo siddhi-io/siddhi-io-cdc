@@ -66,7 +66,6 @@ public class WaitOnMissingRecordPollingStrategy extends PollingStrategy {
         Connection connection = getConnection();
         PreparedStatement statement = null;
         ResultSet resultSet = null;
-        boolean breakOnMissingRecord = false;
         int waitingFor = -1;
         long waitingFrom = -1;
         try {
@@ -115,12 +114,13 @@ public class WaitOnMissingRecordPollingStrategy extends PollingStrategy {
                                 waitingFrom = System.currentTimeMillis();
                             }
 
-                            isTimedout = waitTimeout > -1 && waitingFrom + waitTimeout < System.currentTimeMillis();
+                            long waitEndTimestamp = waitTimeout > -1 ?
+                                    waitingFrom + (waitTimeout * 1000L) : Long.MAX_VALUE;
+                            isTimedout = waitEndTimestamp < System.currentTimeMillis();
                             if (!isTimedout) {
                                 log.debug("Missed record found at " + waitingFor + " in table " + tableName +
                                         ". Hence pausing the process and " + "retry in " + pollingInterval +
                                         " seconds.");
-                                breakOnMissingRecord = true;
                                 break;
                             }
                         }
@@ -150,9 +150,6 @@ public class WaitOnMissingRecordPollingStrategy extends PollingStrategy {
                     CDCPollingUtil.cleanupConnection(resultSet, null, null);
                 }
                 try {
-                    if (breakOnMissingRecord) {
-                        breakOnMissingRecord = false;
-                    }
                     Thread.sleep((long) pollingInterval * 1000);
                 } catch (InterruptedException e) {
                     log.error(buildError("Error while polling the table %s.", tableName), e);

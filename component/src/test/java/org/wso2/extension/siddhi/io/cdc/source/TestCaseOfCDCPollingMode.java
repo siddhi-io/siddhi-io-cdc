@@ -369,10 +369,10 @@ public class TestCaseOfCDCPollingMode {
 
         // Do inserts and wait CDC app to capture the events.
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("inputStream");
-        Object[] ann = new Object[]{11, "Ann"};
-        Object[] bob = new Object[]{12, "Bob"};
-        Object[] charles = new Object[]{13, "Charles"};
-        Object[] david = new Object[]{14, "David"};
+        Object[] ann = new Object[]{1, "Ann"};
+        Object[] bob = new Object[]{2, "Bob"};
+        Object[] charles = new Object[]{3, "Charles"};
+        Object[] david = new Object[]{4, "David"};
 
         inputHandler.send(ann);
         inputHandler.send(bob);
