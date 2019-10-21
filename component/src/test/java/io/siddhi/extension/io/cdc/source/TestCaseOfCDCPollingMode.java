@@ -257,7 +257,7 @@ public class TestCaseOfCDCPollingMode {
         Assert.assertEquals(insertingObject, currentEvent.getData());
 
         //persisting
-        Thread.sleep(500);
+        Thread.sleep(5000);
         siddhiAppRuntime.persist();
 
         //stopping siddhi app
@@ -271,6 +271,7 @@ public class TestCaseOfCDCPollingMode {
         inputHandler = siddhiAppRuntime.getInputHandler("insertionStream");
         insertingObject = new Object[]{"e004", "new_employer"};
         inputHandler.send(insertingObject);
+        Thread.sleep(5000);
         siddhiAppRuntime.shutdown();
 
         //start CDC siddhi app
