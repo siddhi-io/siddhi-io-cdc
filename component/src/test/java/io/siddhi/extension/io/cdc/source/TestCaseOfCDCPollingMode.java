@@ -42,8 +42,8 @@ public class TestCaseOfCDCPollingMode {
     private Event currentEvent;
     private AtomicInteger eventCount = new AtomicInteger(0);
     private AtomicBoolean eventArrived = new AtomicBoolean(false);
-    private int waitTime = 50;
-    private int timeout = 10000;
+    private int waitTime = 5000;
+    private int timeout = 50000;
     private String username;
     private String password;
     private String jdbcDriverName;
