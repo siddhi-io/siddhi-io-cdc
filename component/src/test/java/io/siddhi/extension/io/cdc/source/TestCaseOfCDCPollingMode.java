@@ -42,8 +42,8 @@ public class TestCaseOfCDCPollingMode {
     private Event currentEvent;
     private AtomicInteger eventCount = new AtomicInteger(0);
     private AtomicBoolean eventArrived = new AtomicBoolean(false);
-    private int waitTime = 50;
-    private int timeout = 10000;
+    private int waitTime = 5000;
+    private int timeout = 50000;
     private String username;
     private String password;
     private String jdbcDriverName;
@@ -257,7 +257,7 @@ public class TestCaseOfCDCPollingMode {
         Assert.assertEquals(insertingObject, currentEvent.getData());
 
         //persisting
-        Thread.sleep(500);
+        Thread.sleep(5000);
         siddhiAppRuntime.persist();
 
         //stopping siddhi app
@@ -271,6 +271,7 @@ public class TestCaseOfCDCPollingMode {
         inputHandler = siddhiAppRuntime.getInputHandler("insertionStream");
         insertingObject = new Object[]{"e004", "new_employer"};
         inputHandler.send(insertingObject);
+        Thread.sleep(5000);
         siddhiAppRuntime.shutdown();
 
         //start CDC siddhi app
