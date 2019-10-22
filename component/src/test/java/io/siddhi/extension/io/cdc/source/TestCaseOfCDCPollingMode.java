@@ -48,7 +48,6 @@ public class TestCaseOfCDCPollingMode {
     private String password;
     private String jdbcDriverName;
     private String databaseURL;
-    private String pollingTableName = "login";
     private String pollingColumn = "id";
 
     @BeforeClass
@@ -106,6 +105,7 @@ public class TestCaseOfCDCPollingMode {
         log.info("CDC TestCase: Capturing change data with polling mode.");
         log.info("------------------------------------------------------------------------------------------------");
 
+        String pollingTableName = "loginTable1";
         SiddhiManager siddhiManager = new SiddhiManager();
 
         int pollingInterval = 1;
@@ -123,11 +123,11 @@ public class TestCaseOfCDCPollingMode {
                 "@Store(type='rdbms', jdbc.url='" + databaseURL + "'," +
                 " username='" + username + "', password='" + password + "' ," +
                 " jdbc.driver.name='" + jdbcDriverName + "')" +
-                " define table login (id string, name string);";
+                " define table loginTable1 (id string, name string);";
 
         String rdbmsQuery = "@info(name='query2') " +
                 "from insertionStream " +
-                "insert into login;";
+                "insert into loginTable1;";
 
         QueryCallback rdbmsQueryCallback = new QueryCallback() {
             @Override
@@ -186,6 +186,7 @@ public class TestCaseOfCDCPollingMode {
         log.info("CDC TestCase: Testing state persistence of the polling mode.");
         log.info("------------------------------------------------------------------------------------------------");
 
+        String pollingTableName = "loginTable2";
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setPersistenceStore(persistenceStore);
@@ -206,11 +207,11 @@ public class TestCaseOfCDCPollingMode {
                 "\n@Store(type='rdbms', jdbc.url='" + databaseURL + "'," +
                 " username='" + username + "', password='" + password + "' ," +
                 " jdbc.driver.name='" + jdbcDriverName + "')" +
-                "\ndefine table login (id string, name string);";
+                "\ndefine table loginTable2 (id string, name string);";
 
         String rdbmsQuery = "@info(name='query2') " +
                 "from insertionStream " +
-                "insert into login;";
+                "insert into loginTable2;";
 
         QueryCallback rdbmsQueryCallback = new QueryCallback() {
             @Override
