@@ -42,13 +42,12 @@ public class TestCaseOfCDCPollingMode {
     private Event currentEvent;
     private AtomicInteger eventCount = new AtomicInteger(0);
     private AtomicBoolean eventArrived = new AtomicBoolean(false);
-    private int waitTime = 50;
-    private int timeout = 10000;
+    private int waitTime = 5000;
+    private int timeout = 50000;
     private String username;
     private String password;
     private String jdbcDriverName;
     private String databaseURL;
-    private String pollingTableName = "login";
     private String pollingColumn = "id";
 
     @BeforeClass
@@ -106,6 +105,7 @@ public class TestCaseOfCDCPollingMode {
         log.info("CDC TestCase: Capturing change data with polling mode.");
         log.info("------------------------------------------------------------------------------------------------");
 
+        String pollingTableName = "loginTable1";
         SiddhiManager siddhiManager = new SiddhiManager();
 
         int pollingInterval = 1;
@@ -123,11 +123,11 @@ public class TestCaseOfCDCPollingMode {
                 "@Store(type='rdbms', jdbc.url='" + databaseURL + "'," +
                 " username='" + username + "', password='" + password + "' ," +
                 " jdbc.driver.name='" + jdbcDriverName + "')" +
-                " define table login (id string, name string);";
+                " define table loginTable1 (id string, name string);";
 
         String rdbmsQuery = "@info(name='query2') " +
                 "from insertionStream " +
-                "insert into login;";
+                "insert into loginTable1;";
 
         QueryCallback rdbmsQueryCallback = new QueryCallback() {
             @Override
@@ -177,131 +177,7 @@ public class TestCaseOfCDCPollingMode {
         siddhiManager.shutdown();
     }
 
-    /**
-     * Test case to test state persistence of polling mode.
-     */
     @Test(dependsOnMethods = {"testCDCPollingMode"})
-    public void testCDCPollingModeStatePersistence() throws InterruptedException {
-        log.info("------------------------------------------------------------------------------------------------");
-        log.info("CDC TestCase: Testing state persistence of the polling mode.");
-        log.info("------------------------------------------------------------------------------------------------");
-
-        PersistenceStore persistenceStore = new InMemoryPersistenceStore();
-        SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.setPersistenceStore(persistenceStore);
-
-        int pollingInterval = 1;
-        String cdcinStreamDefinition = "@App:name('testing_siddhi_app')" +
-                "\n@source(type = 'cdc', mode='polling'," +
-                " polling.column='" + pollingColumn + "'," +
-                " jdbc.driver.name='" + jdbcDriverName + "'," +
-                " url = '" + databaseURL + "'," +
-                " username = '" + username + "'," +
-                " password = '" + password + "'," +
-                " table.name = '" + pollingTableName + "', polling.interval = '" + pollingInterval + "'," +
-                " @map(type='keyvalue'))" +
-                "define stream istm (id string, name string);";
-
-        String rdbmsStoreDefinition = "\ndefine stream insertionStream (id string, name string);" +
-                "\n@Store(type='rdbms', jdbc.url='" + databaseURL + "'," +
-                " username='" + username + "', password='" + password + "' ," +
-                " jdbc.driver.name='" + jdbcDriverName + "')" +
-                "\ndefine table login (id string, name string);";
-
-        String rdbmsQuery = "@info(name='query2') " +
-                "from insertionStream " +
-                "insert into login;";
-
-        QueryCallback rdbmsQueryCallback = new QueryCallback() {
-            @Override
-            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-                for (Event event : inEvents) {
-                    log.info("insert done: " + event);
-                }
-            }
-        };
-
-        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cdcinStreamDefinition
-                + rdbmsStoreDefinition + rdbmsQuery);
-        siddhiAppRuntime.addCallback("query2", rdbmsQueryCallback);
-
-        StreamCallback insertionStreamCallback = new StreamCallback() {
-            @Override
-            public void receive(Event[] events) {
-                for (Event event : events) {
-                    currentEvent = event;
-                    eventCount.getAndIncrement();
-                    log.info(eventCount + ". " + event);
-                    eventArrived.set(true);
-                }
-            }
-        };
-
-        siddhiAppRuntime.addCallback("istm", insertionStreamCallback);
-        siddhiAppRuntime.start();
-
-        //wait till cdc-poller initialize.
-        Thread.sleep(5000);
-
-        //Do an insert and wait for cdc app to capture.
-        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("insertionStream");
-        Object[] insertingObject = new Object[]{"e003", "testEmployer"};
-        inputHandler.send(insertingObject);
-
-        SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
-
-        //Assert event arrival.
-        Assert.assertTrue(eventArrived.get());
-
-        //Assert event data.
-        Assert.assertEquals(insertingObject, currentEvent.getData());
-
-        //persisting
-        Thread.sleep(500);
-        siddhiAppRuntime.persist();
-
-        //stopping siddhi app
-        Thread.sleep(500);
-        siddhiAppRuntime.shutdown();
-
-        //insert a row while the cdc source is down.
-        siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(rdbmsStoreDefinition + rdbmsQuery);
-        siddhiAppRuntime.addCallback("query2", rdbmsQueryCallback);
-        siddhiAppRuntime.start();
-        inputHandler = siddhiAppRuntime.getInputHandler("insertionStream");
-        insertingObject = new Object[]{"e004", "new_employer"};
-        inputHandler.send(insertingObject);
-        siddhiAppRuntime.shutdown();
-
-        //start CDC siddhi app
-        init();
-        siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cdcinStreamDefinition);
-        siddhiAppRuntime.addCallback("istm", insertionStreamCallback);
-        siddhiAppRuntime.start();
-
-        //loading
-        try {
-            siddhiAppRuntime.restoreLastRevision();
-        } catch (CannotRestoreSiddhiAppStateException e) {
-            Assert.fail("Restoring of Siddhi app " + siddhiAppRuntime.getName() + " failed", e);
-        }
-
-        //wait till cdc-poller initialize.
-        Thread.sleep(5000);
-
-        SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
-
-        //Assert event arrival.
-        Assert.assertTrue(eventArrived.get());
-
-        //Assert event data.
-        Assert.assertEquals(insertingObject, currentEvent.getData());
-
-        siddhiAppRuntime.shutdown();
-        siddhiManager.shutdown();
-    }
-
-    @Test(dependsOnMethods = {"testCDCPollingModeStatePersistence"})
     public void testOutOfOrderRecords() throws InterruptedException {
         log.info("------------------------------------------------------------------------------------------------");
         log.info("CDC TestCase: Test missed/out-of-order events in polling mode.");
@@ -384,6 +260,133 @@ public class TestCaseOfCDCPollingMode {
 
         // Assert received event count.
         Assert.assertEquals(eventCount.get(), 4);
+
+        siddhiAppRuntime.shutdown();
+        siddhiManager.shutdown();
+    }
+
+    /**
+     * Test case to test state persistence of polling mode.
+     */
+    @Test(dependsOnMethods = {"testOutOfOrderRecords"})
+    public void testCDCPollingModeStatePersistence() throws InterruptedException {
+        log.info("------------------------------------------------------------------------------------------------");
+        log.info("CDC TestCase: Testing state persistence of the polling mode.");
+        log.info("------------------------------------------------------------------------------------------------");
+
+        String pollingTableName = "loginTable2";
+        PersistenceStore persistenceStore = new InMemoryPersistenceStore();
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setPersistenceStore(persistenceStore);
+
+        int pollingInterval = 1;
+        String cdcinStreamDefinition = "@App:name('testing_siddhi_app')" +
+                "\n@source(type = 'cdc', mode='polling'," +
+                " polling.column='" + pollingColumn + "'," +
+                " jdbc.driver.name='" + jdbcDriverName + "'," +
+                " url = '" + databaseURL + "'," +
+                " username = '" + username + "'," +
+                " password = '" + password + "'," +
+                " table.name = '" + pollingTableName + "', polling.interval = '" + pollingInterval + "'," +
+                " @map(type='keyvalue'))" +
+                "define stream istm (id string, name string);";
+
+        String rdbmsStoreDefinition = "\ndefine stream insertionStream (id string, name string);" +
+                "\n@Store(type='rdbms', jdbc.url='" + databaseURL + "'," +
+                " username='" + username + "', password='" + password + "' ," +
+                " jdbc.driver.name='" + jdbcDriverName + "')" +
+                "\ndefine table loginTable2 (id string, name string);";
+
+        String rdbmsQuery = "@info(name='query2') " +
+                "from insertionStream " +
+                "insert into loginTable2;";
+
+        QueryCallback rdbmsQueryCallback = new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                for (Event event : inEvents) {
+                    log.info("insert done: " + event);
+                }
+            }
+        };
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cdcinStreamDefinition
+                + rdbmsStoreDefinition + rdbmsQuery);
+        siddhiAppRuntime.addCallback("query2", rdbmsQueryCallback);
+
+        StreamCallback insertionStreamCallback = new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                for (Event event : events) {
+                    currentEvent = event;
+                    eventCount.getAndIncrement();
+                    log.info(eventCount + ". " + event);
+                    eventArrived.set(true);
+                }
+            }
+        };
+
+        siddhiAppRuntime.addCallback("istm", insertionStreamCallback);
+        siddhiAppRuntime.start();
+
+        //wait till cdc-poller initialize.
+        Thread.sleep(5000);
+
+        //Do an insert and wait for cdc app to capture.
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("insertionStream");
+        Object[] insertingObject = new Object[]{"e003", "testEmployer"};
+        inputHandler.send(insertingObject);
+
+        SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
+
+        //Assert event arrival.
+        Assert.assertTrue(eventArrived.get());
+
+        //Assert event data.
+        Assert.assertEquals(insertingObject, currentEvent.getData());
+
+        //persisting
+        Thread.sleep(5000);
+        siddhiAppRuntime.persist();
+
+        //stopping siddhi app
+        Thread.sleep(500);
+        siddhiAppRuntime.shutdown();
+
+        //insert a row while the cdc source is down.
+        siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(rdbmsStoreDefinition + rdbmsQuery);
+        siddhiAppRuntime.addCallback("query2", rdbmsQueryCallback);
+        siddhiAppRuntime.start();
+        inputHandler = siddhiAppRuntime.getInputHandler("insertionStream");
+        insertingObject = new Object[]{"e004", "new_employer"};
+        inputHandler.send(insertingObject);
+        Thread.sleep(5000);
+        siddhiAppRuntime.shutdown();
+
+        //start CDC siddhi app
+        init();
+        siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cdcinStreamDefinition);
+        siddhiAppRuntime.addCallback("istm", insertionStreamCallback);
+        siddhiAppRuntime.start();
+        Thread.sleep(5000);
+
+        //loading
+        try {
+            siddhiAppRuntime.restoreLastRevision();
+        } catch (CannotRestoreSiddhiAppStateException e) {
+            Assert.fail("Restoring of Siddhi app " + siddhiAppRuntime.getName() + " failed", e);
+        }
+
+        //wait till cdc-poller initialize.
+        Thread.sleep(5000);
+
+        SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
+
+        //Assert event arrival.
+        Assert.assertTrue(eventArrived.get());
+
+        //Assert event data.
+        Assert.assertEquals(insertingObject, currentEvent.getData());
 
         siddhiAppRuntime.shutdown();
         siddhiManager.shutdown();
