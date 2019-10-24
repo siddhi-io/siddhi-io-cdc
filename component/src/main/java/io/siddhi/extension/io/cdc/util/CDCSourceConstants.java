@@ -78,4 +78,6 @@ public class CDCSourceConstants {
     public static final String PDB = "oracle.pdb";
     public static final String OUTSERVER_NAME = "oracle.outserver.name";
 
+    public static final String WAIT_ON_MISSED_RECORD = "wait.on.missed.record";
+    public static final String MISSED_RECORD_WAITING_TIMEOUT = "missed.record.waiting.timeout";
 }
