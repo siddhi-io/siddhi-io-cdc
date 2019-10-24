@@ -519,14 +519,16 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            io.siddhi.extension.io.cdc.*;version="${project.version}"
+                            io.siddhi.extension.io.cdc.*;version="${project.version}",
+                            org.apache.kafka.common.*,
+                            org.apache.kafka.clients.*,
                         </Export-Package>
                         <Private-Package>
                             com.github.shyiko.*,
                             io.debezium.*,
-                            org.apache.kafka.connect*,
-                            org.apache.kafka.common*,
-                            org.apache.kafka.clients*
+                            org.apache.kafka.connect.*,
+                            org.apache.kafka.common.*,
+                            org.apache.kafka.clients.*,
                         </Private-Package>
                         <Import-Package>
                             io.siddhi.annotation.*;version="${siddhi.import.version.range}",

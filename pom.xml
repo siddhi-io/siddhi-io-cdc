@@ -158,6 +158,13 @@
                 <version>${org.testng.version}</version>
                 <scope>test</scope>
             </dependency>
+<!--            &lt;!&ndash; https://mvnrepository.com/artifact/com.oracle.jdbc/ojdbc8 &ndash;&gt;-->
+<!--            <dependency>-->
+<!--                <groupId>com.oracle.jdbc</groupId>-->
+<!--                <artifactId>ojdbc8</artifactId>-->
+<!--                <version>12.2.0.1</version>-->
+<!--            </dependency>-->
+
         </dependencies>
     </dependencyManagement>
     <build>
@@ -194,18 +201,18 @@
         </plugins>
     </build>
     <properties>
-        <siddhi.version>5.1.0</siddhi.version>
+        <siddhi.version>5.1.5</siddhi.version>
         <siddhi.import.version.range>[5.1.0,6.0.0)</siddhi.import.version.range>
         <log4j.version>1.2.17.wso2v1</log4j.version>
         <carbon.transport.version>4.4.15</carbon.transport.version>
         <siddhi-map-keyvalue.version>2.0.1</siddhi-map-keyvalue.version>
         <jacoco.plugin.version>0.7.9</jacoco.plugin.version>
         <mysql-binlog-connector-java.version>0.13.0</mysql-binlog-connector-java.version>
-        <debezium-connector-mysql.version>0.8.3.Final</debezium-connector-mysql.version>
-        <debezium-embedded.version>0.8.3.Final</debezium-embedded.version>
-        <debezium-connector-oracle.version>0.8.3.Final</debezium-connector-oracle.version>
-        <debezium-connector-postgres.version>0.8.3.Final</debezium-connector-postgres.version>
-        <debezium-connector-sqlserver.version>0.9.5.Final</debezium-connector-sqlserver.version>
+        <debezium-connector-mysql.version>0.10.0.Final</debezium-connector-mysql.version>
+        <debezium-embedded.version>0.10.0.Final</debezium-embedded.version>
+        <debezium-connector-oracle.version>0.10.0.Final</debezium-connector-oracle.version>
+        <debezium-connector-postgres.version>0.10.0.Final</debezium-connector-postgres.version>
+        <debezium-connector-sqlserver.version>0.10.0.Final</debezium-connector-sqlserver.version>
         <hikari.version>3.2.0</hikari.version>
         <org.testng.version>6.11</org.testng.version>
         <siddhi-store-rdbms.version>6.0.1</siddhi-store-rdbms.version>
@@ -223,7 +230,20 @@
         <docker.container.siddhi-cdc-mssql.ip>0.0.0.0</docker.container.siddhi-cdc-mssql.ip>
         <siddhi-cdc-postgres.port>5433</siddhi-cdc-postgres.port>
         <docker.container.siddhi-cdc-postgres.ip>0.0.0.0</docker.container.siddhi-cdc-postgres.ip>
+        <oracle.jdbc.Driver.version>12.2.0.1</oracle.jdbc.Driver.version>
     </properties>
+<!--    <repositories>-->
+<!--        <repository>-->
+<!--            <id>xwiki.externals.repository</id>-->
+<!--            <name>XWiki Externals Repository</name>-->
+<!--            <url>https://maven.xwiki.org/externals/</url>-->
+<!--            <releases>-->
+<!--                <enabled>true</enabled>-->
+<!--                <updatePolicy>daily</updatePolicy>-->
+<!--                <checksumPolicy>ignore</checksumPolicy>-->
+<!--            </releases>-->
+<!--        </repository>-->
+<!--    </repositories>-->
     <scm>
         <url>https://github.com/siddhi-io/siddhi-io-cdc.git</url>
         <developerConnection>scm:git:https://github.com/siddhi-io/siddhi-io-cdc.git</developerConnection>

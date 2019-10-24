@@ -50,6 +50,7 @@ public class CDCSourceConstants {
     public static final String DATABASE_HISTORY = "database.history";
     public static final String MYSQL_CONNECTOR_CLASS = "io.debezium.connector.mysql.MySqlConnector";
     public static final String POSTGRESQL_CONNECTOR_CLASS = "io.debezium.connector.postgresql.PostgresConnector";
+    public static final String ORACLE_CONNECTOR_CLASS = "io.debezium.connector.oracle.OracleConnector";
     public static final String SQLSERVER_CONNECTOR_CLASS = "io.debezium.connector.sqlserver.SqlServerConnector";
     public static final String BEFORE_PREFIX = "before_";
     public static final String CACHE_OBJECT = "cacheObj";
@@ -70,4 +71,11 @@ public class CDCSourceConstants {
     public static final int DEFAULT_POLLING_INTERVAL_SECONDS = 1;
     public static final String DATASOURCE_NAME = "datasource.name";
     public static final String JNDI_RESOURCE = "jndi.resource";
+    public static final String ORACLE_PDB_PROPERTY_NAME = "database.pdb.name";
+    public static final String ORACLE_OUTSERVER_PROPERTY_NAME = "database.out.server.name";
+
+    // Oracle related attributes.
+    public static final String PDB = "oracle.pdb";
+    public static final String OUTSERVER_NAME = "oracle.outserver.name";
+
 }
