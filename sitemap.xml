@@ -1,63 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-     <loc>None</loc>
-     <lastmod>2019-08-06</lastmod>
+     <loc>https://wso2-extensions.github.io/siddhi-io-cdc/</loc>
+     <lastmod>2019-10-25</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-08-06</lastmod>
+     <loc>https://wso2-extensions.github.io/siddhi-io-cdc/api/1.0.11/</loc>
+     <lastmod>2019-10-25</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-08-06</lastmod>
+     <loc>https://wso2-extensions.github.io/siddhi-io-cdc/api/1.0.10/</loc>
+     <lastmod>2019-10-25</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-08-06</lastmod>
+     <loc>https://wso2-extensions.github.io/siddhi-io-cdc/api/1.0.9/</loc>
+     <lastmod>2019-10-25</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-08-06</lastmod>
+     <loc>https://wso2-extensions.github.io/siddhi-io-cdc/api/1.0.8/</loc>
+     <lastmod>2019-10-25</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-08-06</lastmod>
+     <loc>https://wso2-extensions.github.io/siddhi-io-cdc/api/1.0.7/</loc>
+     <lastmod>2019-10-25</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-08-06</lastmod>
+     <loc>https://wso2-extensions.github.io/siddhi-io-cdc/api/1.0.6/</loc>
+     <lastmod>2019-10-25</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-08-06</lastmod>
+     <loc>https://wso2-extensions.github.io/siddhi-io-cdc/api/1.0.5/</loc>
+     <lastmod>2019-10-25</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-08-06</lastmod>
+     <loc>https://wso2-extensions.github.io/siddhi-io-cdc/api/latest/</loc>
+     <lastmod>2019-10-25</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-08-06</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>None</loc>
-     <lastmod>2019-08-06</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>None</loc>
-     <lastmod>2019-08-06</lastmod>
+     <loc>https://wso2-extensions.github.io/siddhi-io-cdc/license/</loc>
+     <lastmod>2019-10-25</lastmod>
      <changefreq>daily</changefreq>
     </url>
 </urlset>
