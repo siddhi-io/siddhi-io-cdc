@@ -10,11 +10,9 @@
       <meta name="viewport" content="width=device-width,initial-scale=1">
       <meta http-equiv="x-ua-compatible" content="ie=edge">
       
-        <meta name="description" content="Siddhi Change Data Capture io Extension">
+        <meta name="description" content="Siddhi IO CDC Extension">
       
       
-      
-        <meta name="author" content="WSO2">
       
       
         <meta name="lang:clipboard.copy" content="Copy to clipboard">
@@ -35,18 +33,18 @@
       
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
-      <link rel="shortcut icon" href="/siddhi-io-cdc/images/favicon.ico">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.4.0">
+      <link rel="shortcut icon" href="/images/favicon.ico">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
     
     
       
-        <title>Siddhi-IO-CDC</title>
+        <title>Siddhi IO CDC</title>
       
     
     
-      <link rel="stylesheet" href="/siddhi-io-cdc/assets/stylesheets/application.0284f74d.css">
+      <link rel="stylesheet" href="/assets/stylesheets/application.3020aac5.css">
       
-        <link rel="stylesheet" href="/siddhi-io-cdc/assets/stylesheets/application-palette.01803549.css">
+        <link rel="stylesheet" href="/assets/stylesheets/application-palette.224b79ff.css">
       
       
         
@@ -55,19 +53,19 @@
       
     
     
-      <script src="/siddhi-io-cdc/assets/javascripts/modernizr.74668098.js"></script>
+      <script src="/assets/javascripts/modernizr.01ccdecf.js"></script>
     
     
       
         <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono&display=fallback">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
         <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
       
     
-    <link rel="stylesheet" href="/siddhi-io-cdc/assets/fonts/material-icons.css">
+    <link rel="stylesheet" href="/assets/fonts/material-icons.css">
     
     
-      <link rel="stylesheet" href="/siddhi-io-cdc/stylesheets/extra.css">
+      <link rel="stylesheet" href="/assets/stylesheets/extra.css">
     
     
       
@@ -108,7 +106,24 @@
       <defs>
         
         
-          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448"
+    viewBox="0 0 416 448" id="__github">
+  <path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19-18.125
+        8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19 18.125-8.5
+        18.125 8.5 10.75 19 3.125 20.5zM320 304q0 10-3.125 20.5t-10.75
+        19-18.125 8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19
+        18.125-8.5 18.125 8.5 10.75 19 3.125 20.5zM360
+        304q0-30-17.25-51t-46.75-21q-10.25 0-48.75 5.25-17.75 2.75-39.25
+        2.75t-39.25-2.75q-38-5.25-48.75-5.25-29.5 0-46.75 21t-17.25 51q0 22 8
+        38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0
+        37.25-1.75t35-7.375 30.5-15 20.25-25.75 8-38.375zM416 260q0 51.75-15.25
+        82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5-41.75
+        1.125q-19.5 0-35.5-0.75t-36.875-3.125-38.125-7.5-34.25-12.875-30.25-20.25-21.5-28.75q-15.5-30.75-15.5-82.75
+        0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25
+        30.875q36.75-8.75 77.25-8.75 37 0 70 8 26.25-20.5
+        46.75-30.25t47.25-9.75q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34
+        99.5z" />
+</svg>
         
       </defs>
     </svg>
@@ -121,9 +136,9 @@
   <nav class="md-header-nav md-grid">
     <div class="md-flex">
       <div class="md-flex__cell md-flex__cell--shrink">
-        <a href="https://wso2-extensions.github.io/siddhi-io-cdc/" title="Siddhi-IO-CDC" class="md-header-nav__button md-logo">
+        <a href="/." title="Siddhi IO CDC" class="md-header-nav__button md-logo">
           
-            <img src="/siddhi-io-cdc/images/siddhi-logo-w.svg" width="24" height="24">
+            <img src="/images/siddhi-logo.svg" width="24" height="24">
           
         </a>
       </div>
@@ -134,11 +149,9 @@
         <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
           
             <span class="md-header-nav__topic">
-              Siddhi-IO-CDC
+              Siddhi IO CDC
             </span>
             <span class="md-header-nav__topic">
-              
-                
               
             </span>
           
@@ -180,7 +193,7 @@
 
   
 
-<a href="https://github.com/wso2-extensions/siddhi-io-cdc/" title="Go to repository" class="md-source" data-md-source="github">
+<a href="https://github.com/siddhi-io/siddhi-io-cdc/" title="Go to repository" class="md-source" data-md-source="github">
   
     <div class="md-source__icon">
       <svg viewBox="0 0 24 24" width="24" height="24">
@@ -189,7 +202,7 @@
     </div>
   
   <div class="md-source__repository">
-    Siddhi-IO-CDC
+    Siddhi IO CDC
   </div>
 </a>
           </div>
@@ -213,12 +226,12 @@
                   <div class="md-sidebar__inner">
                     <nav class="md-nav md-nav--primary" data-md-level="0">
   <label class="md-nav__title md-nav__title--site" for="__drawer">
-    <a href="https://wso2-extensions.github.io/siddhi-io-cdc/" title="Siddhi-IO-CDC" class="md-nav__button md-logo">
+    <a href="/." title="Siddhi IO CDC" class="md-nav__button md-logo">
       
-        <img src="/siddhi-io-cdc/images/siddhi-logo-w.svg" width="48" height="48">
+        <img src="/images/siddhi-logo.svg" width="48" height="48">
       
     </a>
-    Siddhi-IO-CDC
+    Siddhi IO CDC
   </label>
   
     <div class="md-nav__source">
@@ -227,7 +240,7 @@
 
   
 
-<a href="https://github.com/wso2-extensions/siddhi-io-cdc/" title="Go to repository" class="md-source" data-md-source="github">
+<a href="https://github.com/siddhi-io/siddhi-io-cdc/" title="Go to repository" class="md-source" data-md-source="github">
   
     <div class="md-source__icon">
       <svg viewBox="0 0 24 24" width="24" height="24">
@@ -236,7 +249,7 @@
     </div>
   
   <div class="md-source__repository">
-    Siddhi-IO-CDC
+    Siddhi IO CDC
   </div>
 </a>
     </div>
@@ -249,8 +262,8 @@
 
 
   <li class="md-nav__item">
-    <a href="/siddhi-io-cdc/." title="Welcome" class="md-nav__link">
-      Welcome
+    <a href="/." title="Information" class="md-nav__link">
+      Information
     </a>
   </li>
 
@@ -280,7 +293,67 @@
 
 
   <li class="md-nav__item">
-    <a href="/siddhi-io-cdc/api/1.0.11/" title="1.0.11" class="md-nav__link">
+    <a href="/api/latest/" title="latest" class="md-nav__link">
+      latest
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="/api/2.0.3/" title="2.0.3" class="md-nav__link">
+      2.0.3
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="/api/2.0.2/" title="2.0.2" class="md-nav__link">
+      2.0.2
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="/api/2.0.1/" title="2.0.1" class="md-nav__link">
+      2.0.1
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="/api/2.0.0/" title="2.0.0" class="md-nav__link">
+      2.0.0
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="/api/1.0.11/" title="1.0.11" class="md-nav__link">
       1.0.11
     </a>
   </li>
@@ -292,7 +365,7 @@
 
 
   <li class="md-nav__item">
-    <a href="/siddhi-io-cdc/api/1.0.10/" title="1.0.10" class="md-nav__link">
+    <a href="/api/1.0.10/" title="1.0.10" class="md-nav__link">
       1.0.10
     </a>
   </li>
@@ -304,7 +377,7 @@
 
 
   <li class="md-nav__item">
-    <a href="/siddhi-io-cdc/api/1.0.9/" title="1.0.9" class="md-nav__link">
+    <a href="/api/1.0.9/" title="1.0.9" class="md-nav__link">
       1.0.9
     </a>
   </li>
@@ -316,7 +389,7 @@
 
 
   <li class="md-nav__item">
-    <a href="/siddhi-io-cdc/api/1.0.8/" title="1.0.8" class="md-nav__link">
+    <a href="/api/1.0.8/" title="1.0.8" class="md-nav__link">
       1.0.8
     </a>
   </li>
@@ -328,7 +401,7 @@
 
 
   <li class="md-nav__item">
-    <a href="/siddhi-io-cdc/api/1.0.7/" title="1.0.7" class="md-nav__link">
+    <a href="/api/1.0.7/" title="1.0.7" class="md-nav__link">
       1.0.7
     </a>
   </li>
@@ -340,7 +413,7 @@
 
 
   <li class="md-nav__item">
-    <a href="/siddhi-io-cdc/api/1.0.6/" title="1.0.6" class="md-nav__link">
+    <a href="/api/1.0.6/" title="1.0.6" class="md-nav__link">
       1.0.6
     </a>
   </li>
@@ -352,20 +425,8 @@
 
 
   <li class="md-nav__item">
-    <a href="/siddhi-io-cdc/api/1.0.5/" title="1.0.5" class="md-nav__link">
+    <a href="/api/1.0.5/" title="1.0.5" class="md-nav__link">
       1.0.5
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="/siddhi-io-cdc/api/latest/" title="latest" class="md-nav__link">
-      latest
     </a>
   </li>
 
@@ -381,7 +442,7 @@
 
 
   <li class="md-nav__item">
-    <a href="/siddhi-io-cdc/license/" title="License" class="md-nav__link">
+    <a href="/license/" title="License" class="md-nav__link">
       License
     </a>
   </li>
@@ -418,7 +479,7 @@
       <div class="md-footer-copyright">
         
           <div class="md-footer-copyright__highlight">
-            Copyright &copy; 2011 - 2018 WSO2
+            Siddhi - Documentation
           </div>
         
         powered by
@@ -429,9 +490,13 @@
       </div>
       
   <div class="md-footer-social">
-    <link rel="stylesheet" href="/siddhi-io-cdc/assets/fonts/font-awesome.css">
+    <link rel="stylesheet" href="/assets/fonts/font-awesome.css">
     
-      <a href="https://github.com/wso2/cdc" class="md-footer-social__link fa fa-github"></a>
+      <a href="https://github.com/siddhi-io/siddhi" class="md-footer-social__link fa fa-github"></a>
+    
+      <a href="https://medium.com/siddhi-io" class="md-footer-social__link fa fa-medium"></a>
+    
+      <a href="https://twitter.com/siddhi_io" class="md-footer-social__link fa fa-twitter"></a>
     
       <a href="https://www.linkedin.com/groups/13553064" class="md-footer-social__link fa fa-linkedin"></a>
     
@@ -443,11 +508,11 @@
       
     </div>
     
-      <script src="/siddhi-io-cdc/assets/javascripts/application.245445c6.js"></script>
+      <script src="/assets/javascripts/application.dc02f8ce.js"></script>
       
-      <script>app.initialize({version:"1.0.4",url:{base:"/siddhi-io-cdc/"}})</script>
+      <script>app.initialize({version:"1.0.4",url:{base:"/"}})</script>
       
-        <script src="/siddhi-io-cdc/javascripts/extra.js"></script>
+        <script src="/assets/javascripts/extra.js"></script>
       
     
   </body>

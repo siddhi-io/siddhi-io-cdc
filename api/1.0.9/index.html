@@ -10,13 +10,9 @@
       <meta name="viewport" content="width=device-width,initial-scale=1">
       <meta http-equiv="x-ua-compatible" content="ie=edge">
       
-        <meta name="description" content="Siddhi Change Data Capture io Extension">
+        <meta name="description" content="Siddhi IO CDC Extension">
       
       
-        <link rel="canonical" href="https://wso2-extensions.github.io/siddhi-io-cdc/api/1.0.9/">
-      
-      
-        <meta name="author" content="WSO2">
       
       
         <meta name="lang:clipboard.copy" content="Copy to clipboard">
@@ -38,17 +34,17 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../images/favicon.ico">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.4.0">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
     
     
       
-        <title>1.0.9 - Siddhi-IO-CDC</title>
+        <title>1.0.9 - Siddhi IO CDC</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.0284f74d.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.3020aac5.css">
       
-        <link rel="stylesheet" href="../../assets/stylesheets/application-palette.01803549.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/application-palette.224b79ff.css">
       
       
         
@@ -57,19 +53,19 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.01ccdecf.js"></script>
     
     
       
         <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono&display=fallback">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
         <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
       
     
     <link rel="stylesheet" href="../../assets/fonts/material-icons.css">
     
     
-      <link rel="stylesheet" href="../../stylesheets/extra.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/extra.css">
     
     
       
@@ -110,7 +106,24 @@
       <defs>
         
         
-          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448"
+    viewBox="0 0 416 448" id="__github">
+  <path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19-18.125
+        8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19 18.125-8.5
+        18.125 8.5 10.75 19 3.125 20.5zM320 304q0 10-3.125 20.5t-10.75
+        19-18.125 8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19
+        18.125-8.5 18.125 8.5 10.75 19 3.125 20.5zM360
+        304q0-30-17.25-51t-46.75-21q-10.25 0-48.75 5.25-17.75 2.75-39.25
+        2.75t-39.25-2.75q-38-5.25-48.75-5.25-29.5 0-46.75 21t-17.25 51q0 22 8
+        38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0
+        37.25-1.75t35-7.375 30.5-15 20.25-25.75 8-38.375zM416 260q0 51.75-15.25
+        82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5-41.75
+        1.125q-19.5 0-35.5-0.75t-36.875-3.125-38.125-7.5-34.25-12.875-30.25-20.25-21.5-28.75q-15.5-30.75-15.5-82.75
+        0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25
+        30.875q36.75-8.75 77.25-8.75 37 0 70 8 26.25-20.5
+        46.75-30.25t47.25-9.75q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34
+        99.5z" />
+</svg>
         
       </defs>
     </svg>
@@ -127,9 +140,9 @@
   <nav class="md-header-nav md-grid">
     <div class="md-flex">
       <div class="md-flex__cell md-flex__cell--shrink">
-        <a href="https://wso2-extensions.github.io/siddhi-io-cdc/" title="Siddhi-IO-CDC" class="md-header-nav__button md-logo">
+        <a href="../.." title="Siddhi IO CDC" class="md-header-nav__button md-logo">
           
-            <img src="../../images/siddhi-logo-w.svg" width="24" height="24">
+            <img src="../../images/siddhi-logo.svg" width="24" height="24">
           
         </a>
       </div>
@@ -140,12 +153,10 @@
         <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
           
             <span class="md-header-nav__topic">
-              Siddhi-IO-CDC
+              Siddhi IO CDC
             </span>
             <span class="md-header-nav__topic">
-              
-                1.0.9
-              
+              1.0.9
             </span>
           
         </div>
@@ -186,7 +197,7 @@
 
   
 
-<a href="https://github.com/wso2-extensions/siddhi-io-cdc/" title="Go to repository" class="md-source" data-md-source="github">
+<a href="https://github.com/siddhi-io/siddhi-io-cdc/" title="Go to repository" class="md-source" data-md-source="github">
   
     <div class="md-source__icon">
       <svg viewBox="0 0 24 24" width="24" height="24">
@@ -195,7 +206,7 @@
     </div>
   
   <div class="md-source__repository">
-    Siddhi-IO-CDC
+    Siddhi IO CDC
   </div>
 </a>
           </div>
@@ -219,12 +230,12 @@
                   <div class="md-sidebar__inner">
                     <nav class="md-nav md-nav--primary" data-md-level="0">
   <label class="md-nav__title md-nav__title--site" for="__drawer">
-    <a href="https://wso2-extensions.github.io/siddhi-io-cdc/" title="Siddhi-IO-CDC" class="md-nav__button md-logo">
+    <a href="../.." title="Siddhi IO CDC" class="md-nav__button md-logo">
       
-        <img src="../../images/siddhi-logo-w.svg" width="48" height="48">
+        <img src="../../images/siddhi-logo.svg" width="48" height="48">
       
     </a>
-    Siddhi-IO-CDC
+    Siddhi IO CDC
   </label>
   
     <div class="md-nav__source">
@@ -233,7 +244,7 @@
 
   
 
-<a href="https://github.com/wso2-extensions/siddhi-io-cdc/" title="Go to repository" class="md-source" data-md-source="github">
+<a href="https://github.com/siddhi-io/siddhi-io-cdc/" title="Go to repository" class="md-source" data-md-source="github">
   
     <div class="md-source__icon">
       <svg viewBox="0 0 24 24" width="24" height="24">
@@ -242,7 +253,7 @@
     </div>
   
   <div class="md-source__repository">
-    Siddhi-IO-CDC
+    Siddhi IO CDC
   </div>
 </a>
     </div>
@@ -255,8 +266,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../.." title="Welcome" class="md-nav__link">
-      Welcome
+    <a href="../.." title="Information" class="md-nav__link">
+      Information
     </a>
   </li>
 
@@ -281,6 +292,66 @@
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
         
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../latest/" title="latest" class="md-nav__link">
+      latest
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../2.0.3/" title="2.0.3" class="md-nav__link">
+      2.0.3
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../2.0.2/" title="2.0.2" class="md-nav__link">
+      2.0.2
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../2.0.1/" title="2.0.1" class="md-nav__link">
+      2.0.1
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../2.0.0/" title="2.0.0" class="md-nav__link">
+      2.0.0
+    </a>
+  </li>
+
         
           
           
@@ -417,18 +488,6 @@
   </li>
 
         
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../latest/" title="latest" class="md-nav__link">
-      latest
-    </a>
-  </li>
-
-        
       </ul>
     </nav>
   </li>
@@ -502,18 +561,17 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/wso2-extensions/siddhi-io-cdc/edit/master/docs/api/1.0.9.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                  <a href="https://github.com/siddhi-io/siddhi-io-cdc/blob/master/api/1.0.9.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="api-docs-v109">API Docs - v1.0.9<a class="headerlink" href="#api-docs-v109" title="Permanent link">&para;</a></h1>
-<h2 id="source">Source<a class="headerlink" href="#source" title="Permanent link">&para;</a></h2>
-<h3 id="cdc-source">cdc <em><a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source">(Source)</a></em><a class="headerlink" href="#cdc-source" title="Permanent link">&para;</a></h3>
+                <h1 id="api-docs-v109">API Docs - v1.0.9</h1>
+<h2 id="source">Source</h2>
+<h3 id="cdc-source">cdc <em><a target="_blank" href="https://siddhi.io/en/v4.x/docs/query-guide/#source">(Source)</a></em></h3>
 <p style="word-wrap: break-word">The CDC source receives events when change events (i.e., INSERT, UPDATE, DELETE) are triggered for a database table. Events are received in the 'key-value' format.<br>The key values of the map of a CDC change event are as follows.<br>&nbsp;&nbsp;&nbsp;&nbsp;For insert: Keys are specified as columns of the table.<br>&nbsp;&nbsp;&nbsp;&nbsp;For delete: Keys are followed followed by the specified table columns. This is achieved via 'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'.<br>&nbsp;&nbsp;&nbsp;&nbsp;For update: Keys are followed followed by the specified table columns. This is achieved via 'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'.<br>For 'polling' mode: Keys are specified as the coloumns of the table.<br>See parameter: mode for supported databases and change events.</p>
 
 <p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
-<div class="codehilite"><pre><span></span>@source(type=&quot;cdc&quot;, url=&quot;&lt;STRING&gt;&quot;, mode=&quot;&lt;STRING&gt;&quot;, jdbc.driver.name=&quot;&lt;STRING&gt;&quot;, username=&quot;&lt;STRING&gt;&quot;, password=&quot;&lt;STRING&gt;&quot;, pool.properties=&quot;&lt;STRING&gt;&quot;, datasource.name=&quot;&lt;STRING&gt;&quot;, table.name=&quot;&lt;STRING&gt;&quot;, polling.column=&quot;&lt;STRING&gt;&quot;, polling.interval=&quot;&lt;INT&gt;&quot;, operation=&quot;&lt;STRING&gt;&quot;, connector.properties=&quot;&lt;STRING&gt;&quot;, database.server.id=&quot;&lt;STRING&gt;&quot;, database.server.name=&quot;&lt;STRING&gt;&quot;, @map(...)))
-</pre></div>
-
+<pre><code>@source(type=&quot;cdc&quot;, url=&quot;&lt;STRING&gt;&quot;, mode=&quot;&lt;STRING&gt;&quot;, jdbc.driver.name=&quot;&lt;STRING&gt;&quot;, username=&quot;&lt;STRING&gt;&quot;, password=&quot;&lt;STRING&gt;&quot;, pool.properties=&quot;&lt;STRING&gt;&quot;, datasource.name=&quot;&lt;STRING&gt;&quot;, table.name=&quot;&lt;STRING&gt;&quot;, polling.column=&quot;&lt;STRING&gt;&quot;, polling.interval=&quot;&lt;INT&gt;&quot;, operation=&quot;&lt;STRING&gt;&quot;, connector.properties=&quot;&lt;STRING&gt;&quot;, database.server.id=&quot;&lt;STRING&gt;&quot;, database.server.name=&quot;&lt;STRING&gt;&quot;, @map(...)))
+</code></pre>
 
 <p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
 <table>
@@ -640,69 +698,63 @@
 </table></p>
 <p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
 <span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
-<div class="codehilite"><pre><span></span>@source(type = &#39;cdc&#39; , url = &#39;jdbc:mysql://localhost:3306/SimpleDB&#39;, 
-username = &#39;cdcuser&#39;, password = &#39;pswd4cdc&#39;, 
-table.name = &#39;students&#39;, operation = &#39;insert&#39;, 
-@map(type=&#39;keyvalue&#39;, @attributes(id = &#39;id&#39;, name = &#39;name&#39;)))
+<pre><code>@source(type = 'cdc' , url = 'jdbc:mysql://localhost:3306/SimpleDB', 
+username = 'cdcuser', password = 'pswd4cdc', 
+table.name = 'students', operation = 'insert', 
+@map(type='keyvalue', @attributes(id = 'id', name = 'name')))
 define stream inputStream (id string, name string);
-</pre></div>
-
+</code></pre>
 
 <p style="word-wrap: break-word">In this example, the CDC source listens to the row insertions that are made in the 'students' table with the column name, and the ID. This table belongs to the 'SimpleDB' MySQL database that can be accessed via the given URL.</p>
 
 <p><span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span></p>
-<div class="codehilite"><pre><span></span>@source(type = &#39;cdc&#39; , url = &#39;jdbc:mysql://localhost:3306/SimpleDB&#39;, 
-username = &#39;cdcuser&#39;, password = &#39;pswd4cdc&#39;, 
-table.name = &#39;students&#39;, operation = &#39;update&#39;, 
-@map(type=&#39;keyvalue&#39;, @attributes(id = &#39;id&#39;, name = &#39;name&#39;, 
-before_id = &#39;before_id&#39;, before_name = &#39;before_name&#39;)))
+<pre><code>@source(type = 'cdc' , url = 'jdbc:mysql://localhost:3306/SimpleDB', 
+username = 'cdcuser', password = 'pswd4cdc', 
+table.name = 'students', operation = 'update', 
+@map(type='keyvalue', @attributes(id = 'id', name = 'name', 
+before_id = 'before_id', before_name = 'before_name')))
 define stream inputStream (before_id string, id string, 
 before_name string , name string);
-</pre></div>
-
+</code></pre>
 
 <p style="word-wrap: break-word">In this example, the CDC source listens to the row updates that are made in the 'students' table. This table belongs to the 'SimpleDB' MySQL database that can be accessed via the given URL.</p>
 
 <p><span id="example-3" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 3</span></p>
-<div class="codehilite"><pre><span></span>@source(type = &#39;cdc&#39; , url = &#39;jdbc:mysql://localhost:3306/SimpleDB&#39;, 
-username = &#39;cdcuser&#39;, password = &#39;pswd4cdc&#39;, 
-table.name = &#39;students&#39;, operation = &#39;delete&#39;, 
-@map(type=&#39;keyvalue&#39;, @attributes(before_id = &#39;before_id&#39;, before_name = &#39;before_name&#39;)))
+<pre><code>@source(type = 'cdc' , url = 'jdbc:mysql://localhost:3306/SimpleDB', 
+username = 'cdcuser', password = 'pswd4cdc', 
+table.name = 'students', operation = 'delete', 
+@map(type='keyvalue', @attributes(before_id = 'before_id', before_name = 'before_name')))
 define stream inputStream (before_id string, before_name string);
-</pre></div>
-
+</code></pre>
 
 <p style="word-wrap: break-word">In this example, the CDC source listens to the row deletions made in the 'students' table. This table belongs to the 'SimpleDB' database that can be accessed via the given URL.</p>
 
 <p><span id="example-4" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 4</span></p>
-<div class="codehilite"><pre><span></span>@source(type = &#39;cdc&#39;, mode=&#39;polling&#39;, polling.column = &#39;id&#39;, 
-jdbc.driver.name = &#39;com.mysql.jdbc.Driver&#39;, url = &#39;jdbc:mysql://localhost:3306/SimpleDB&#39;, 
-username = &#39;cdcuser&#39;, password = &#39;pswd4cdc&#39;, 
-table.name = &#39;students&#39;, 
-@map(type=&#39;keyvalue&#39;), @attributes(id = &#39;id&#39;, name = &#39;name&#39;))
+<pre><code>@source(type = 'cdc', mode='polling', polling.column = 'id', 
+jdbc.driver.name = 'com.mysql.jdbc.Driver', url = 'jdbc:mysql://localhost:3306/SimpleDB', 
+username = 'cdcuser', password = 'pswd4cdc', 
+table.name = 'students', 
+@map(type='keyvalue'), @attributes(id = 'id', name = 'name'))
 define stream inputStream (id int, name string);
-</pre></div>
-
+</code></pre>
 
 <p style="word-wrap: break-word">In this example, the CDC source polls the 'students' table for inserts. 'id' that is specified as the polling colum' is an auto incremental field. The connection to the database is made via the URL, username, password, and the JDBC driver name.</p>
 
 <p><span id="example-5" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 5</span></p>
-<div class="codehilite"><pre><span></span>@source(type = &#39;cdc&#39;, mode=&#39;polling&#39;, polling.column = &#39;id&#39;, datasource.name = &#39;SimpleDB&#39;,
-table.name = &#39;students&#39;, 
-@map(type=&#39;keyvalue&#39;), @attributes(id = &#39;id&#39;, name = &#39;name&#39;))
+<pre><code>@source(type = 'cdc', mode='polling', polling.column = 'id', datasource.name = 'SimpleDB',
+table.name = 'students', 
+@map(type='keyvalue'), @attributes(id = 'id', name = 'name'))
 define stream inputStream (id int, name string);
-</pre></div>
-
+</code></pre>
 
 <p style="word-wrap: break-word">In this example, the CDC source polls the 'students' table for inserts. The given polling column is a char column with the 'S001, S002, ... .' pattern. The connection to the database is made via a data source named 'SimpleDB'. Note that the 'datasource.name' parameter works only with the Stream Processor.</p>
 
 <p><span id="example-6" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 6</span></p>
-<div class="codehilite"><pre><span></span>@source(type = &#39;cdc&#39;, mode=&#39;polling&#39;, polling.column = &#39;last_updated&#39;, datasource.name = &#39;SimpleDB&#39;,
-table.name = &#39;students&#39;, 
-@map(type=&#39;keyvalue&#39;))
+<pre><code>@source(type = 'cdc', mode='polling', polling.column = 'last_updated', datasource.name = 'SimpleDB',
+table.name = 'students', 
+@map(type='keyvalue'))
 define stream inputStream (name string);
-</pre></div>
-
+</code></pre>
 
 <p style="word-wrap: break-word">In this example, the CDC source polls the 'students' table for inserts and updates. The polling column is a timestamp field.</p>
                 
@@ -762,7 +814,7 @@ define stream inputStream (name string);
       <div class="md-footer-copyright">
         
           <div class="md-footer-copyright__highlight">
-            Copyright &copy; 2011 - 2018 WSO2
+            Siddhi - Documentation
           </div>
         
         powered by
@@ -775,7 +827,11 @@ define stream inputStream (name string);
   <div class="md-footer-social">
     <link rel="stylesheet" href="../../assets/fonts/font-awesome.css">
     
-      <a href="https://github.com/wso2/cdc" class="md-footer-social__link fa fa-github"></a>
+      <a href="https://github.com/siddhi-io/siddhi" class="md-footer-social__link fa fa-github"></a>
+    
+      <a href="https://medium.com/siddhi-io" class="md-footer-social__link fa fa-medium"></a>
+    
+      <a href="https://twitter.com/siddhi_io" class="md-footer-social__link fa fa-twitter"></a>
     
       <a href="https://www.linkedin.com/groups/13553064" class="md-footer-social__link fa fa-linkedin"></a>
     
@@ -787,11 +843,11 @@ define stream inputStream (name string);
       
     </div>
     
-      <script src="../../assets/javascripts/application.245445c6.js"></script>
+      <script src="../../assets/javascripts/application.dc02f8ce.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       
-        <script src="../../javascripts/extra.js"></script>
+        <script src="../../assets/javascripts/extra.js"></script>
       
     
   </body>
