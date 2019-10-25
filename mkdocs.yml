@@ -27,8 +27,10 @@ extra:
     link: https://www.linkedin.com/groups/13553064
 markdown_extensions:
 - admonition
-- toc(permalink=true)
-- codehilite(guess_lang=false)
+- toc:
+    permalink: true
+- codehilite:
+    guess_lang: false
 pages:
 - Welcome: index.md
 - API Docs:
