@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.extension.siddhi.io.cdc</groupId>
         <artifactId>siddhi-io-cdc-parent</artifactId>
-        <version>1.0.11-SNAPSHOT</version>
+        <version>1.0.11</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>siddhi-io-cdc</artifactId>
