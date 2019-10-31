@@ -507,7 +507,7 @@
                     </suiteXmlFiles>
                     <argLine>${jcoverage.command}</argLine>
                     <useSystemClassLoader>false</useSystemClassLoader>
-                    <skip>${skip.surefire.test}</skip>
+<!--                    <skip>${skip.surefire.test}</skip>-->
                 </configuration>
             </plugin>
             <plugin>
@@ -525,7 +525,7 @@
                         </Export-Package>
                         <Private-Package>
                             com.github.shyiko.*,
-                            io.debezium.*,
+                            io.debezium.*,;version="${debezium-embedded.version}"
                             org.apache.kafka.connect.*,
                             org.apache.kafka.common.*,
                             org.apache.kafka.clients.*,

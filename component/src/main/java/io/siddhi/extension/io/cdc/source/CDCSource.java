@@ -204,13 +204,6 @@ import java.util.concurrent.Executors;
                         optional = true,
                         type = DataType.STRING
                 ),
-//                @Parameter(
-//                        name = CDCSourceConstants.CDB,
-//                        type = DataType.STRING,
-//                        optional = true,
-//                        defaultValue = "Empty_String",
-//                        description = "Oracle CDB name(Note: Only valid when monitoring Oracle with listening mode)"
-//                ),
                 @Parameter(
                         name = CDCSourceConstants.PDB,
                         type = DataType.STRING,
@@ -332,7 +325,8 @@ import java.util.concurrent.Executors;
                 )
         }
 )
-
+// TODO: 10/28/19 say the configs are mandatory for oracle add an example move the properties as
+//  connector properties
 public class CDCSource extends Source<CDCSource.CdcState> {
     private static final Logger log = Logger.getLogger(CDCSource.class);
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -495,14 +489,6 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                 };
 
                 EmbeddedEngine engine = changeDataCapture.getEngine(completionCallback);
-//                ClassLoader t = ClassLoader.getSystemClassLoader();
-//                Thread.currentThread().setContextClassLoader(CDCSource.class.getClassLoader());
-//                try {
-//                    executorService.execute(engine);
-//                } finally {
-//                    Thread.currentThread().setContextClassLoader(t);
-//                }
-
                 executorService.execute(engine);
                 break;
             case CDCSourceConstants.MODE_POLLING:

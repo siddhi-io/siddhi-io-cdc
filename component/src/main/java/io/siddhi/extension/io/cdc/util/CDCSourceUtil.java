@@ -21,6 +21,7 @@ package io.siddhi.extension.io.cdc.util;
 import io.siddhi.extension.io.cdc.source.listening.InMemoryOffsetBackingStore;
 import io.siddhi.extension.io.cdc.source.listening.WrongConfigurationException;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
+//import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +39,7 @@ public class CDCSourceUtil {
                                                    String connectorProperties, int cdcSourceHashCode,
                                                    String oraclePDB, String oracleOutServerNme)
             throws WrongConfigurationException {
-
+//        Logger logger = Logger.getLogger(CDCSourceUtil.class);
         Map<String, Object> configMap = new HashMap<>();
         String host;
         int port;
@@ -141,6 +142,13 @@ public class CDCSourceUtil {
                         throw new WrongConfigurationException("Invalid JDBC url: " + url + " received for stream: " +
                                 siddhiStreamName + ". Expected url format: jdbc:oracle:driver://<host>:<port>:<sid>");
                     }
+
+//                    try { // Load the ojdbc driver relevant to the Dtabase version this driver won't get loaded due to
+//                          // the reason it is a spi loaded jar therefore we have to manually load the class driver.
+//                        Class.forName("oracle.jdbc.OracleDriver");
+//                    } catch (ClassNotFoundException e) {
+//                        logger.error("Error while loading the OJDBC driver", e);
+//                    }
 
                     configMap.put(CDCSourceConstants.DATABASE_HOSTNAME, host);
                     configMap.put(CDCSourceConstants.DATABASE_PORT, port);

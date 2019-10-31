@@ -158,13 +158,6 @@
                 <version>${org.testng.version}</version>
                 <scope>test</scope>
             </dependency>
-<!--            &lt;!&ndash; https://mvnrepository.com/artifact/com.oracle.jdbc/ojdbc8 &ndash;&gt;-->
-<!--            <dependency>-->
-<!--                <groupId>com.oracle.jdbc</groupId>-->
-<!--                <artifactId>ojdbc8</artifactId>-->
-<!--                <version>12.2.0.1</version>-->
-<!--            </dependency>-->
-
         </dependencies>
     </dependencyManagement>
     <build>
@@ -232,18 +225,6 @@
         <docker.container.siddhi-cdc-postgres.ip>0.0.0.0</docker.container.siddhi-cdc-postgres.ip>
         <oracle.jdbc.Driver.version>12.2.0.1</oracle.jdbc.Driver.version>
     </properties>
-<!--    <repositories>-->
-<!--        <repository>-->
-<!--            <id>xwiki.externals.repository</id>-->
-<!--            <name>XWiki Externals Repository</name>-->
-<!--            <url>https://maven.xwiki.org/externals/</url>-->
-<!--            <releases>-->
-<!--                <enabled>true</enabled>-->
-<!--                <updatePolicy>daily</updatePolicy>-->
-<!--                <checksumPolicy>ignore</checksumPolicy>-->
-<!--            </releases>-->
-<!--        </repository>-->
-<!--    </repositories>-->
     <scm>
         <url>https://github.com/siddhi-io/siddhi-io-cdc.git</url>
         <developerConnection>scm:git:https://github.com/siddhi-io/siddhi-io-cdc.git</developerConnection>
