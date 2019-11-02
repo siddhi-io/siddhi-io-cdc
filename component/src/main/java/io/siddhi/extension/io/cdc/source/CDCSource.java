@@ -351,10 +351,37 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                                        SiddhiAppContext siddhiAppContext) {
         //initialize mode
         mode = optionHolder.validateAndGetStaticValue(CDCSourceConstants.MODE, CDCSourceConstants.MODE_LISTENING);
-
+        log.info("hahahahaha ::::::" + System.getProperty("LD_LIBRARY_PATH"));
         //initialize common mandatory parameters
         String tableName = optionHolder.validateAndGetOption(CDCSourceConstants.TABLE_NAME).getValue();
         String siddhiAppName = siddhiAppContext.getName();
+//        System.setProperty("java.library.path","/root/instantclient_12_1");
+//        System.load("/root/instantclient_19_3/libclntsh.so");
+//        System.load("/root/instantclient_19_3/libclntsh.so.10.1");
+//        System.load("/root/instantclient_19_3/libclntsh.so.11.1");
+//        System.load("/root/instantclient_19_3/libclntsh.so.12.1");
+//        System.load("/root/instantclient_19_3/libclntsh.so.18.1");
+//        System.load("/root/instantclient_19_3/libclntshcore.so.19.1");
+//        System.load("/root/instantclient_19_3/libipc1.so");
+//        System.load("/root/instantclient_19_3/libmql1.so");
+//        System.load("/root/instantclient_19_3/libnnz19.so");
+//        System.load("/root/instantclient_19_3/libocci.so");
+//        System.load("/root/instantclient_19_3/libocci.so.10.1");
+//        System.load("/root/instantclient_19_3/libocci.so.11.1");
+//        System.load("/root/instantclient_19_3/libocci.so.12.1");
+//        System.load("/root/instantclient_19_3/libocci.so.18.1");
+//        System.load("/root/instantclient_19_3/libociei.so");
+//        System.load("/root/instantclient_19_3/libocijdbc19.so");
+//        System.load("/root/instantclient_19_3/liboramysql19.so");
+//        System.load("/Users/charukak/Dev/instantclient_12_2/libclntsh.dylib");
+//        System.load("/Users/charukak/Dev/instantclient_12_2/libclntshcore.dylib.12.1");
+//        System.load("/Users/charukak/Dev/instantclient_12_2/libnnz12.dylib");
+//        System.load("/Users/charukak/Dev/instantclient_12_2/libocci.dylib");
+//        System.load("/Users/charukak/Dev/instantclient_12_2/libociei.dylib");
+////        System.load("/Users/charukak/Dev/instantclient_12_2/libocijdbc12.dylib");
+//        System.load("/Users/charukak/Dev/instantclient_12_2/libons.dylib");
+//        System.load("/Users/charukak/Dev/instantclient_12_2/liboramysql12.dylib");
+
 
         switch (mode) {
             case CDCSourceConstants.MODE_LISTENING:
@@ -464,6 +491,8 @@ public class CDCSource extends Source<CDCSource.CdcState> {
             default:
                 throw new SiddhiAppValidationException("Unsupported " + CDCSourceConstants.MODE + ": " + mode);
         }
+
+        AllLoadedNativeLibrariesInJVM.listAllLoadedNativeLibrariesFromJVM();
         return () -> new CdcState(mode);
     }
 
@@ -490,6 +519,12 @@ public class CDCSource extends Source<CDCSource.CdcState> {
 
                 EmbeddedEngine engine = changeDataCapture.getEngine(completionCallback);
                 executorService.execute(engine);
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                AllLoadedNativeLibrariesInJVM.listAllLoadedNativeLibrariesFromJVM();
                 break;
             case CDCSourceConstants.MODE_POLLING:
                 //create a completion callback to handle exceptions from CDCPoller
