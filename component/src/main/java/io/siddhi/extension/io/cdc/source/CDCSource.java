@@ -365,8 +365,6 @@ import java.util.concurrent.Executors;
                 )
         }
 )
-// TODO: 10/28/19 say the configs are mandatory for oracle add an example move the properties as
-//  connector properties
 public class CDCSource extends Source<CDCSource.CdcState> {
     private static final Logger log = Logger.getLogger(CDCSource.class);
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -395,10 +393,8 @@ public class CDCSource extends Source<CDCSource.CdcState> {
         String tableName = optionHolder.validateAndGetOption(CDCSourceConstants.TABLE_NAME).getValue();
         String siddhiAppName = siddhiAppContext.getName();
 
-
         switch (mode) {
             case CDCSourceConstants.MODE_LISTENING:
-
                 String url = optionHolder.validateAndGetOption(CDCSourceConstants.DATABASE_CONNECTION_URL).getValue();
                 String username = optionHolder.validateAndGetOption(CDCSourceConstants.USERNAME).getValue();
                 String password = optionHolder.validateAndGetOption(CDCSourceConstants.PASSWORD).getValue();
@@ -453,7 +449,6 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                 }
                 break;
             case CDCSourceConstants.MODE_POLLING:
-
                 String pollingColumn = optionHolder.validateAndGetStaticValue(CDCSourceConstants.POLLING_COLUMN);
                 boolean isDatasourceNameAvailable = optionHolder.isOptionExists(CDCSourceConstants.DATASOURCE_NAME);
                 boolean isJndiResourceAvailable = optionHolder.isOptionExists(CDCSourceConstants.JNDI_RESOURCE);
