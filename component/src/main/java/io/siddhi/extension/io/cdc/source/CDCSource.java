@@ -78,8 +78,52 @@ import java.util.concurrent.Executors;
                 "'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'.\n" +
                 "\tFor update: Keys are followed followed by the specified table columns. This is achieved via " +
                 "'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'." +
-
                 "\n\nFor 'polling' mode: Keys are specified as the columns of the table." +
+
+                "#### Preparations required for working with Oracle Databases in listening mode\n" +
+                "\n" +
+                "Using the extension in Windows, Mac OSX and AIX are pretty straight forward inorder to achieve the " +
+                "required behaviour please follow the steps given below\n" +
+                "\n" +
+                " - First download the following jar versions\n" +
+                "   - `kafka connect-api: version 2.3.0`\n" +
+                "   - `kafka connect-runtime: version 2.3.0`\n" +
+                "   - `kafka connect-json: version 2.3.0`\n" +
+                "   Create an uber jar using the jars by using the following `build.xml`\n" +
+                "   \n" +
+                "   ```\n" +
+                "   <project>\n" +
+                "      <target name=\"run\">\n" +
+                "        <jar id=\"files\" jarfile=\"kafka-all.jar\">\n" +
+                "          <zipfileset src=\"connect-api-2.3.0.jar\" includes=\"**/*.java **/*.class\"/>\n" +
+                "          <zipfileset src=\"connect-runtime-2.3.0.jar\" includes=\"**/*.java **/*.class\"/>\n" +
+                "          <zipfileset src=\"connect-json-2.3.0.jar\" includes=\"**/*.java **/*.class\"/>\n" +
+                "        </jar>\n" +
+                "      </target>\n" +
+                "    </project>\n" +
+                "\n" +
+                "   ```\n" +
+                "   After placing them and the `build.xml` inside the same folder generate the `kafka-all.jar` using " +
+                "the `ant run` command after generating the jar convert it to an OSGi bundle using the " +
+                "`jartobundle.sh` tool inside the `<distribution>/bin` and copy the OSGi converted jar into the " +
+                "`<distribution>/lib`\n" +
+                "  - Download the compatible version of oracle instantclient for the database version from [here]" +
+                "(https://www.oracle.com/database/technologies/instant-client/downloads.html) and extract\n" +
+                "  - Extract and set the environment variable `LD_LIBRARY_PATH` to the location of instantclient " +
+                "which was exstracted as shown below\n" +
+                "  ```\n" +
+                "    export LD_LIBRARY_PATH=<path to the instant client location>\n" +
+                "  ```\n" +
+                "  - Inside the instantclient folder which was download there are two jars `xstreams.jar` and " +
+                "`ojdbc<version>.jar` convert them to OSGi bundles using the tools which were provided in the " +
+                "`<distribution>/bin` for converting the `ojdbc.jar` use the tool `spi-provider.sh|bat` and for " +
+                "the conversion of `xstreams.jar` use the jni-provider.sh as shown below(Note: this way of " +
+                "converting Xstreams jar is applicable only for Linux environments for other OSs this step is not " +
+                "required and converting it through the `jartobundle.sh` tool is enough)\n" +
+                "  ```\n" +
+                "    ./jni-provider.sh <input-jar> <destination> <comma seperated native library names>\n" +
+                "  ```\n" +
+                "  once ojdbc and xstreams jars are converted to OSGi copy the generated jars to the `<distribution>/lib`. Currently siddhi-io-cdc only supports the oracle database distributions 12 and above"+
 
                 "\n\nSee parameter: mode for supported databases and change events.",
         parameters = {
@@ -203,21 +247,6 @@ import java.util.concurrent.Executors;
                         defaultValue = "{host}_{port}",
                         optional = true,
                         type = DataType.STRING
-                ),
-                @Parameter(
-                        name = CDCSourceConstants.PDB,
-                        type = DataType.STRING,
-                        optional = true,
-                        defaultValue = "Empty_String",
-                        description = "Oracle PDB name(Note: Only valid when monitoring Oracle with listening mode)"
-                ),
-                @Parameter(
-                        name = CDCSourceConstants.OUTSERVER_NAME,
-                        type = DataType.STRING,
-                        optional = true,
-                        defaultValue = "Empty_String",
-                        description = "Name of the Xtream Outbound server created for CDC(Note: Only valid when " +
-                                "monitoring Oracle with listening mode)"
                 ),
                 @Parameter(
                         name = "wait.on.missed.record",
@@ -351,36 +380,9 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                                        SiddhiAppContext siddhiAppContext) {
         //initialize mode
         mode = optionHolder.validateAndGetStaticValue(CDCSourceConstants.MODE, CDCSourceConstants.MODE_LISTENING);
-        log.info("hahahahaha ::::::" + System.getProperty("LD_LIBRARY_PATH"));
         //initialize common mandatory parameters
         String tableName = optionHolder.validateAndGetOption(CDCSourceConstants.TABLE_NAME).getValue();
         String siddhiAppName = siddhiAppContext.getName();
-//        System.setProperty("java.library.path","/root/instantclient_12_1");
-//        System.load("/root/instantclient_19_3/libclntsh.so");
-//        System.load("/root/instantclient_19_3/libclntsh.so.10.1");
-//        System.load("/root/instantclient_19_3/libclntsh.so.11.1");
-//        System.load("/root/instantclient_19_3/libclntsh.so.12.1");
-//        System.load("/root/instantclient_19_3/libclntsh.so.18.1");
-//        System.load("/root/instantclient_19_3/libclntshcore.so.19.1");
-//        System.load("/root/instantclient_19_3/libipc1.so");
-//        System.load("/root/instantclient_19_3/libmql1.so");
-//        System.load("/root/instantclient_19_3/libnnz19.so");
-//        System.load("/root/instantclient_19_3/libocci.so");
-//        System.load("/root/instantclient_19_3/libocci.so.10.1");
-//        System.load("/root/instantclient_19_3/libocci.so.11.1");
-//        System.load("/root/instantclient_19_3/libocci.so.12.1");
-//        System.load("/root/instantclient_19_3/libocci.so.18.1");
-//        System.load("/root/instantclient_19_3/libociei.so");
-//        System.load("/root/instantclient_19_3/libocijdbc19.so");
-//        System.load("/root/instantclient_19_3/liboramysql19.so");
-//        System.load("/Users/charukak/Dev/instantclient_12_2/libclntsh.dylib");
-//        System.load("/Users/charukak/Dev/instantclient_12_2/libclntshcore.dylib.12.1");
-//        System.load("/Users/charukak/Dev/instantclient_12_2/libnnz12.dylib");
-//        System.load("/Users/charukak/Dev/instantclient_12_2/libocci.dylib");
-//        System.load("/Users/charukak/Dev/instantclient_12_2/libociei.dylib");
-////        System.load("/Users/charukak/Dev/instantclient_12_2/libocijdbc12.dylib");
-//        System.load("/Users/charukak/Dev/instantclient_12_2/libons.dylib");
-//        System.load("/Users/charukak/Dev/instantclient_12_2/liboramysql12.dylib");
 
 
         switch (mode) {
@@ -390,9 +392,7 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                 String username = optionHolder.validateAndGetOption(CDCSourceConstants.USERNAME).getValue();
                 String password = optionHolder.validateAndGetOption(CDCSourceConstants.PASSWORD).getValue();
                 String streamName = sourceEventListener.getStreamDefinition().getId();
-                String oraclePDB = optionHolder.validateAndGetStaticValue(CDCSourceConstants.PDB, "");
-                String oracleOutserverName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.OUTSERVER_NAME,
-                        "");
+
 
                 //initialize mandatory parameters
                 operation = optionHolder.validateAndGetOption(CDCSourceConstants.OPERATION).getValue();
@@ -432,7 +432,7 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                 try {
                     Map<String, Object> configMap = CDCSourceUtil.getConfigMap(username, password, url, tableName,
                             historyFileDirectory, siddhiAppName, streamName, serverID, serverName, connectorProperties,
-                            this.hashCode(), oraclePDB, oracleOutserverName);
+                            this.hashCode());
                     changeDataCapture.setConfig(configMap);
                 } catch (WrongConfigurationException ex) {
                     throw new SiddhiAppCreationException("The cdc source couldn't get started because of invalid" +
@@ -492,7 +492,6 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                 throw new SiddhiAppValidationException("Unsupported " + CDCSourceConstants.MODE + ": " + mode);
         }
 
-        AllLoadedNativeLibrariesInJVM.listAllLoadedNativeLibrariesFromJVM();
         return () -> new CdcState(mode);
     }
 
@@ -519,12 +518,6 @@ public class CDCSource extends Source<CDCSource.CdcState> {
 
                 EmbeddedEngine engine = changeDataCapture.getEngine(completionCallback);
                 executorService.execute(engine);
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                AllLoadedNativeLibrariesInJVM.listAllLoadedNativeLibrariesFromJVM();
                 break;
             case CDCSourceConstants.MODE_POLLING:
                 //create a completion callback to handle exceptions from CDCPoller

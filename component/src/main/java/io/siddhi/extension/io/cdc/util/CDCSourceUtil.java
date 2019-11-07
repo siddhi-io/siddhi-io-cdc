@@ -21,7 +21,6 @@ package io.siddhi.extension.io.cdc.util;
 import io.siddhi.extension.io.cdc.source.listening.InMemoryOffsetBackingStore;
 import io.siddhi.extension.io.cdc.source.listening.WrongConfigurationException;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
-//import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,10 +35,8 @@ public class CDCSourceUtil {
     public static Map<String, Object> getConfigMap(String username, String password, String url, String tableName,
                                                    String historyFileDirectory, String siddhiAppName,
                                                    String siddhiStreamName, int serverID, String serverName,
-                                                   String connectorProperties, int cdcSourceHashCode,
-                                                   String oraclePDB, String oracleOutServerNme)
+                                                   String connectorProperties, int cdcSourceHashCode)
             throws WrongConfigurationException {
-//        Logger logger = Logger.getLogger(CDCSourceUtil.class);
         Map<String, Object> configMap = new HashMap<>();
         String host;
         int port;
@@ -134,6 +131,8 @@ public class CDCSourceUtil {
                     Pattern p = Pattern.compile(regex);
                     Matcher matcher = p.matcher(url);
 
+                    Map<String, String> connectorPropertiesMap = getConnectorPropertiesMap(connectorProperties);
+
                     if (matcher.find()) {
                         host = matcher.group(2);
                         port = Integer.parseInt(matcher.group(3));
@@ -143,28 +142,29 @@ public class CDCSourceUtil {
                                 siddhiStreamName + ". Expected url format: jdbc:oracle:driver://<host>:<port>:<sid>");
                     }
 
-//                    try { // Load the ojdbc driver relevant to the Dtabase version this driver won't get loaded due to
-//                          // the reason it is a spi loaded jar therefore we have to manually load the class driver.
-//                        Class.forName("oracle.jdbc.OracleDriver");
-//                    } catch (ClassNotFoundException e) {
-//                        logger.error("Error while loading the OJDBC driver", e);
-//                    }
+                    if (!(connectorPropertiesMap.containsKey(CDCSourceConstants.ORACLE_PDB_PROPERTY_NAME) ||
+                            connectorProperties.contains(CDCSourceConstants.ORACLE_OUTSERVER_PROPERTY_NAME))) {
+                        throw new WrongConfigurationException("Required properties are missing in the connector " +
+                                "properties configuration");
+                    }
 
                     configMap.put(CDCSourceConstants.DATABASE_HOSTNAME, host);
                     configMap.put(CDCSourceConstants.DATABASE_PORT, port);
-                    configMap.put(CDCSourceConstants.TABLE_WHITELIST, String.format("%s.%s", oraclePDB, tableName));
+                    configMap.put(CDCSourceConstants.TABLE_WHITELIST, String.format("%s.%s",
+                            connectorPropertiesMap.get(CDCSourceConstants.ORACLE_PDB_PROPERTY_NAME), tableName));
                     configMap.put(CDCSourceConstants.DATABASE_DBNAME, database);
                     // Oracle specific properties
-                    configMap.put(CDCSourceConstants.ORACLE_PDB_PROPERTY_NAME, oraclePDB);
-                    configMap.put(CDCSourceConstants.ORACLE_OUTSERVER_PROPERTY_NAME, oracleOutServerNme);
+                    configMap.put(CDCSourceConstants.ORACLE_PDB_PROPERTY_NAME,
+                            connectorPropertiesMap.get(CDCSourceConstants.ORACLE_PDB_PROPERTY_NAME));
+                    configMap.put(CDCSourceConstants.ORACLE_OUTSERVER_PROPERTY_NAME,
+                            connectorPropertiesMap.get(CDCSourceConstants.ORACLE_OUTSERVER_PROPERTY_NAME));
                     configMap.put(CDCSourceConstants.CONNECTOR_CLASS, CDCSourceConstants.ORACLE_CONNECTOR_CLASS);
-
                     break;
                 }
-                default: {
+                default:
                     throw new WrongConfigurationException("Unsupported schema. Expected schema: mysql or postgresql" +
                             "or sqlserver por oracle, Found: " + splittedURL[1]);
-                }
+
             }
 
             //Add general config details to configMap
@@ -215,6 +215,8 @@ public class CDCSourceUtil {
                 if (keyAndValue.length != 2) {
                     throw new SiddhiAppValidationException("connector.properties input is invalid. Check near :" +
                             keyValuePair);
+                } else {
+                    connectorPropertiesMap.put(keyAndValue[0], keyAndValue[1]);
                 }
             }
         }

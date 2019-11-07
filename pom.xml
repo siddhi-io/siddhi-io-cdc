@@ -194,7 +194,7 @@
         </plugins>
     </build>
     <properties>
-        <siddhi.version>5.1.5</siddhi.version>
+        <siddhi.version>5.1.7</siddhi.version>
         <siddhi.import.version.range>[5.1.0,6.0.0)</siddhi.import.version.range>
         <log4j.version>1.2.17.wso2v1</log4j.version>
         <carbon.transport.version>4.4.15</carbon.transport.version>
@@ -206,6 +206,7 @@
         <debezium-connector-oracle.version>0.10.0.Final</debezium-connector-oracle.version>
         <debezium-connector-postgres.version>0.10.0.Final</debezium-connector-postgres.version>
         <debezium-connector-sqlserver.version>0.10.0.Final</debezium-connector-sqlserver.version>
+        <version.oracle.driver>12.1.0.2</version.oracle.driver>
         <hikari.version>3.2.0</hikari.version>
         <org.testng.version>6.11</org.testng.version>
         <siddhi-store-rdbms.version>6.0.1</siddhi-store-rdbms.version>
