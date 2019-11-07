@@ -508,7 +508,7 @@
                     </suiteXmlFiles>
                     <argLine>${jcoverage.command}</argLine>
                     <useSystemClassLoader>false</useSystemClassLoader>
-                    <!--                    <skip>${skip.surefire.test}</skip>-->
+                    <skip>${skip.surefire.test}</skip>
                 </configuration>
             </plugin>
             <plugin>

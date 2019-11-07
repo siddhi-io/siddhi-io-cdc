@@ -123,7 +123,9 @@ import java.util.concurrent.Executors;
                 "  ```\n" +
                 "    ./jni-provider.sh <input-jar> <destination> <comma seperated native library names>\n" +
                 "  ```\n" +
-                "  once ojdbc and xstreams jars are converted to OSGi copy the generated jars to the `<distribution>/lib`. Currently siddhi-io-cdc only supports the oracle database distributions 12 and above"+
+                "  once ojdbc and xstreams jars are converted to OSGi copy the generated jars to the " +
+                "`<distribution>/lib`. Currently siddhi-io-cdc only supports the oracle database distributions " +
+                "12 and above" +
 
                 "\n\nSee parameter: mode for supported databases and change events.",
         parameters = {
@@ -351,6 +353,15 @@ import java.util.concurrent.Executors;
                                 "polling column is a numeric field. This source expects the records in the database " +
                                 "to be written concurrently/out-of-order so it waits if it encounters a missing " +
                                 "record. If the record doesn't appear within 10 seconds it resumes the process."
+                ),
+                @Example(
+                        syntax = "@source(type = 'cdc', url = 'jdbc:oracle:thin://localhost:1521/ORCLCDB', " +
+                                "username='c##xstrm', password='xs', table.name='DEBEZIUM.sweetproductiontable', " +
+                                "operation = 'insert', connector.properties='oracle.outserver.name=DBZXOUT,oracle." +
+                                "pdb=ORCLPDB1' @map(type = 'keyvalue'))\n" +
+                                "define stream insertSweetProductionStream (ID int, NAME string, WEIGHT int);\n",
+                        description = "In this example, the CDC source connect to an Oracle database and listens for" +
+                                " insert queries of sweetproduction table"
                 )
         }
 )
