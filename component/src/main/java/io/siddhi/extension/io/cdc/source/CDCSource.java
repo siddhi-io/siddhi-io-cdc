@@ -85,28 +85,6 @@ import java.util.concurrent.Executors;
                 "Using the extension in Windows, Mac OSX and AIX are pretty straight forward inorder to achieve the " +
                 "required behaviour please follow the steps given below\n" +
                 "\n" +
-                " - First download the following jar versions\n" +
-                "   - `kafka connect-api: version 2.3.0`\n" +
-                "   - `kafka connect-runtime: version 2.3.0`\n" +
-                "   - `kafka connect-json: version 2.3.0`\n" +
-                "   Create an uber jar using the jars by using the following `build.xml`\n" +
-                "   \n" +
-                "   ```\n" +
-                "   <project>\n" +
-                "      <target name=\"run\">\n" +
-                "        <jar id=\"files\" jarfile=\"kafka-all.jar\">\n" +
-                "          <zipfileset src=\"connect-api-2.3.0.jar\" includes=\"**/*.java **/*.class\"/>\n" +
-                "          <zipfileset src=\"connect-runtime-2.3.0.jar\" includes=\"**/*.java **/*.class\"/>\n" +
-                "          <zipfileset src=\"connect-json-2.3.0.jar\" includes=\"**/*.java **/*.class\"/>\n" +
-                "        </jar>\n" +
-                "      </target>\n" +
-                "    </project>\n" +
-                "\n" +
-                "   ```\n" +
-                "   After placing them and the `build.xml` inside the same folder generate the `kafka-all.jar` using " +
-                "the `ant run` command after generating the jar convert it to an OSGi bundle using the " +
-                "`jartobundle.sh` tool inside the `<distribution>/bin` and copy the OSGi converted jar into the " +
-                "`<distribution>/lib`\n" +
                 "  - Download the compatible version of oracle instantclient for the database version from [here]" +
                 "(https://www.oracle.com/database/technologies/instant-client/downloads.html) and extract\n" +
                 "  - Extract and set the environment variable `LD_LIBRARY_PATH` to the location of instantclient " +
