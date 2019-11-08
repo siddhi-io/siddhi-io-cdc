@@ -180,7 +180,8 @@ import java.util.concurrent.Executors;
                                 " used as 'polling.column'. However, note that fields of these types only support" +
                                 " insert change capturing, and the possibility of using a char field also depends on" +
                                 " how the data is input." +
-                                "\n**It is required to enter a value for this parameter when the mode is 'polling'.**"
+                                "\n**It is required to enter a value for this parameter only " +
+                                "when the mode is 'polling'.**"
                         ,
                         type = DataType.STRING,
                         defaultValue = "<Empty_String>",
@@ -198,9 +199,8 @@ import java.util.concurrent.Executors;
                 @Parameter(
                         name = CDCSourceConstants.OPERATION,
                         description = "The change event operation you want to carry out. Possible values are" +
-                                " 'insert', 'update' or 'delete'. It is required to specify a value when the mode is" +
-                                " 'listening'." +
-                                "\nThis parameter is not case sensitive.",
+                                " 'insert', 'update' or 'delete'. This parameter is not case sensitive. " +
+                                "**It is required to specify a value only when the mode is 'listening'.**\n",
                         type = DataType.STRING
                 ),
                 @Parameter(
