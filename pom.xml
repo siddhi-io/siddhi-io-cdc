@@ -158,6 +158,23 @@
                 <version>${org.testng.version}</version>
                 <scope>test</scope>
             </dependency>
+
+            <!--     Kafka client dependencies       -->
+            <dependency>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>connect-json</artifactId>
+                <version>2.3.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>connect-runtime</artifactId>
+                <version>2.3.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>connect-api</artifactId>
+                <version>2.3.0</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>

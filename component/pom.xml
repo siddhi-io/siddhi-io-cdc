@@ -115,6 +115,18 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>connect-json</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>connect-runtime</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>connect-api</artifactId>
+        </dependency>
     </dependencies>
     <profiles>
         <profile>
@@ -512,6 +524,30 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-dependencies</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <markersDirectory>${project.build.directory}/dependencies/dependency-maven-plugin-markers</markersDirectory>
+<!--                            <markersDirectory>${project.build.directory}/classes/META-INF/services</markersDirectory>-->
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.apache.kafka</groupId>
+                                    <artifactId>connect-runtime</artifactId>
+                                    <outputDirectory>${project.build.directory}/dependencies/connect-runtime</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
@@ -521,8 +557,6 @@
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
                             io.siddhi.extension.io.cdc.*;version="${project.version}",
-                            org.apache.kafka.common.*,
-                            org.apache.kafka.clients.*,
                         </Export-Package>
                         <Private-Package>
                             com.github.shyiko.*,
@@ -540,6 +574,7 @@
                         <DynamicImport-Package>*</DynamicImport-Package>
                         <Include-Resource>
                             META-INF=target/classes/META-INF,
+                            META-INF/services=${project.build.directory}/dependencies/connect-runtime/META-INF/services,
                             {maven-resources}
                         </Include-Resource>
                     </instructions>
