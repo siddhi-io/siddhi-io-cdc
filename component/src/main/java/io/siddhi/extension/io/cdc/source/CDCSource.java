@@ -378,7 +378,6 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                 String password = optionHolder.validateAndGetOption(CDCSourceConstants.PASSWORD).getValue();
                 String streamName = sourceEventListener.getStreamDefinition().getId();
 
-
                 //initialize mandatory parameters
                 operation = optionHolder.validateAndGetOption(CDCSourceConstants.OPERATION).getValue();
 
@@ -475,7 +474,6 @@ public class CDCSource extends Source<CDCSource.CdcState> {
             default:
                 throw new SiddhiAppValidationException("Unsupported " + CDCSourceConstants.MODE + ": " + mode);
         }
-
         return () -> new CdcState(mode);
     }
 

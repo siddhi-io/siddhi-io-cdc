@@ -535,7 +535,6 @@
                         </goals>
                         <configuration>
                             <markersDirectory>${project.build.directory}/dependencies/dependency-maven-plugin-markers</markersDirectory>
-<!--                            <markersDirectory>${project.build.directory}/classes/META-INF/services</markersDirectory>-->
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>org.apache.kafka</groupId>
@@ -556,7 +555,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            io.siddhi.extension.io.cdc.*;version="${project.version}",
+                            io.siddhi.extension.io.cdc.*,
                         </Export-Package>
                         <Private-Package>
                             com.github.shyiko.*,
