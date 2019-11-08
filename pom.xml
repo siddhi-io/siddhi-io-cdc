@@ -163,17 +163,17 @@
             <dependency>
                 <groupId>org.apache.kafka</groupId>
                 <artifactId>connect-json</artifactId>
-                <version>2.3.0</version>
+                <version>${kafka.connect.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.kafka</groupId>
                 <artifactId>connect-runtime</artifactId>
-                <version>2.3.0</version>
+                <version>${kafka.connect.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.kafka</groupId>
                 <artifactId>connect-api</artifactId>
-                <version>2.3.0</version>
+                <version>${kafka.connect.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -242,6 +242,7 @@
         <siddhi-cdc-postgres.port>5433</siddhi-cdc-postgres.port>
         <docker.container.siddhi-cdc-postgres.ip>0.0.0.0</docker.container.siddhi-cdc-postgres.ip>
         <oracle.jdbc.Driver.version>12.2.0.1</oracle.jdbc.Driver.version>
+        <kafka.connect.version>2.3.0</kafka.connect.version>
     </properties>
     <scm>
         <url>https://github.com/siddhi-io/siddhi-io-cdc.git</url>
