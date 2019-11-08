@@ -78,19 +78,43 @@ import java.util.concurrent.Executors;
                 "'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'.\n" +
                 "\tFor update: Keys are followed followed by the specified table columns. This is achieved via " +
                 "'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'." +
-
                 "\n\nFor 'polling' mode: Keys are specified as the columns of the table." +
+
+                "#### Preparations required for working with Oracle Databases in listening mode\n" +
+                "\n" +
+                "Using the extension in Windows, Mac OSX and AIX are pretty straight forward inorder to achieve the " +
+                "required behaviour please follow the steps given below\n" +
+                "\n" +
+                "  - Download the compatible version of oracle instantclient for the database version from [here]" +
+                "(https://www.oracle.com/database/technologies/instant-client/downloads.html) and extract\n" +
+                "  - Extract and set the environment variable `LD_LIBRARY_PATH` to the location of instantclient " +
+                "which was exstracted as shown below\n" +
+                "  ```\n" +
+                "    export LD_LIBRARY_PATH=<path to the instant client location>\n" +
+                "  ```\n" +
+                "  - Inside the instantclient folder which was download there are two jars `xstreams.jar` and " +
+                "`ojdbc<version>.jar` convert them to OSGi bundles using the tools which were provided in the " +
+                "`<distribution>/bin` for converting the `ojdbc.jar` use the tool `spi-provider.sh|bat` and for " +
+                "the conversion of `xstreams.jar` use the jni-provider.sh as shown below(Note: this way of " +
+                "converting Xstreams jar is applicable only for Linux environments for other OSs this step is not " +
+                "required and converting it through the `jartobundle.sh` tool is enough)\n" +
+                "  ```\n" +
+                "    ./jni-provider.sh <input-jar> <destination> <comma seperated native library names>\n" +
+                "  ```\n" +
+                "  once ojdbc and xstreams jars are converted to OSGi copy the generated jars to the " +
+                "`<distribution>/lib`. Currently siddhi-io-cdc only supports the oracle database distributions " +
+                "12 and above" +
 
                 "\n\nSee parameter: mode for supported databases and change events.",
         parameters = {
-                @Parameter(name = "url",
+                @Parameter(name = CDCSourceConstants.DATABASE_CONNECTION_URL,
                         description = "The connection URL to the database." +
                                 "\nF=The format used is: " +
                                 "'jdbc:mysql://<host>:<port>/<database_name>' ",
                         type = DataType.STRING
                 ),
                 @Parameter(
-                        name = "mode",
+                        name = CDCSourceConstants.MODE,
                         description = "Mode to capture the change data. The type of events that can be received, " +
                                 "and the required parameters differ based on the mode. The mode can be one of the " +
                                 "following:\n" +
@@ -103,15 +127,15 @@ import java.util.concurrent.Executors;
                         optional = true
                 ),
                 @Parameter(
-                        name = "jdbc.driver.name",
-                        description = "The driver class name for connecting the database. \n**It is required to " +
-                                "specify a value for this parameter only when the mode is 'polling'.**",
+                        name = CDCSourceConstants.JDBC_DRIVER_NAME,
+                        description = "The driver class name for connecting the database." +
+                                " **It is required to specify a value for this parameter when the mode is 'polling'.**",
                         type = DataType.STRING,
                         defaultValue = "<Empty_String>",
                         optional = true
                 ),
                 @Parameter(
-                        name = "username",
+                        name = CDCSourceConstants.USERNAME,
                         description = "The username to be used for accessing the database. This user needs to have" +
                                 " the 'SELECT', 'RELOAD', 'SHOW DATABASES', 'REPLICATION SLAVE', and " +
                                 "'REPLICATION CLIENT'privileges for the change data capturing table (specified via" +
@@ -120,11 +144,11 @@ import java.util.concurrent.Executors;
                         type = DataType.STRING
                 ),
                 @Parameter(
-                        name = "password",
+                        name = CDCSourceConstants.PASSWORD,
                         description = "The password of the username you specified for accessing the database.",
                         type = DataType.STRING
                 ),
-                @Parameter(name = "pool.properties",
+                @Parameter(name = CDCSourceConstants.POOL_PROPERTIES,
                         description = "The pool parameters for the database connection can be specified as key-value" +
                                 " pairs.",
                         type = DataType.STRING,
@@ -132,7 +156,7 @@ import java.util.concurrent.Executors;
                         defaultValue = "<Empty_String>"
                 ),
                 @Parameter(
-                        name = "datasource.name",
+                        name = CDCSourceConstants.DATASOURCE_NAME,
                         description = "Name of the wso2 datasource to connect to the database." +
                                 " When datasource name is provided, the URL, username and password are not needed. " +
                                 "A datasource based connection is given more priority over the URL based connection." +
@@ -143,12 +167,12 @@ import java.util.concurrent.Executors;
                         optional = true
                 ),
                 @Parameter(
-                        name = "table.name",
+                        name = CDCSourceConstants.TABLE_NAME,
                         description = "The name of the table that needs to be monitored for data changes.",
                         type = DataType.STRING
                 ),
                 @Parameter(
-                        name = "polling.column",
+                        name = CDCSourceConstants.POLLING_COLUMN,
                         description = "The column name  that is polled to capture the change data. " +
                                 "It is recommended to have a TIMESTAMP field as the 'polling.column' in order to" +
                                 " capture the inserts and updates." +
@@ -164,7 +188,7 @@ import java.util.concurrent.Executors;
                         optional = true
                 ),
                 @Parameter(
-                        name = "polling.interval",
+                        name = CDCSourceConstants.POLLING_INTERVAL,
                         description = "The time interval (specified in seconds) to poll the given table for changes." +
                                 "\nThis parameter is applicable only when the mode is set to 'polling'."
                         ,
@@ -173,14 +197,14 @@ import java.util.concurrent.Executors;
                         optional = true
                 ),
                 @Parameter(
-                        name = "operation",
+                        name = CDCSourceConstants.OPERATION,
                         description = "The change event operation you want to carry out. Possible values are" +
                                 " 'insert', 'update' or 'delete'. This parameter is not case sensitive. " +
                                 "**It is required to specify a value only when the mode is 'listening'.**\n",
                         type = DataType.STRING
                 ),
                 @Parameter(
-                        name = "connector.properties",
+                        name = CDCSourceConstants.CONNECTOR_PROPERTIES,
                         description = "Here, you can specify Debezium connector properties as a comma-separated " +
                                 "string. " +
                                 "\nThe properties specified here are given more priority over the parameters. This" +
@@ -189,7 +213,7 @@ import java.util.concurrent.Executors;
                         optional = true,
                         defaultValue = "Empty_String"
                 ),
-                @Parameter(name = "database.server.id",
+                @Parameter(name = CDCSourceConstants.DATABASE_SERVER_ID,
                         description = "An ID to be used when joining MySQL database cluster to read the bin log. " +
                                 "This should be a unique integer between 1 to 2^32. This parameter is applicable " +
                                 "only when the mode is 'listening'.",
@@ -197,7 +221,7 @@ import java.util.concurrent.Executors;
                         optional = true,
                         defaultValue = "Random integer between 5400 and 6400"
                 ),
-                @Parameter(name = "database.server.name",
+                @Parameter(name = CDCSourceConstants.DATABASE_SERVER_NAME,
                         description = "A logical name that identifies and provides a namespace for the database " +
                                 "server. This parameter is applicable only when the mode is 'listening'.",
                         defaultValue = "{host}_{port}",
@@ -307,10 +331,18 @@ import java.util.concurrent.Executors;
                                 "polling column is a numeric field. This source expects the records in the database " +
                                 "to be written concurrently/out-of-order so it waits if it encounters a missing " +
                                 "record. If the record doesn't appear within 10 seconds it resumes the process."
+                ),
+                @Example(
+                        syntax = "@source(type = 'cdc', url = 'jdbc:oracle:thin://localhost:1521/ORCLCDB', " +
+                                "username='c##xstrm', password='xs', table.name='DEBEZIUM.sweetproductiontable', " +
+                                "operation = 'insert', connector.properties='oracle.outserver.name=DBZXOUT,oracle." +
+                                "pdb=ORCLPDB1' @map(type = 'keyvalue'))\n" +
+                                "define stream insertSweetProductionStream (ID int, NAME string, WEIGHT int);\n",
+                        description = "In this example, the CDC source connect to an Oracle database and listens for" +
+                                " insert queries of sweetproduction table"
                 )
         }
 )
-
 public class CDCSource extends Source<CDCSource.CdcState> {
     private static final Logger log = Logger.getLogger(CDCSource.class);
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -331,18 +363,16 @@ public class CDCSource extends Source<CDCSource.CdcState> {
 
     @Override
     public StateFactory<CdcState> init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
-                             String[] requestedTransportPropertyNames, ConfigReader configReader,
-                             SiddhiAppContext siddhiAppContext) {
+                                       String[] requestedTransportPropertyNames, ConfigReader configReader,
+                                       SiddhiAppContext siddhiAppContext) {
         //initialize mode
         mode = optionHolder.validateAndGetStaticValue(CDCSourceConstants.MODE, CDCSourceConstants.MODE_LISTENING);
-
         //initialize common mandatory parameters
         String tableName = optionHolder.validateAndGetOption(CDCSourceConstants.TABLE_NAME).getValue();
         String siddhiAppName = siddhiAppContext.getName();
 
         switch (mode) {
             case CDCSourceConstants.MODE_LISTENING:
-
                 String url = optionHolder.validateAndGetOption(CDCSourceConstants.DATABASE_CONNECTION_URL).getValue();
                 String username = optionHolder.validateAndGetOption(CDCSourceConstants.USERNAME).getValue();
                 String password = optionHolder.validateAndGetOption(CDCSourceConstants.PASSWORD).getValue();
@@ -396,7 +426,6 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                 }
                 break;
             case CDCSourceConstants.MODE_POLLING:
-
                 String pollingColumn = optionHolder.validateAndGetStaticValue(CDCSourceConstants.POLLING_COLUMN);
                 boolean isDatasourceNameAvailable = optionHolder.isOptionExists(CDCSourceConstants.DATASOURCE_NAME);
                 boolean isJndiResourceAvailable = optionHolder.isOptionExists(CDCSourceConstants.JNDI_RESOURCE);
@@ -450,7 +479,7 @@ public class CDCSource extends Source<CDCSource.CdcState> {
 
     @Override
     public Class[] getOutputEventClasses() {
-        return new Class[]{Map.class};
+        return new Class[] {Map.class};
     }
 
     @Override

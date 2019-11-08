@@ -37,7 +37,6 @@ public class CDCSourceUtil {
                                                    String siddhiStreamName, int serverID, String serverName,
                                                    String connectorProperties, int cdcSourceHashCode)
             throws WrongConfigurationException {
-
         Map<String, Object> configMap = new HashMap<>();
         String host;
         int port;
@@ -126,10 +125,46 @@ public class CDCSourceUtil {
                     configMap.put(CDCSourceConstants.CONNECTOR_CLASS, CDCSourceConstants.SQLSERVER_CONNECTOR_CLASS);
                     break;
                 }
-                default: {
-                    throw new WrongConfigurationException("Unsupported schema. Expected schema: mysql or postgresql" +
-                            "or sqlserver, Found: " + splittedURL[1]);
+                case "oracle": {
+                    String regex = "jdbc:oracle:(\\w*):@?\\/?\\/?(\\w*|[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\." +
+                            "[0-9]{1,3}):(\\d++)\\/?:?(\\w*)";
+                    Pattern p = Pattern.compile(regex);
+                    Matcher matcher = p.matcher(url);
+
+                    Map<String, String> connectorPropertiesMap = getConnectorPropertiesMap(connectorProperties);
+
+                    if (matcher.find()) {
+                        host = matcher.group(2);
+                        port = Integer.parseInt(matcher.group(3));
+                        database = matcher.group(4);
+                    } else {
+                        throw new WrongConfigurationException("Invalid JDBC url: " + url + " received for stream: " +
+                                siddhiStreamName + ". Expected url format: jdbc:oracle:driver://<host>:<port>:<sid>");
+                    }
+
+                    if (!(connectorPropertiesMap.containsKey(CDCSourceConstants.ORACLE_PDB_PROPERTY_NAME) ||
+                            connectorProperties.contains(CDCSourceConstants.ORACLE_OUTSERVER_PROPERTY_NAME))) {
+                        throw new WrongConfigurationException("Required properties are missing in the connector " +
+                                "properties configuration");
+                    }
+
+                    configMap.put(CDCSourceConstants.DATABASE_HOSTNAME, host);
+                    configMap.put(CDCSourceConstants.DATABASE_PORT, port);
+                    configMap.put(CDCSourceConstants.TABLE_WHITELIST, String.format("%s.%s",
+                            connectorPropertiesMap.get(CDCSourceConstants.ORACLE_PDB_PROPERTY_NAME), tableName));
+                    configMap.put(CDCSourceConstants.DATABASE_DBNAME, database);
+                    // Oracle specific properties
+                    configMap.put(CDCSourceConstants.ORACLE_PDB_PROPERTY_NAME,
+                            connectorPropertiesMap.get(CDCSourceConstants.ORACLE_PDB_PROPERTY_NAME));
+                    configMap.put(CDCSourceConstants.ORACLE_OUTSERVER_PROPERTY_NAME,
+                            connectorPropertiesMap.get(CDCSourceConstants.ORACLE_OUTSERVER_PROPERTY_NAME));
+                    configMap.put(CDCSourceConstants.CONNECTOR_CLASS, CDCSourceConstants.ORACLE_CONNECTOR_CLASS);
+                    break;
                 }
+                default:
+                    throw new WrongConfigurationException("Unsupported schema. Expected schema: mysql or postgresql" +
+                            "or sqlserver por oracle, Found: " + splittedURL[1]);
+
             }
 
             //Add general config details to configMap
@@ -180,6 +215,8 @@ public class CDCSourceUtil {
                 if (keyAndValue.length != 2) {
                     throw new SiddhiAppValidationException("connector.properties input is invalid. Check near :" +
                             keyValuePair);
+                } else {
+                    connectorPropertiesMap.put(keyAndValue[0], keyAndValue[1]);
                 }
             }
         }

@@ -16,7 +16,8 @@
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>io.siddhi.extension.io.cdc</groupId>
         <artifactId>siddhi-io-cdc-parent</artifactId>
@@ -113,6 +114,18 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>connect-json</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>connect-runtime</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>connect-api</artifactId>
         </dependency>
     </dependencies>
     <profiles>
@@ -511,6 +524,29 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-dependencies</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <markersDirectory>${project.build.directory}/dependencies/dependency-maven-plugin-markers</markersDirectory>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.apache.kafka</groupId>
+                                    <artifactId>connect-runtime</artifactId>
+                                    <outputDirectory>${project.build.directory}/dependencies/connect-runtime</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
@@ -519,14 +555,14 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            io.siddhi.extension.io.cdc.*;version="${project.version}"
+                            io.siddhi.extension.io.cdc.*,
                         </Export-Package>
                         <Private-Package>
                             com.github.shyiko.*,
                             io.debezium.*,
-                            org.apache.kafka.connect*,
-                            org.apache.kafka.common*,
-                            org.apache.kafka.clients*
+                            org.apache.kafka.connect.*,
+                            org.apache.kafka.common.*,
+                            org.apache.kafka.clients.*,
                         </Private-Package>
                         <Import-Package>
                             io.siddhi.annotation.*;version="${siddhi.import.version.range}",
@@ -537,6 +573,7 @@
                         <DynamicImport-Package>*</DynamicImport-Package>
                         <Include-Resource>
                             META-INF=target/classes/META-INF,
+                            META-INF/services=${project.build.directory}/dependencies/connect-runtime/META-INF/services,
                             {maven-resources}
                         </Include-Resource>
                     </instructions>
