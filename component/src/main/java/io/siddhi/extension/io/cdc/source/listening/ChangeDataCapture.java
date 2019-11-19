@@ -19,6 +19,7 @@
 package io.siddhi.extension.io.cdc.source.listening;
 
 import io.debezium.config.Configuration;
+import io.debezium.data.VariableScaleDecimal;
 import io.debezium.embedded.EmbeddedEngine;
 import io.debezium.embedded.spi.OffsetCommitPolicy;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
@@ -29,9 +30,11 @@ import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.DataException;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -163,7 +166,7 @@ public class ChangeDataCapture {
                     fields = rawDetails.schema().fields();
                     for (Field key : fields) {
                         fieldName = key.name();
-                        detailsMap.put(fieldName, rawDetails.get(fieldName));
+                        detailsMap.put(fieldName, getValue(rawDetails.get(fieldName)));
                     }
                     break;
                 case CDCSourceConstants.CONNECT_RECORD_DELETE_OPERATION:
@@ -172,7 +175,8 @@ public class ChangeDataCapture {
                     fields = rawDetails.schema().fields();
                     for (Field key : fields) {
                         fieldName = key.name();
-                        detailsMap.put(CDCSourceConstants.BEFORE_PREFIX + fieldName, rawDetails.get(fieldName));
+                        detailsMap.put(CDCSourceConstants.BEFORE_PREFIX + fieldName,
+                                getValue(rawDetails.get(fieldName)));
                     }
                     break;
                 case CDCSourceConstants.CONNECT_RECORD_UPDATE_OPERATION:
@@ -181,18 +185,37 @@ public class ChangeDataCapture {
                     fields = rawDetails.schema().fields();
                     for (Field key : fields) {
                         fieldName = key.name();
-                        detailsMap.put(CDCSourceConstants.BEFORE_PREFIX + fieldName, rawDetails.get(fieldName));
+                        detailsMap.put(CDCSourceConstants.BEFORE_PREFIX + fieldName,
+                                getValue(rawDetails.get(fieldName)));
                     }
                     //append row details after update.
                     rawDetails = (Struct) record.get(CDCSourceConstants.AFTER);
                     fields = rawDetails.schema().fields();
                     for (Field key : fields) {
                         fieldName = key.name();
-                        detailsMap.put(fieldName, rawDetails.get(fieldName));
+                        detailsMap.put(fieldName, getValue(rawDetails.get(fieldName)));
                     }
                     break;
             }
         }
         return detailsMap;
+    }
+
+    private Object getValue(Object v) {
+        if (v instanceof Struct) {
+            Optional<BigDecimal> value = VariableScaleDecimal.toLogical((Struct) v).getDecimalValue();
+            BigDecimal bigDecimal = value.orElse(null);
+            if (bigDecimal == null) {
+                return null;
+            }
+            return bigDecimal.longValue();
+        }
+        if (v instanceof Short) {
+            return ((Short) v).intValue();
+        }
+        if (v instanceof Byte) {
+            return ((Byte) v).intValue();
+        }
+        return v;
     }
 }
