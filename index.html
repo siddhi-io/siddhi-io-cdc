@@ -374,6 +374,18 @@
 
 
   <li class="md-nav__item">
+    <a href="api/2.0.5/" title="2.0.5" class="md-nav__link">
+      2.0.5
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="api/2.0.4/" title="2.0.4" class="md-nav__link">
       2.0.4
     </a>
@@ -632,10 +644,10 @@
 <li>Versions 2.x and lower with group id <code>org.wso2.extension.siddhi.*</code> from <a target="_blank" href="https://mvnrepository.com/artifact/org.wso2.extension.siddhi.io.cdc/siddhi-io-cdc">here</a>.</li>
 </ul>
 <h2 id="latest-api-docs">Latest API Docs</h2>
-<p>Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi-io-cdc/api/2.0.4">2.0.4</a>.</p>
+<p>Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi-io-cdc/api/2.0.5">2.0.5</a>.</p>
 <h2 id="features">Features</h2>
 <ul>
-<li><a target="_blank" href="https://siddhi-io.github.io/siddhi-io-cdc/api/2.0.4/#cdc-source">cdc</a> <em>(<a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#source">Source</a>)</em><br> <div style="padding-left: 1em;"><p><p style="word-wrap: break-word;margin: 0;">The CDC source receives events when change events (i.e., INSERT, UPDATE, DELETE) are triggered for a database table. Events are received in the 'key-value' format.<br><br>There are two modes you could perform CDC: Listening mode and Polling mode.<br><br>In polling mode, the datasource is periodically polled for capturing the changes. The polling period can be configured.<br>In polling mode, you can only capture INSERT and UPDATE changes.<br><br>On listening mode, the Source will keep listening to the Change Log of the database and notify in case a change has taken place. Here, you are immediately notified about the change, compared to polling mode.<br><br>The key values of the map of a CDC change event are as follows.<br><br>For 'listening' mode: <br>&nbsp;&nbsp;&nbsp;&nbsp;For insert: Keys are specified as columns of the table.<br>&nbsp;&nbsp;&nbsp;&nbsp;For delete: Keys are followed by the specified table columns. This is achieved via 'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'.<br>&nbsp;&nbsp;&nbsp;&nbsp;For update: Keys are followed followed by the specified table columns. This is achieved via 'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'.<br><br>For 'polling' mode: Keys are specified as the columns of the table.#### Preparations required for working with Oracle Databases in listening mode<br><br>Using the extension in Windows, Mac OSX and AIX are pretty straight forward inorder to achieve the required behaviour please follow the steps given below<br><br>&nbsp;&nbsp;- Download the compatible version of oracle instantclient for the database version from <a href="https://www.oracle.com/database/technologies/instant-client/downloads.html">here</a> and extract<br>&nbsp;&nbsp;- Extract and set the environment variable <code>LD_LIBRARY_PATH</code> to the location of instantclient which was exstracted as shown below<br>&nbsp;&nbsp;</p><pre>
+<li><a target="_blank" href="https://siddhi-io.github.io/siddhi-io-cdc/api/2.0.5/#cdc-source">cdc</a> <em>(<a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#source">Source</a>)</em><br> <div style="padding-left: 1em;"><p><p style="word-wrap: break-word;margin: 0;">The CDC source receives events when change events (i.e., INSERT, UPDATE, DELETE) are triggered for a database table. Events are received in the 'key-value' format.<br><br>There are two modes you could perform CDC: Listening mode and Polling mode.<br><br>In polling mode, the datasource is periodically polled for capturing the changes. The polling period can be configured.<br>In polling mode, you can only capture INSERT and UPDATE changes.<br><br>On listening mode, the Source will keep listening to the Change Log of the database and notify in case a change has taken place. Here, you are immediately notified about the change, compared to polling mode.<br><br>The key values of the map of a CDC change event are as follows.<br><br>For 'listening' mode: <br>&nbsp;&nbsp;&nbsp;&nbsp;For insert: Keys are specified as columns of the table.<br>&nbsp;&nbsp;&nbsp;&nbsp;For delete: Keys are followed by the specified table columns. This is achieved via 'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'.<br>&nbsp;&nbsp;&nbsp;&nbsp;For update: Keys are followed followed by the specified table columns. This is achieved via 'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'.<br><br>For 'polling' mode: Keys are specified as the columns of the table.#### Preparations required for working with Oracle Databases in listening mode<br><br>Using the extension in Windows, Mac OSX and AIX are pretty straight forward inorder to achieve the required behaviour please follow the steps given below<br><br>&nbsp;&nbsp;- Download the compatible version of oracle instantclient for the database version from <a href="https://www.oracle.com/database/technologies/instant-client/downloads.html">here</a> and extract<br>&nbsp;&nbsp;- Extract and set the environment variable <code>LD_LIBRARY_PATH</code> to the location of instantclient which was exstracted as shown below<br>&nbsp;&nbsp;</p><pre>
     export LD_LIBRARY_PATH=&lt;path to the instant client location&gt;
   </pre><p style="word-wrap: break-word;margin: 0;"><br>&nbsp;&nbsp;- Inside the instantclient folder which was download there are two jars <code>xstreams.jar</code> and <code>ojdbc&lt;version&gt;.jar</code> convert them to OSGi bundles using the tools which were provided in the <code>&lt;distribution&gt;/bin</code> for converting the <code>ojdbc.jar</code> use the tool <code>spi-provider.sh|bat</code> and for the conversion of <code>xstreams.jar</code> use the jni-provider.sh as shown below(Note: this way of converting Xstreams jar is applicable only for Linux environments for other OSs this step is not required and converting it through the <code>jartobundle.sh</code> tool is enough)<br>&nbsp;&nbsp;</p><pre>
     ./jni-provider.sh &lt;input-jar&gt; &lt;destination&gt; &lt;comma seperated native library names&gt;
