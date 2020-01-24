@@ -79,6 +79,11 @@
                 <version>${debezium-connector-sqlserver.version}</version>
             </dependency>
             <dependency>
+                <groupId>io.debezium</groupId>
+                <artifactId>debezium-connector-mongodb</artifactId>
+                <version>${debezium-connector-mongodb.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.zaxxer</groupId>
                 <artifactId>HikariCP</artifactId>
                 <version>${hikari.version}</version>
@@ -127,6 +132,12 @@
                 <groupId>com.h2database</groupId>
                 <artifactId>h2</artifactId>
                 <version>${h2.connector.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mongodb</groupId>
+                <artifactId>mongo-java-driver</artifactId>
+                <version>${mongodb.connector.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -223,6 +234,7 @@
         <debezium-connector-oracle.version>0.10.0.Final</debezium-connector-oracle.version>
         <debezium-connector-postgres.version>0.10.0.Final</debezium-connector-postgres.version>
         <debezium-connector-sqlserver.version>0.10.0.Final</debezium-connector-sqlserver.version>
+        <debezium-connector-mongodb.version>0.10.0.Final</debezium-connector-mongodb.version>
         <version.oracle.driver>12.1.0.2</version.oracle.driver>
         <hikari.version>3.2.0</hikari.version>
         <org.testng.version>6.11</org.testng.version>
@@ -243,6 +255,7 @@
         <docker.container.siddhi-cdc-postgres.ip>0.0.0.0</docker.container.siddhi-cdc-postgres.ip>
         <oracle.jdbc.Driver.version>12.2.0.1</oracle.jdbc.Driver.version>
         <kafka.connect.version>2.3.0</kafka.connect.version>
+        <mongodb.connector.version>3.4.0</mongodb.connector.version>
     </properties>
     <scm>
         <url>https://github.com/siddhi-io/siddhi-io-cdc.git</url>
