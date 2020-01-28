@@ -52,6 +52,7 @@ public class CDCSourceConstants {
     public static final String POSTGRESQL_CONNECTOR_CLASS = "io.debezium.connector.postgresql.PostgresConnector";
     public static final String ORACLE_CONNECTOR_CLASS = "io.debezium.connector.oracle.OracleConnector";
     public static final String SQLSERVER_CONNECTOR_CLASS = "io.debezium.connector.sqlserver.SqlServerConnector";
+    public static final String MONGODB_CONNECTOR_CLASS = "io.debezium.connector.mongodb.MongoDbConnector";
     public static final String BEFORE_PREFIX = "before_";
     public static final String CACHE_OBJECT = "cacheObj";
     public static final int DEFAULT_SERVER_ID = -1;
@@ -76,4 +77,9 @@ public class CDCSourceConstants {
     public static final String WAIT_ON_MISSED_RECORD = "wait.on.missed.record";
     public static final String MISSED_RECORD_WAITING_TIMEOUT = "missed.record.waiting.timeout";
     public static final String CONNECTOR_NAME = "name";
+    public static final String MONGODB_USER = "mongodb.user";
+    public static final String MONGODB_PASSWORD = "mongodb.password";
+    public static final String MONGODB_HOSTS = "mongodb.hosts";
+    public static final String MONGODB_NAME = "mongodb.name";
+    public static final String MONGODB_COLLECTION_WHITELIST = "collection.whitelist";
 }

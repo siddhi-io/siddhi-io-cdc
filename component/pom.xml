@@ -52,6 +52,10 @@
             <artifactId>debezium-connector-postgres</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.debezium</groupId>
+            <artifactId>debezium-connector-mongodb</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.siddhi</groupId>
             <artifactId>siddhi-core</artifactId>
         </dependency>
