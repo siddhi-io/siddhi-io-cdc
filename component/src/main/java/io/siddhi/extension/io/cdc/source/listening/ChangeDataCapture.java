@@ -29,14 +29,18 @@ import org.apache.kafka.connect.connector.ConnectRecord;
 import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.DataException;
+import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static java.util.Objects.isNull;
 
 /**
  * This class is for capturing change data using debezium embedded engine.
@@ -162,11 +166,33 @@ public class ChangeDataCapture {
             switch (op) {
                 case CDCSourceConstants.CONNECT_RECORD_INSERT_OPERATION:
                     //append row details after insert.
-                    rawDetails = (Struct) record.get(CDCSourceConstants.AFTER);
-                    fields = rawDetails.schema().fields();
-                    for (Field key : fields) {
-                        fieldName = key.name();
-                        detailsMap.put(fieldName, getValue(rawDetails.get(fieldName)));
+                    if (record.get(CDCSourceConstants.AFTER) instanceof String) {
+                        String insertString = (String) record.get(CDCSourceConstants.AFTER);
+                        JSONObject jsonObj = new JSONObject(insertString);
+                        Iterator<String> keys = jsonObj.keys();
+                        for (Iterator<String> it = keys; it.hasNext(); ) {
+                            String key = it.next();
+                            key.getClass().getTypeName();
+                            if (jsonObj.get(key) instanceof Integer || jsonObj.get(key) instanceof Integer) {
+                                detailsMap.put(key, getValue(jsonObj.getLong(key)));
+                            } else if (jsonObj.get(key) instanceof Float || jsonObj.get(key) instanceof Double) {
+                                detailsMap.put(key, getValue(jsonObj.getDouble(key)));
+                            } else if (jsonObj.get(key) instanceof String) {
+                                detailsMap.put(key, getValue(jsonObj.getString(key)));
+                            } else if (isNull(jsonObj.get(key))) {
+                                detailsMap.put(key, null);
+                            }
+//                            else if (jsonObj.get(key) != null) {
+//                                detailsMap.put(key, getValue(jsonObj.getJSONObject(key)));
+//                            }
+                        }
+                    } else {
+                        rawDetails = (Struct) record.get(CDCSourceConstants.AFTER);
+                        fields = rawDetails.schema().fields();
+                        for (Field key : fields) {
+                            fieldName = key.name();
+                            detailsMap.put(fieldName, getValue(rawDetails.get(fieldName)));
+                        }
                     }
                     break;
                 case CDCSourceConstants.CONNECT_RECORD_DELETE_OPERATION:

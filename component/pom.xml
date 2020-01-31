@@ -28,6 +28,11 @@
     <name>Siddhi IO CDC extension</name>
     <dependencies>
         <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20190722</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.log4j.wso2</groupId>
             <artifactId>log4j</artifactId>
         </dependency>
@@ -566,6 +571,7 @@
                             org.apache.kafka.connect.*,
                             org.apache.kafka.common.*,
                             org.apache.kafka.clients.*,
+                            org.antlr.*,
                         </Private-Package>
                         <Import-Package>
                             io.siddhi.annotation.*;version="${siddhi.import.version.range}",
