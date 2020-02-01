@@ -40,7 +40,6 @@ public class CDCSourceUtil {
         Map<String, Object> configMap = new HashMap<>();
         String host;
         int port;
-        boolean mongodb = false;
         String database;
 
         //Add schema specific details to configMap
@@ -160,29 +159,28 @@ public class CDCSourceUtil {
                     break;
                 }
                 case "mongodb": {
-                    mongodb = true;
                     //Extract url details
-                    String regex = "jdbc:mongodb://(\\w*|[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}):" +
+                    String regex = "jdbc:mongodb://(\\w*|(\\w*)/[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}):" +
                             "(\\d++)/(\\w*)";
                     Pattern p = Pattern.compile(regex);
                     Matcher matcher = p.matcher(url);
+                    String replicaSetName;
                     if (matcher.find()) {
                         host = matcher.group(1);
-                        port = Integer.parseInt(matcher.group(2));
-                        database = matcher.group(3);
+                        replicaSetName = matcher.group(2);
+                        port = Integer.parseInt(matcher.group(3));
+                        database = matcher.group(4);
                     } else {
                         throw new WrongConfigurationException("Invalid JDBC url: " + url +
                                 " received for stream: " + siddhiStreamName +
-                                ". Expected url format: jdbc:mongodb://<host>:<port>/<database_name>");
+                                ". Expected url format: jdbc:mongodb://<replica_set_name>/<host>:<port>/" +
+                                "<database_name>");
                     }
-
                     configMap.put(CDCSourceConstants.CONNECTOR_CLASS, CDCSourceConstants.MONGODB_CONNECTOR_CLASS);
-                    configMap.put(CDCSourceConstants.MONGODB_USER, username);
-                    configMap.put(CDCSourceConstants.MONGODB_PASSWORD, password);
                     //hostname and port pairs of the MongoDB servers in the replica set.
-                    configMap.put(CDCSourceConstants.MONGODB_HOSTS, "mongo01/127.0.0.1:27017");
+                    configMap.put(CDCSourceConstants.MONGODB_HOSTS, host + ":" + port);
                     //unique name that identifies the connector and/or MongoDB replica set or sharded cluster
-                    configMap.put(CDCSourceConstants.MONGODB_NAME, "mongo01");
+                    configMap.put(CDCSourceConstants.MONGODB_NAME, replicaSetName);
                     //fully-qualified namespaces for MongoDB collections to be monitored
                     configMap.put(CDCSourceConstants.MONGODB_COLLECTION_WHITELIST, database + "." + tableName);
                     break;
@@ -193,36 +191,34 @@ public class CDCSourceUtil {
 
             }
 
-            if(!mongodb) {
-                //Add general config details to configMap
-                configMap.put(CDCSourceConstants.DATABASE_USER, username);
-                configMap.put(CDCSourceConstants.DATABASE_PASSWORD, password);
+            //Add general config details to configMap
+            configMap.put(CDCSourceConstants.DATABASE_USER, username);
+            configMap.put(CDCSourceConstants.DATABASE_PASSWORD, password);
 
-                if (serverID == CDCSourceConstants.DEFAULT_SERVER_ID) {
-                    Random random = new Random();
-                    configMap.put(CDCSourceConstants.SERVER_ID, random.nextInt(1001) + 5400);
-                } else {
-                    configMap.put(CDCSourceConstants.SERVER_ID, serverID);
-                }
-
-                //set the database server name if specified, otherwise set <host>_<port> as default
-                if (serverName.equals("")) {
-                    configMap.put(CDCSourceConstants.DATABASE_SERVER_NAME, host + "_" + port);
-                } else {
-                    configMap.put(CDCSourceConstants.DATABASE_SERVER_NAME, serverName);
-                }
-
-                //set history file path.
-                configMap.put(CDCSourceConstants.DATABASE_HISTORY, CDCSourceConstants.DATABASE_HISTORY_FILEBASE_HISTORY);
-                configMap.put(CDCSourceConstants.DATABASE_HISTORY_FILE_NAME,
-                        historyFileDirectory + siddhiStreamName + ".dat");
+            if (serverID == CDCSourceConstants.DEFAULT_SERVER_ID) {
+                Random random = new Random();
+                configMap.put(CDCSourceConstants.SERVER_ID, random.nextInt(1001) + 5400);
+            } else {
+                configMap.put(CDCSourceConstants.SERVER_ID, serverID);
             }
 
-            //set connector property: name
-            configMap.put(CDCSourceConstants.CONNECTOR_NAME, siddhiAppName + siddhiStreamName);
+            //set the database server name if specified, otherwise set <host>_<port> as default
+            if (serverName.equals("")) {
+                configMap.put(CDCSourceConstants.DATABASE_SERVER_NAME, host + "_" + port);
+            } else {
+                configMap.put(CDCSourceConstants.DATABASE_SERVER_NAME, serverName);
+            }
 
             configMap.put(CDCSourceConstants.OFFSET_STORAGE, InMemoryOffsetBackingStore.class.getName());
             configMap.put(CDCSourceConstants.CDC_SOURCE_OBJECT, cdcSourceHashCode);
+
+            //set history file path.
+            configMap.put(CDCSourceConstants.DATABASE_HISTORY, CDCSourceConstants.DATABASE_HISTORY_FILEBASE_HISTORY);
+            configMap.put(CDCSourceConstants.DATABASE_HISTORY_FILE_NAME,
+                    historyFileDirectory + siddhiStreamName + ".dat");
+
+            //set connector property: name
+            configMap.put(CDCSourceConstants.CONNECTOR_NAME, siddhiAppName + siddhiStreamName);
 
             //set additional connector properties using comma separated key value pair string
             for (Map.Entry<String, String> entry : getConnectorPropertiesMap(connectorProperties).entrySet()) {

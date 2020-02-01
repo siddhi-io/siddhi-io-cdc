@@ -29,6 +29,7 @@ import org.apache.kafka.connect.connector.ConnectRecord;
 import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.DataException;
+import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
@@ -40,12 +41,11 @@ import java.util.Optional;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static java.util.Objects.isNull;
-
 /**
  * This class is for capturing change data using debezium embedded engine.
  **/
 public class ChangeDataCapture {
+    private static final Logger log = Logger.getLogger(ChangeDataCapture.class);
 
     private String operation;
     private Configuration config;
@@ -166,60 +166,66 @@ public class ChangeDataCapture {
             switch (op) {
                 case CDCSourceConstants.CONNECT_RECORD_INSERT_OPERATION:
                     //append row details after insert.
-                    if (record.get(CDCSourceConstants.AFTER) instanceof String) {
-                        String insertString = (String) record.get(CDCSourceConstants.AFTER);
-                        JSONObject jsonObj = new JSONObject(insertString);
-                        Iterator<String> keys = jsonObj.keys();
-                        for (Iterator<String> it = keys; it.hasNext(); ) {
-                            String key = it.next();
-                            key.getClass().getTypeName();
-                            if (jsonObj.get(key) instanceof Integer || jsonObj.get(key) instanceof Integer) {
-                                detailsMap.put(key, getValue(jsonObj.getLong(key)));
-                            } else if (jsonObj.get(key) instanceof Float || jsonObj.get(key) instanceof Double) {
-                                detailsMap.put(key, getValue(jsonObj.getDouble(key)));
-                            } else if (jsonObj.get(key) instanceof String) {
-                                detailsMap.put(key, getValue(jsonObj.getString(key)));
-                            } else if (isNull(jsonObj.get(key))) {
-                                detailsMap.put(key, null);
-                            }
-//                            else if (jsonObj.get(key) != null) {
-//                                detailsMap.put(key, getValue(jsonObj.getJSONObject(key)));
-//                            }
-                        }
-                    } else {
+                    try {
                         rawDetails = (Struct) record.get(CDCSourceConstants.AFTER);
                         fields = rawDetails.schema().fields();
                         for (Field key : fields) {
                             fieldName = key.name();
                             detailsMap.put(fieldName, getValue(rawDetails.get(fieldName)));
                         }
+                    } catch (ClassCastException ex) {
+                        String insertString = (String) record.get(CDCSourceConstants.AFTER);
+                        JSONObject jsonObj = new JSONObject(insertString);
+                        Iterator<String> keys = jsonObj.keys();
+                        for (Iterator<String> it = keys; it.hasNext(); ) {
+                            String key = it.next();
+                            if (jsonObj.get(key) instanceof Boolean) {
+                                detailsMap.put(key, getValue(jsonObj.getBoolean(key)));
+                            } else if (jsonObj.get(key) instanceof Double) {
+                                log.info("INTEGER, LONG, FLOAT and DOUBLE values are returned as DOUBLE.");
+                                detailsMap.put(key, getValue(jsonObj.getDouble(key)));
+                            } else if (jsonObj.get(key) instanceof String) {
+                                detailsMap.put(key, getValue(jsonObj.getString(key)));
+                            } else if (jsonObj.get(key) instanceof JSONObject ) {
+                                detailsMap.put(key, getValue(jsonObj.getJSONObject(key)));
+                            }
+                        }
                     }
                     break;
                 case CDCSourceConstants.CONNECT_RECORD_DELETE_OPERATION:
                     //append row details before delete.
-                    rawDetails = (Struct) record.get(CDCSourceConstants.BEFORE);
-                    fields = rawDetails.schema().fields();
-                    for (Field key : fields) {
-                        fieldName = key.name();
-                        detailsMap.put(CDCSourceConstants.BEFORE_PREFIX + fieldName,
-                                getValue(rawDetails.get(fieldName)));
+                    try {
+                        rawDetails = (Struct) record.get(CDCSourceConstants.BEFORE);
+                        fields = rawDetails.schema().fields();
+                        for (Field key : fields) {
+                            fieldName = key.name();
+                            detailsMap.put(CDCSourceConstants.BEFORE_PREFIX + fieldName,
+                                    getValue(rawDetails.get(fieldName)));
+                        }
+                    } catch (DataException ex) {
+                        log.info("Delete operation is not supported for MongoDB.");
                     }
+
                     break;
                 case CDCSourceConstants.CONNECT_RECORD_UPDATE_OPERATION:
                     //append row details before update.
-                    rawDetails = (Struct) record.get(CDCSourceConstants.BEFORE);
-                    fields = rawDetails.schema().fields();
-                    for (Field key : fields) {
-                        fieldName = key.name();
-                        detailsMap.put(CDCSourceConstants.BEFORE_PREFIX + fieldName,
-                                getValue(rawDetails.get(fieldName)));
-                    }
-                    //append row details after update.
-                    rawDetails = (Struct) record.get(CDCSourceConstants.AFTER);
-                    fields = rawDetails.schema().fields();
-                    for (Field key : fields) {
-                        fieldName = key.name();
-                        detailsMap.put(fieldName, getValue(rawDetails.get(fieldName)));
+                    try {
+                        rawDetails = (Struct) record.get(CDCSourceConstants.BEFORE);
+                        fields = rawDetails.schema().fields();
+                        for (Field key : fields) {
+                            fieldName = key.name();
+                            detailsMap.put(CDCSourceConstants.BEFORE_PREFIX + fieldName,
+                                    getValue(rawDetails.get(fieldName)));
+                        }
+                        //append row details after update.
+                        rawDetails = (Struct) record.get(CDCSourceConstants.AFTER);
+                        fields = rawDetails.schema().fields();
+                        for (Field key : fields) {
+                            fieldName = key.name();
+                            detailsMap.put(fieldName, getValue(rawDetails.get(fieldName)));
+                        }
+                    } catch (DataException ex) {
+                        log.info("Update operation is not supported for MongoDB.");
                     }
                     break;
             }
