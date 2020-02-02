@@ -148,6 +148,9 @@ public class ChangeDataCapture {
 
         try {
             op = (String) record.get("op");
+            if ("r".equals(op)){
+                op = CDCSourceConstants.CONNECT_RECORD_INSERT_OPERATION;
+            }
         } catch (NullPointerException | DataException ex) {
             return detailsMap;
         }
@@ -192,8 +195,13 @@ public class ChangeDataCapture {
                                 try {
                                     detailsMap.put(key, Long.parseLong((String) jsonObj.getJSONObject(key).
                                             get("$numberLong")));
-                                } catch (JSONException e) {
-                                    detailsMap.put(key, jsonObj.getJSONObject(key));
+                                } catch (JSONException e1) {
+                                    try {
+                                        detailsMap.put(key, Double.parseDouble((String) jsonObj.getJSONObject(key).
+                                                get("$numberDecimal")));
+                                    } catch (JSONException e2){
+                                        detailsMap.put(key, jsonObj.getJSONObject(key));
+                                    }
                                 }
                             }
                         }
@@ -212,7 +220,6 @@ public class ChangeDataCapture {
                     } catch (DataException ex) {
                         log.info("Delete record with id : " + connectRecord.key().toString());
                     }
-
                     break;
                 case CDCSourceConstants.CONNECT_RECORD_UPDATE_OPERATION:
                     //append row details before update.
@@ -234,7 +241,6 @@ public class ChangeDataCapture {
                     } catch (DataException ex) {
                         log.info("Update record id : " + connectRecord.key().toString() +
                                 ", fields : " + record.getString("patch"));
-
                     }
                     break;
             }
