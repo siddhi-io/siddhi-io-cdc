@@ -41,6 +41,7 @@ public class CDCSourceUtil {
         String host;
         int port;
         String database;
+        Boolean isMongodb = false;
 
         //Add schema specific details to configMap
         String[] splittedURL = url.split(":");
@@ -160,6 +161,7 @@ public class CDCSourceUtil {
                 }
                 case "mongodb": {
                     //Extract url details
+                    isMongodb = true;
                     String regex = "jdbc:mongodb://(\\w*|(\\w*)/[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}):" +
                             "(\\d++)/(\\w*)";
                     Pattern p = Pattern.compile(regex);
@@ -192,8 +194,13 @@ public class CDCSourceUtil {
             }
 
             //Add general config details to configMap
-            configMap.put(CDCSourceConstants.DATABASE_USER, username);
-            configMap.put(CDCSourceConstants.DATABASE_PASSWORD, password);
+            if (!isMongodb) {
+                configMap.put(CDCSourceConstants.DATABASE_USER, username);
+                configMap.put(CDCSourceConstants.DATABASE_PASSWORD, password);
+            } else {
+                configMap.put(CDCSourceConstants.MONGODB_USER, username);
+                configMap.put(CDCSourceConstants.MONGODB_PASSWORD, password);
+            }
 
             if (serverID == CDCSourceConstants.DEFAULT_SERVER_ID) {
                 Random random = new Random();

@@ -30,6 +30,7 @@ import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.DataException;
 import org.apache.log4j.Logger;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
@@ -180,14 +181,20 @@ public class ChangeDataCapture {
                         for (Iterator<String> it = keys; it.hasNext(); ) {
                             String key = it.next();
                             if (jsonObj.get(key) instanceof Boolean) {
-                                detailsMap.put(key, getValue(jsonObj.getBoolean(key)));
+                                detailsMap.put(key, jsonObj.getBoolean(key));
+                            } else if (jsonObj.get(key) instanceof Integer) {
+                                detailsMap.put(key, jsonObj.getInt(key));
                             } else if (jsonObj.get(key) instanceof Double) {
-                                log.info("INTEGER, LONG, FLOAT and DOUBLE values are returned as DOUBLE.");
-                                detailsMap.put(key, getValue(jsonObj.getDouble(key)));
+                                detailsMap.put(key, jsonObj.getDouble(key));
                             } else if (jsonObj.get(key) instanceof String) {
-                                detailsMap.put(key, getValue(jsonObj.getString(key)));
-                            } else if (jsonObj.get(key) instanceof JSONObject ) {
-                                detailsMap.put(key, getValue(jsonObj.getJSONObject(key)));
+                                detailsMap.put(key, jsonObj.getString(key));
+                            } else if (jsonObj.get(key) instanceof JSONObject) {
+                                try {
+                                    detailsMap.put(key, Long.parseLong((String) jsonObj.getJSONObject(key).
+                                            get("$numberLong")));
+                                } catch (JSONException e) {
+                                    detailsMap.put(key, jsonObj.getJSONObject(key));
+                                }
                             }
                         }
                     }
@@ -203,7 +210,7 @@ public class ChangeDataCapture {
                                     getValue(rawDetails.get(fieldName)));
                         }
                     } catch (DataException ex) {
-                        log.info("Delete operation is not supported for MongoDB.");
+                        log.info("Delete record with id : " + connectRecord.key().toString());
                     }
 
                     break;
@@ -225,7 +232,9 @@ public class ChangeDataCapture {
                             detailsMap.put(fieldName, getValue(rawDetails.get(fieldName)));
                         }
                     } catch (DataException ex) {
-                        log.info("Update operation is not supported for MongoDB.");
+                        log.info("Update record id : " + connectRecord.key().toString() +
+                                ", fields : " + record.getString("patch"));
+
                     }
                     break;
             }
