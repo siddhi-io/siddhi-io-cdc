@@ -28,14 +28,14 @@ public class TestCaseOfCDCListeningModeMongo {
     private String password;
     private String databaseURL;
     private String replicaSetUrl;
-    private String tableName = "SweetProductionTable";
+    private String collectionName = "SweetProductionTable";
 
     @BeforeClass
     public void initializeConnectionParams() {
-        databaseURL = "mongodb://127.0.0.1:27017/production";
-        replicaSetUrl = "jdbc:mongodb://mongo01/127.0.0.1:27017/production";
-        username = System.getenv("DATABASE_USER");
-        password = System.getenv("DATABASE_PASSWORD");
+        databaseURL = "mongodb://<host>:<port>/<collection_name>";
+        replicaSetUrl = "jdbc:mongodb://<replica_set_name>/<host>:<port>/<database_name>";
+        username = "user_name";
+        password = "password";
     }
 
     @BeforeMethod
@@ -61,14 +61,14 @@ public class TestCaseOfCDCListeningModeMongo {
                 " url = '" + replicaSetUrl + "'," +
                 " username = '" + username + "'," +
                 " password = '" + password + "'," +
-                " table.name = '" + tableName + "', " +
+                " table.name = '" + collectionName + "', " +
                 " operation = 'insert', " +
                 " @map(type='keyvalue'))" +
-                "define stream istm (name string, amount double);";
+                "define stream istm (name string, amount double, volume int);";
 
-        String mongoStoreDefinition = "define stream insertionStream (name string, amount double);" +
+        String mongoStoreDefinition = "define stream insertionStream (name string, amount double, volume int);" +
                 "@Store(type='mongodb', mongodb.uri='" + databaseURL + "')" +
-                "define table SweetProductionTable (name string, amount double);";
+                "define table SweetProductionTable (name string, amount double, volume int);";
 
         String mongoQuery = "@info(name='query2') " +
                 "from insertionStream " +
@@ -106,7 +106,7 @@ public class TestCaseOfCDCListeningModeMongo {
 
         //Do an insert and wait for cdc app to capture.
         InputHandler rdbmsInputHandler = mongoAppRuntime.getInputHandler("insertionStream");
-        Object[] insertingObject = new Object[]{"e001", 100.00};
+        Object[] insertingObject = new Object[]{"e001", 100.00, 5};
         rdbmsInputHandler.send(insertingObject);
         SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
 
@@ -137,7 +137,7 @@ public class TestCaseOfCDCListeningModeMongo {
                 " url = '" + replicaSetUrl + "'," +
                 " username = '" + username + "'," +
                 " password = '" + password + "'," +
-                " table.name = '" + tableName + "', " +
+                " table.name = '" + collectionName + "', " +
                 " operation = 'delete', " +
                 " @map(type='keyvalue'))" +
                 "define stream delstm (id string);";
@@ -229,7 +229,7 @@ public class TestCaseOfCDCListeningModeMongo {
                 " url = '" + replicaSetUrl + "'," +
                 " username = '" + username + "'," +
                 " password = '" + password + "'," +
-                " table.name = '" + tableName + "', " +
+                " table.name = '" + collectionName + "', " +
                 " operation = 'update', " +
                 " @map(type='keyvalue'))" +
                 "define stream updatestm (amount double);";
@@ -285,7 +285,7 @@ public class TestCaseOfCDCListeningModeMongo {
         Object[] insertingObject = new Object[]{"sweets", 100.00};
         mongoInputHandler.send(insertingObject);
 
-        Thread.sleep(100);
+        Thread.sleep(1000);
 
         //Update inserted row.
         mongoInputHandler = mongoAppRuntime.getInputHandler("UpdateStream");

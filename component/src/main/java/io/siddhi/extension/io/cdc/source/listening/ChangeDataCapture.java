@@ -194,10 +194,10 @@ public class ChangeDataCapture {
                                     getValue(rawDetails.get(fieldName)));
                         }
                     } catch (DataException ex) {
-                        String deleteDocument = (String) ((Struct)connectRecord.key()).get("id");
+                        String deleteDocument = (String) ((Struct) connectRecord.key()).get("id");
                         JSONObject jsonObj = new JSONObject(deleteDocument);
                         Iterator<String> keys = jsonObj.keys();
-                        while(keys.hasNext()) {
+                        while (keys.hasNext()) {
                             String key = keys.next();
                             if (jsonObj.get(key) instanceof String) {
                                 detailsMap.put("id", jsonObj.get(key));
@@ -234,7 +234,7 @@ public class ChangeDataCapture {
         return detailsMap;
     }
 
-    private Map<String, Object> getMongoDetailMap(JSONObject jsonObj){
+    private Map<String, Object> getMongoDetailMap(JSONObject jsonObj) {
         Map<String, Object> detailsMap = new HashMap<>();
         Iterator<String> keys = jsonObj.keys();
         for (Iterator<String> it = keys; it.hasNext(); ) {
