@@ -106,6 +106,12 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
+                <groupId>io.siddhi.extension.store.mongodb</groupId>
+                <artifactId>siddhi-store-mongodb</artifactId>
+                <version>${siddhi-store-mongodb.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.wso2.carbon.datasources</groupId>
                 <artifactId>org.wso2.carbon.datasource.core</artifactId>
                 <version>${carbon.datasource.core.version}</version>
@@ -239,6 +245,7 @@
         <hikari.version>3.2.0</hikari.version>
         <org.testng.version>6.11</org.testng.version>
         <siddhi-store-rdbms.version>6.0.1</siddhi-store-rdbms.version>
+        <siddhi-store-mongodb.version>2.1.0</siddhi-store-mongodb.version>
         <carbon.datasource.core.version>RELEASE</carbon.datasource.core.version>
         <mavan.findbugsplugin.exclude.file>../findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
         <ojdbc6.version>12.1.0.1-atlassian-hosted</ojdbc6.version>

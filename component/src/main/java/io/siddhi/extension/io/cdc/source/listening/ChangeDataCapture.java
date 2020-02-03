@@ -148,7 +148,7 @@ public class ChangeDataCapture {
 
         try {
             op = (String) record.get("op");
-            if ("r".equals(op)){
+            if ("r".equals(op)) {
                 op = CDCSourceConstants.CONNECT_RECORD_INSERT_OPERATION;
             }
         } catch (NullPointerException | DataException ex) {
@@ -180,31 +180,7 @@ public class ChangeDataCapture {
                     } catch (ClassCastException ex) {
                         String insertString = (String) record.get(CDCSourceConstants.AFTER);
                         JSONObject jsonObj = new JSONObject(insertString);
-                        Iterator<String> keys = jsonObj.keys();
-                        for (Iterator<String> it = keys; it.hasNext(); ) {
-                            String key = it.next();
-                            if (jsonObj.get(key) instanceof Boolean) {
-                                detailsMap.put(key, jsonObj.getBoolean(key));
-                            } else if (jsonObj.get(key) instanceof Integer) {
-                                detailsMap.put(key, jsonObj.getInt(key));
-                            } else if (jsonObj.get(key) instanceof Double) {
-                                detailsMap.put(key, jsonObj.getDouble(key));
-                            } else if (jsonObj.get(key) instanceof String) {
-                                detailsMap.put(key, jsonObj.getString(key));
-                            } else if (jsonObj.get(key) instanceof JSONObject) {
-                                try {
-                                    detailsMap.put(key, Long.parseLong((String) jsonObj.getJSONObject(key).
-                                            get("$numberLong")));
-                                } catch (JSONException e1) {
-                                    try {
-                                        detailsMap.put(key, Double.parseDouble((String) jsonObj.getJSONObject(key).
-                                                get("$numberDecimal")));
-                                    } catch (JSONException e2){
-                                        detailsMap.put(key, jsonObj.getJSONObject(key));
-                                    }
-                                }
-                            }
-                        }
+                        detailsMap = getMongoDetailMap(jsonObj);
                     }
                     break;
                 case CDCSourceConstants.CONNECT_RECORD_DELETE_OPERATION:
@@ -218,7 +194,15 @@ public class ChangeDataCapture {
                                     getValue(rawDetails.get(fieldName)));
                         }
                     } catch (DataException ex) {
-                        log.info("Delete record with id : " + connectRecord.key().toString());
+                        String deleteDocument = (String) ((Struct)connectRecord.key()).get("id");
+                        JSONObject jsonObj = new JSONObject(deleteDocument);
+                        Iterator<String> keys = jsonObj.keys();
+                        while(keys.hasNext()) {
+                            String key = keys.next();
+                            if (jsonObj.get(key) instanceof String) {
+                                detailsMap.put("id", jsonObj.get(key));
+                            }
+                        }
                     }
                     break;
                 case CDCSourceConstants.CONNECT_RECORD_UPDATE_OPERATION:
@@ -239,10 +223,42 @@ public class ChangeDataCapture {
                             detailsMap.put(fieldName, getValue(rawDetails.get(fieldName)));
                         }
                     } catch (DataException ex) {
-                        log.info("Update record id : " + connectRecord.key().toString() +
-                                ", fields : " + record.getString("patch"));
+                        String updateDocument = (String) record.get("patch");
+                        JSONObject jsonObj = new JSONObject(updateDocument);
+                        JSONObject setJsonObj = (JSONObject) jsonObj.get("$set");
+                        detailsMap = getMongoDetailMap(setJsonObj);
                     }
                     break;
+            }
+        }
+        return detailsMap;
+    }
+
+    private Map<String, Object> getMongoDetailMap(JSONObject jsonObj){
+        Map<String, Object> detailsMap = new HashMap<>();
+        Iterator<String> keys = jsonObj.keys();
+        for (Iterator<String> it = keys; it.hasNext(); ) {
+            String key = it.next();
+            if (jsonObj.get(key) instanceof Boolean) {
+                detailsMap.put(key, jsonObj.getBoolean(key));
+            } else if (jsonObj.get(key) instanceof Integer) {
+                detailsMap.put(key, jsonObj.getInt(key));
+            } else if (jsonObj.get(key) instanceof Double) {
+                detailsMap.put(key, jsonObj.getDouble(key));
+            } else if (jsonObj.get(key) instanceof String) {
+                detailsMap.put(key, jsonObj.getString(key));
+            } else if (jsonObj.get(key) instanceof JSONObject) {
+                try {
+                    detailsMap.put(key, Long.parseLong((String) jsonObj.getJSONObject(key).
+                            get("$numberLong")));
+                } catch (JSONException e1) {
+                    try {
+                        detailsMap.put(key, Double.parseDouble((String) jsonObj.getJSONObject(key).
+                                get("$numberDecimal")));
+                    } catch (JSONException e2) {
+                        detailsMap.put(key, jsonObj.getJSONObject(key).toString());
+                    }
+                }
             }
         }
         return detailsMap;
