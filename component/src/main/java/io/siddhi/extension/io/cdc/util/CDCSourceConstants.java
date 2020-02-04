@@ -56,9 +56,11 @@ public class CDCSourceConstants {
     public static final String BEFORE_PREFIX = "before_";
     public static final String CACHE_OBJECT = "cacheObj";
     public static final int DEFAULT_SERVER_ID = -1;
+    public static final String CONNECT_RECORD_OPERATION = "op";
     public static final String CONNECT_RECORD_INSERT_OPERATION = "c";
     public static final String CONNECT_RECORD_UPDATE_OPERATION = "u";
     public static final String CONNECT_RECORD_DELETE_OPERATION = "d";
+    public static final String CONNECT_RECORD_INITIAL_SYNC = "r";
     public static final String BEFORE = "before";
     public static final String AFTER = "after";
     public static final String CARBON_HOME = "carbon.home";
@@ -82,4 +84,10 @@ public class CDCSourceConstants {
     public static final String MONGODB_HOSTS = "mongodb.hosts";
     public static final String MONGODB_NAME = "mongodb.name";
     public static final String MONGODB_COLLECTION_WHITELIST = "collection.whitelist";
+    public static final String MONGO_COLLECTION_OBJECT_ID = "$oid";
+    public static final String MONGO_COLLECTION_ID = "id";
+    public static final String MONGO_PATCH = "patch";
+    public static final String MONGO_SET = "$set";
+    public static final String MONGO_OBJECT_NUMBER_LONG = "$numberLong";
+    public static final String MONGO_OBJECT_NUMBER_DECIMAL = "$numberDecimal";
 }

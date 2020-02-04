@@ -29,7 +29,6 @@ import org.apache.kafka.connect.connector.ConnectRecord;
 import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.DataException;
-import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -46,8 +45,6 @@ import java.util.concurrent.locks.ReentrantLock;
  * This class is for capturing change data using debezium embedded engine.
  **/
 public class ChangeDataCapture {
-    private static final Logger log = Logger.getLogger(ChangeDataCapture.class);
-
     private String operation;
     private Configuration config;
     private SourceEventListener sourceEventListener;
@@ -147,8 +144,8 @@ public class ChangeDataCapture {
         String op;
 
         try {
-            op = (String) record.get("op");
-            if ("r".equals(op)) {
+            op = (String) record.get(CDCSourceConstants.CONNECT_RECORD_OPERATION);
+            if (CDCSourceConstants.CONNECT_RECORD_INITIAL_SYNC.equals(op)) {
                 op = CDCSourceConstants.CONNECT_RECORD_INSERT_OPERATION;
             }
         } catch (NullPointerException | DataException ex) {
@@ -194,15 +191,11 @@ public class ChangeDataCapture {
                                     getValue(rawDetails.get(fieldName)));
                         }
                     } catch (DataException ex) {
-                        String deleteDocument = (String) ((Struct) connectRecord.key()).get("id");
-                        JSONObject jsonObj = new JSONObject(deleteDocument);
-                        Iterator<String> keys = jsonObj.keys();
-                        while (keys.hasNext()) {
-                            String key = keys.next();
-                            if (jsonObj.get(key) instanceof String) {
-                                detailsMap.put("id", jsonObj.get(key));
-                            }
-                        }
+                        String deleteDocumentId = (String) ((Struct) connectRecord.key()).
+                                get(CDCSourceConstants.MONGO_COLLECTION_ID);
+                        JSONObject jsonObjId = new JSONObject(deleteDocumentId);
+                        detailsMap.put(CDCSourceConstants.MONGO_COLLECTION_ID,
+                                jsonObjId.get(CDCSourceConstants.MONGO_COLLECTION_OBJECT_ID));
                     }
                     break;
                 case CDCSourceConstants.CONNECT_RECORD_UPDATE_OPERATION:
@@ -223,10 +216,15 @@ public class ChangeDataCapture {
                             detailsMap.put(fieldName, getValue(rawDetails.get(fieldName)));
                         }
                     } catch (DataException ex) {
-                        String updateDocument = (String) record.get("patch");
+                        String updateDocument = (String) record.get(CDCSourceConstants.MONGO_PATCH);
                         JSONObject jsonObj = new JSONObject(updateDocument);
-                        JSONObject setJsonObj = (JSONObject) jsonObj.get("$set");
+                        JSONObject setJsonObj = (JSONObject) jsonObj.get(CDCSourceConstants.MONGO_SET);
                         detailsMap = getMongoDetailMap(setJsonObj);
+                        String updateDocumentId = (String) ((Struct) connectRecord.key()).
+                                get(CDCSourceConstants.MONGO_COLLECTION_ID);
+                        JSONObject jsonObjId = new JSONObject(updateDocumentId);
+                        detailsMap.put(CDCSourceConstants.MONGO_COLLECTION_ID,
+                                jsonObjId.get(CDCSourceConstants.MONGO_COLLECTION_OBJECT_ID));
                     }
                     break;
             }
@@ -250,11 +248,11 @@ public class ChangeDataCapture {
             } else if (jsonObj.get(key) instanceof JSONObject) {
                 try {
                     detailsMap.put(key, Long.parseLong((String) jsonObj.getJSONObject(key).
-                            get("$numberLong")));
+                            get(CDCSourceConstants.MONGO_OBJECT_NUMBER_LONG)));
                 } catch (JSONException e1) {
                     try {
                         detailsMap.put(key, Double.parseDouble((String) jsonObj.getJSONObject(key).
-                                get("$numberDecimal")));
+                                get(CDCSourceConstants.MONGO_OBJECT_NUMBER_DECIMAL)));
                     } catch (JSONException e2) {
                         detailsMap.put(key, jsonObj.getJSONObject(key).toString());
                     }
