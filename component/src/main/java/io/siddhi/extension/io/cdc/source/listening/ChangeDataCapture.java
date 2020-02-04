@@ -254,7 +254,13 @@ public class ChangeDataCapture {
                         detailsMap.put(key, Double.parseDouble((String) jsonObj.getJSONObject(key).
                                 get(CDCSourceConstants.MONGO_OBJECT_NUMBER_DECIMAL)));
                     } catch (JSONException e2) {
-                        detailsMap.put(key, jsonObj.getJSONObject(key).toString());
+                        if (key.equals(CDCSourceConstants.MONGO_COLLECTION_INSERT_ID)) {
+                            detailsMap.put(CDCSourceConstants.MONGO_COLLECTION_ID, jsonObj.getJSONObject(key).
+                                    get(CDCSourceConstants.MONGO_COLLECTION_OBJECT_ID));
+                        } else {
+                            detailsMap.put(key, jsonObj.getJSONObject(key).toString());
+                        }
+
                     }
                 }
             }
