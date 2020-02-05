@@ -173,9 +173,9 @@ public class CDCSourceUtil {
                         port = Integer.parseInt(matcher.group(3));
                         database = matcher.group(4);
                     } else {
-                        throw new WrongConfigurationException("Invalid JDBC url: " + url +
+                        throw new WrongConfigurationException("Invalid MongoDB uri: " + url +
                                 " received for stream: " + siddhiStreamName +
-                                ". Expected url format: jdbc:mongodb://<replica_set_name>/<host>:<port>/" +
+                                ". Expected uri format: jdbc:mongodb://<replica_set_name>/<host>:<port>/" +
                                 "<database_name>");
                     }
                     configMap.put(CDCSourceConstants.CONNECTOR_CLASS, CDCSourceConstants.MONGODB_CONNECTOR_CLASS);
@@ -198,8 +198,8 @@ public class CDCSourceUtil {
                 configMap.put(CDCSourceConstants.DATABASE_USER, username);
                 configMap.put(CDCSourceConstants.DATABASE_PASSWORD, password);
             } else {
-                configMap.put(CDCSourceConstants.MONGODB_USER, username);
-                configMap.put(CDCSourceConstants.MONGODB_PASSWORD, password);
+//                configMap.put(CDCSourceConstants.MONGODB_USER, username);
+//                configMap.put(CDCSourceConstants.MONGODB_PASSWORD, password);
             }
 
             if (serverID == CDCSourceConstants.DEFAULT_SERVER_ID) {

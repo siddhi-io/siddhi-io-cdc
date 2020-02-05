@@ -91,7 +91,9 @@ public class TestCaseOfCDCListeningModeMongo {
         cdcAppRuntime.addCallback("istm", insertionStreamCallback);
         cdcAppRuntime.start();
 
-        QueryCallback rdbmsQueryCallback = new QueryCallback() {
+        Thread.sleep(1000);
+
+        QueryCallback mongoQueryCallback = new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
                 for (Event event : inEvents) {
@@ -101,13 +103,13 @@ public class TestCaseOfCDCListeningModeMongo {
         };
 
         SiddhiAppRuntime mongoAppRuntime = siddhiManager.createSiddhiAppRuntime(mongoStoreDefinition + mongoQuery);
-        mongoAppRuntime.addCallback("query2", rdbmsQueryCallback);
+        mongoAppRuntime.addCallback("query2", mongoQueryCallback);
         mongoAppRuntime.start();
 
         //Do an insert and wait for cdc app to capture.
-        InputHandler rdbmsInputHandler = mongoAppRuntime.getInputHandler("insertionStream");
+        InputHandler mongoInputHandler = mongoAppRuntime.getInputHandler("insertionStream");
         Object[] insertingObject = new Object[]{"e001", 100.00, 5};
-        rdbmsInputHandler.send(insertingObject);
+        mongoInputHandler.send(insertingObject);
         SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
 
         //Assert event arrival.

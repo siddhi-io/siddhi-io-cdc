@@ -19,32 +19,20 @@
 package io.siddhi.extension.io.cdc.source.listening;
 
 import io.debezium.config.Configuration;
-import io.debezium.data.VariableScaleDecimal;
 import io.debezium.embedded.EmbeddedEngine;
 import io.debezium.embedded.spi.OffsetCommitPolicy;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.stream.input.source.SourceEventListener;
-import io.siddhi.extension.io.cdc.util.CDCSourceConstants;
 import org.apache.kafka.connect.connector.ConnectRecord;
-import org.apache.kafka.connect.data.Field;
-import org.apache.kafka.connect.data.Struct;
-import org.apache.kafka.connect.errors.DataException;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * This class is for capturing change data using debezium embedded engine.
  **/
-public class ChangeDataCapture {
+public abstract class ChangeDataCapture {
     private String operation;
     private Configuration config;
     private SourceEventListener sourceEventListener;
@@ -133,156 +121,6 @@ public class ChangeDataCapture {
      * @param operation     is the change data event which is specified by the user.
      **/
 
-    private Map<String, Object> createMap(ConnectRecord connectRecord, String operation) {
+    abstract Map<String, Object> createMap(ConnectRecord connectRecord, String operation);
 
-        //Map to return
-        Map<String, Object> detailsMap = new HashMap<>();
-
-        Struct record = (Struct) connectRecord.value();
-
-        //get the change data object's operation.
-        String op;
-
-        try {
-            op = (String) record.get(CDCSourceConstants.CONNECT_RECORD_OPERATION);
-            if (CDCSourceConstants.CONNECT_RECORD_INITIAL_SYNC.equals(op)) {
-                op = CDCSourceConstants.CONNECT_RECORD_INSERT_OPERATION;
-            }
-        } catch (NullPointerException | DataException ex) {
-            return detailsMap;
-        }
-
-        //match the change data's operation with user specifying operation and proceed.
-        if (operation.equalsIgnoreCase(CDCSourceConstants.INSERT) &&
-                op.equals(CDCSourceConstants.CONNECT_RECORD_INSERT_OPERATION)
-                || operation.equalsIgnoreCase(CDCSourceConstants.DELETE) &&
-                op.equals(CDCSourceConstants.CONNECT_RECORD_DELETE_OPERATION)
-                || operation.equalsIgnoreCase(CDCSourceConstants.UPDATE) &&
-                op.equals(CDCSourceConstants.CONNECT_RECORD_UPDATE_OPERATION)) {
-
-            Struct rawDetails;
-            List<Field> fields;
-            String fieldName;
-
-            switch (op) {
-                case CDCSourceConstants.CONNECT_RECORD_INSERT_OPERATION:
-                    //append row details after insert.
-                    try {
-                        rawDetails = (Struct) record.get(CDCSourceConstants.AFTER);
-                        fields = rawDetails.schema().fields();
-                        for (Field key : fields) {
-                            fieldName = key.name();
-                            detailsMap.put(fieldName, getValue(rawDetails.get(fieldName)));
-                        }
-                    } catch (ClassCastException ex) {
-                        String insertString = (String) record.get(CDCSourceConstants.AFTER);
-                        JSONObject jsonObj = new JSONObject(insertString);
-                        detailsMap = getMongoDetailMap(jsonObj);
-                    }
-                    break;
-                case CDCSourceConstants.CONNECT_RECORD_DELETE_OPERATION:
-                    //append row details before delete.
-                    try {
-                        rawDetails = (Struct) record.get(CDCSourceConstants.BEFORE);
-                        fields = rawDetails.schema().fields();
-                        for (Field key : fields) {
-                            fieldName = key.name();
-                            detailsMap.put(CDCSourceConstants.BEFORE_PREFIX + fieldName,
-                                    getValue(rawDetails.get(fieldName)));
-                        }
-                    } catch (DataException ex) {
-                        String deleteDocumentId = (String) ((Struct) connectRecord.key()).
-                                get(CDCSourceConstants.MONGO_COLLECTION_ID);
-                        JSONObject jsonObjId = new JSONObject(deleteDocumentId);
-                        detailsMap.put(CDCSourceConstants.MONGO_COLLECTION_ID,
-                                jsonObjId.get(CDCSourceConstants.MONGO_COLLECTION_OBJECT_ID));
-                    }
-                    break;
-                case CDCSourceConstants.CONNECT_RECORD_UPDATE_OPERATION:
-                    //append row details before update.
-                    try {
-                        rawDetails = (Struct) record.get(CDCSourceConstants.BEFORE);
-                        fields = rawDetails.schema().fields();
-                        for (Field key : fields) {
-                            fieldName = key.name();
-                            detailsMap.put(CDCSourceConstants.BEFORE_PREFIX + fieldName,
-                                    getValue(rawDetails.get(fieldName)));
-                        }
-                        //append row details after update.
-                        rawDetails = (Struct) record.get(CDCSourceConstants.AFTER);
-                        fields = rawDetails.schema().fields();
-                        for (Field key : fields) {
-                            fieldName = key.name();
-                            detailsMap.put(fieldName, getValue(rawDetails.get(fieldName)));
-                        }
-                    } catch (DataException ex) {
-                        String updateDocument = (String) record.get(CDCSourceConstants.MONGO_PATCH);
-                        JSONObject jsonObj = new JSONObject(updateDocument);
-                        JSONObject setJsonObj = (JSONObject) jsonObj.get(CDCSourceConstants.MONGO_SET);
-                        detailsMap = getMongoDetailMap(setJsonObj);
-                        String updateDocumentId = (String) ((Struct) connectRecord.key()).
-                                get(CDCSourceConstants.MONGO_COLLECTION_ID);
-                        JSONObject jsonObjId = new JSONObject(updateDocumentId);
-                        detailsMap.put(CDCSourceConstants.MONGO_COLLECTION_ID,
-                                jsonObjId.get(CDCSourceConstants.MONGO_COLLECTION_OBJECT_ID));
-                    }
-                    break;
-            }
-        }
-        return detailsMap;
-    }
-
-    private Map<String, Object> getMongoDetailMap(JSONObject jsonObj) {
-        Map<String, Object> detailsMap = new HashMap<>();
-        Iterator<String> keys = jsonObj.keys();
-        for (Iterator<String> it = keys; it.hasNext(); ) {
-            String key = it.next();
-            if (jsonObj.get(key) instanceof Boolean) {
-                detailsMap.put(key, jsonObj.getBoolean(key));
-            } else if (jsonObj.get(key) instanceof Integer) {
-                detailsMap.put(key, jsonObj.getInt(key));
-            } else if (jsonObj.get(key) instanceof Double) {
-                detailsMap.put(key, jsonObj.getDouble(key));
-            } else if (jsonObj.get(key) instanceof String) {
-                detailsMap.put(key, jsonObj.getString(key));
-            } else if (jsonObj.get(key) instanceof JSONObject) {
-                try {
-                    detailsMap.put(key, Long.parseLong((String) jsonObj.getJSONObject(key).
-                            get(CDCSourceConstants.MONGO_OBJECT_NUMBER_LONG)));
-                } catch (JSONException e1) {
-                    try {
-                        detailsMap.put(key, Double.parseDouble((String) jsonObj.getJSONObject(key).
-                                get(CDCSourceConstants.MONGO_OBJECT_NUMBER_DECIMAL)));
-                    } catch (JSONException e2) {
-                        if (key.equals(CDCSourceConstants.MONGO_COLLECTION_INSERT_ID)) {
-                            detailsMap.put(CDCSourceConstants.MONGO_COLLECTION_ID, jsonObj.getJSONObject(key).
-                                    get(CDCSourceConstants.MONGO_COLLECTION_OBJECT_ID));
-                        } else {
-                            detailsMap.put(key, jsonObj.getJSONObject(key).toString());
-                        }
-
-                    }
-                }
-            }
-        }
-        return detailsMap;
-    }
-
-    private Object getValue(Object v) {
-        if (v instanceof Struct) {
-            Optional<BigDecimal> value = VariableScaleDecimal.toLogical((Struct) v).getDecimalValue();
-            BigDecimal bigDecimal = value.orElse(null);
-            if (bigDecimal == null) {
-                return null;
-            }
-            return bigDecimal.longValue();
-        }
-        if (v instanceof Short) {
-            return ((Short) v).intValue();
-        }
-        if (v instanceof Byte) {
-            return ((Byte) v).intValue();
-        }
-        return v;
-    }
 }

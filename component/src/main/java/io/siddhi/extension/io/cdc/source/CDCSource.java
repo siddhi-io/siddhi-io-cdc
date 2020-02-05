@@ -36,6 +36,8 @@ import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.extension.io.cdc.source.listening.CDCSourceObjectKeeper;
 import io.siddhi.extension.io.cdc.source.listening.ChangeDataCapture;
+import io.siddhi.extension.io.cdc.source.listening.MongoChangeDataCapture;
+import io.siddhi.extension.io.cdc.source.listening.RdbmsChangeDataCapture;
 import io.siddhi.extension.io.cdc.source.listening.WrongConfigurationException;
 import io.siddhi.extension.io.cdc.source.polling.CDCPoller;
 import io.siddhi.extension.io.cdc.util.CDCSourceConstants;
@@ -402,7 +404,11 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                 validateListeningModeParameters(optionHolder);
 
                 //send sourceEventListener and preferred operation to changeDataCapture object
-                changeDataCapture = new ChangeDataCapture(operation, sourceEventListener);
+                if (url.contains("jdbc:mongodb")) {
+                    changeDataCapture = new MongoChangeDataCapture(operation, sourceEventListener);
+                } else {
+                    changeDataCapture = new RdbmsChangeDataCapture(operation, sourceEventListener);
+                }
 
                 //create the folder for history file if not exists
                 File directory = new File(historyFileDirectory);
