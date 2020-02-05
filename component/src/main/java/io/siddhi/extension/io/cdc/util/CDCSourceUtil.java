@@ -198,8 +198,8 @@ public class CDCSourceUtil {
                 configMap.put(CDCSourceConstants.DATABASE_USER, username);
                 configMap.put(CDCSourceConstants.DATABASE_PASSWORD, password);
             } else {
-//                configMap.put(CDCSourceConstants.MONGODB_USER, username);
-//                configMap.put(CDCSourceConstants.MONGODB_PASSWORD, password);
+                configMap.put(CDCSourceConstants.MONGODB_USER, username);
+                configMap.put(CDCSourceConstants.MONGODB_PASSWORD, password);
             }
 
             if (serverID == CDCSourceConstants.DEFAULT_SERVER_ID) {
