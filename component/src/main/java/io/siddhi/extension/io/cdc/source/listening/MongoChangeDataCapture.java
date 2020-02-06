@@ -23,6 +23,7 @@ import io.siddhi.extension.io.cdc.util.CDCSourceConstants;
 import org.apache.kafka.connect.connector.ConnectRecord;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.DataException;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -106,24 +107,28 @@ public class MongoChangeDataCapture extends ChangeDataCapture {
                 detailsMap.put(key, jsonObj.getBoolean(key));
             } else if (jsonObj.get(key) instanceof Integer) {
                 detailsMap.put(key, jsonObj.getInt(key));
+            } else if (jsonObj.get(key) instanceof Long) {
+                detailsMap.put(key, jsonObj.getDouble(key));
             } else if (jsonObj.get(key) instanceof Double) {
                 detailsMap.put(key, jsonObj.getDouble(key));
             } else if (jsonObj.get(key) instanceof String) {
                 detailsMap.put(key, jsonObj.getString(key));
             } else if (jsonObj.get(key) instanceof JSONObject) {
-                if (jsonObj.getJSONObject(key).toString().contains(CDCSourceConstants.MONGO_COLLECTION_OBJECT_ID)) {
-                    detailsMap.put(CDCSourceConstants.MONGO_COLLECTION_ID, jsonObj.getJSONObject(key)
-                            .get(CDCSourceConstants.MONGO_COLLECTION_OBJECT_ID));
-                } else if (jsonObj.getJSONObject(key).toString()
-                        .contains(CDCSourceConstants.MONGO_OBJECT_NUMBER_DECIMAL)) {
-                    detailsMap.put(key, Double.parseDouble((String) jsonObj.getJSONObject(key)
-                            .get(CDCSourceConstants.MONGO_OBJECT_NUMBER_DECIMAL)));
-                } else if (jsonObj.getJSONObject(key).toString()
-                        .contains(CDCSourceConstants.MONGO_OBJECT_NUMBER_LONG)) {
+                try {
                     detailsMap.put(key, Long.parseLong((String) jsonObj.getJSONObject(key)
                             .get(CDCSourceConstants.MONGO_OBJECT_NUMBER_LONG)));
-                } else {
-                    detailsMap.put(key, jsonObj.getJSONObject(key).toString());
+                } catch (JSONException notLongObjectEx) {
+                    try {
+                        detailsMap.put(key, Double.parseDouble((String) jsonObj.getJSONObject(key)
+                                .get(CDCSourceConstants.MONGO_OBJECT_NUMBER_DECIMAL)));
+                    } catch (JSONException notDoubleObjectEx) {
+                        if (key.equals(CDCSourceConstants.MONGO_COLLECTION_INSERT_ID)) {
+                            detailsMap.put(CDCSourceConstants.MONGO_COLLECTION_ID, jsonObj.getJSONObject(key)
+                                    .get(CDCSourceConstants.MONGO_COLLECTION_OBJECT_ID));
+                        } else {
+                            detailsMap.put(key, jsonObj.getJSONObject(key).toString());
+                        }
+                    }
                 }
             }
         }
