@@ -404,7 +404,7 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                 validateListeningModeParameters(optionHolder);
 
                 //send sourceEventListener and preferred operation to changeDataCapture object
-                if (url.contains("jdbc:mongodb")) {
+                if (url.toLowerCase().contains("jdbc:mongodb")) {
                     changeDataCapture = new MongoChangeDataCapture(operation, sourceEventListener);
                 } else {
                     changeDataCapture = new RdbmsChangeDataCapture(operation, sourceEventListener);

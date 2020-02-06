@@ -254,7 +254,7 @@ public class TestCaseOfCDCListeningModeMongo {
                 " table.name = '" + collectionName + "', " +
                 " operation = 'update', " +
                 " @map(type='keyvalue'))" +
-                "define stream updatestm (id string, amount double);";
+                "define stream updatestm (amount double);";
 
         String mongoStoreDefinition = "define stream UpdateStream(name string, amount double);" +
                 "define stream InsertStream(name string, amount double);" +
@@ -319,6 +319,10 @@ public class TestCaseOfCDCListeningModeMongo {
 
         //Assert event arrival.
         Assert.assertTrue(eventArrived.get());
+
+        //Assert event data.
+        Object[] expectedEventObject = new Object[]{500.00};
+        Assert.assertEquals(expectedEventObject, currentEvent.getData());
 
         cdcAppRuntime.shutdown();
         mongoAppRuntime.shutdown();

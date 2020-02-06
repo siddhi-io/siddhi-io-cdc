@@ -25,6 +25,7 @@ import org.apache.kafka.connect.connector.ConnectRecord;
 import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.DataException;
+import org.apache.log4j.Logger;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -36,27 +37,23 @@ import java.util.Optional;
  * This class is for capturing change data for RDBMS using debezium embedded engine.
  **/
 public class RdbmsChangeDataCapture extends ChangeDataCapture {
+    private static final Logger log = Logger.getLogger(RdbmsChangeDataCapture.class);
 
     public RdbmsChangeDataCapture(String operation, SourceEventListener sourceEventListener) {
         super(operation, sourceEventListener);
     }
 
     Map<String, Object> createMap(ConnectRecord connectRecord, String operation) {
-
         //Map to return
         Map<String, Object> detailsMap = new HashMap<>();
-
         Struct record = (Struct) connectRecord.value();
-
         //get the change data object's operation.
         String op;
-
         try {
             op = (String) record.get(CDCSourceConstants.CONNECT_RECORD_OPERATION);
         } catch (NullPointerException | DataException ex) {
             return detailsMap;
         }
-
         //match the change data's operation with user specifying operation and proceed.
         if (operation.equalsIgnoreCase(CDCSourceConstants.INSERT) &&
                 op.equals(CDCSourceConstants.CONNECT_RECORD_INSERT_OPERATION)
@@ -64,11 +61,9 @@ public class RdbmsChangeDataCapture extends ChangeDataCapture {
                 op.equals(CDCSourceConstants.CONNECT_RECORD_DELETE_OPERATION)
                 || operation.equalsIgnoreCase(CDCSourceConstants.UPDATE) &&
                 op.equals(CDCSourceConstants.CONNECT_RECORD_UPDATE_OPERATION)) {
-
             Struct rawDetails;
             List<Field> fields;
             String fieldName;
-
             switch (op) {
                 case CDCSourceConstants.CONNECT_RECORD_INSERT_OPERATION:
                     //append row details after insert.
@@ -107,6 +102,7 @@ public class RdbmsChangeDataCapture extends ChangeDataCapture {
                     }
                     break;
                 default:
+                    log.info("Provided \"op\" value is not supported.");
                     break;
             }
         }

@@ -263,6 +263,7 @@
         <oracle.jdbc.Driver.version>12.2.0.1</oracle.jdbc.Driver.version>
         <kafka.connect.version>2.3.0</kafka.connect.version>
         <mongodb.connector.version>3.4.0</mongodb.connector.version>
+        <json.version>20190722</json.version>
     </properties>
     <scm>
         <url>https://github.com/siddhi-io/siddhi-io-cdc.git</url>
