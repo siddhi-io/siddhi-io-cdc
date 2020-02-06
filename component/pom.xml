@@ -577,6 +577,7 @@
                             org.apache.kafka.common.*,
                             org.apache.kafka.clients.*,
                             org.antlr.*,
+                            org.json.*,
                         </Private-Package>
                         <Import-Package>
                             io.siddhi.annotation.*;version="${siddhi.import.version.range}",
