@@ -48,6 +48,7 @@ import org.apache.log4j.Logger;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -404,7 +405,7 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                 validateListeningModeParameters(optionHolder);
 
                 //send sourceEventListener and preferred operation to changeDataCapture object
-                if (url.toLowerCase().contains("jdbc:mongodb")) {
+                if (url.toLowerCase(Locale.ENGLISH).contains("jdbc:mongodb")) {
                     changeDataCapture = new MongoChangeDataCapture(operation, sourceEventListener);
                 } else {
                     changeDataCapture = new RdbmsChangeDataCapture(operation, sourceEventListener);
