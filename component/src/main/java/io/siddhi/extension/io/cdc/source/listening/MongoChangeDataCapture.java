@@ -88,7 +88,7 @@ public class MongoChangeDataCapture extends ChangeDataCapture {
                             jsonObjId1.get(CDCSourceConstants.MONGO_COLLECTION_OBJECT_ID));
                     break;
                 default:
-                    log.info("Provided \"op\" value is not supported.");
+                    log.info("Provided value for \"op\" : " + op + " is not supported.");
                     break;
             }
         }
