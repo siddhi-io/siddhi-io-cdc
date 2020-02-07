@@ -41,6 +41,7 @@ public class CDCSourceUtil {
         String host;
         int port;
         String database;
+        Boolean isMongodb = false;
 
         //Add schema specific details to configMap
         String[] splittedURL = url.split(":");
@@ -158,15 +159,48 @@ public class CDCSourceUtil {
                     configMap.put(CDCSourceConstants.CONNECTOR_CLASS, CDCSourceConstants.ORACLE_CONNECTOR_CLASS);
                     break;
                 }
+                case "mongodb": {
+                    //Extract url details
+                    isMongodb = true;
+                    String regex = "jdbc:mongodb://(\\w*|(\\w*)/[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}):" +
+                            "(\\d++)/(\\w*)";
+                    Pattern p = Pattern.compile(regex);
+                    Matcher matcher = p.matcher(url);
+                    String replicaSetName;
+                    if (matcher.find()) {
+                        host = matcher.group(1);
+                        replicaSetName = matcher.group(2);
+                        port = Integer.parseInt(matcher.group(3));
+                        database = matcher.group(4);
+                    } else {
+                        throw new WrongConfigurationException("Invalid MongoDB uri: " + url +
+                                " received for stream: " + siddhiStreamName +
+                                ". Expected uri format: jdbc:mongodb://<replica_set_name>/<host>:<port>/" +
+                                "<database_name>");
+                    }
+                    configMap.put(CDCSourceConstants.CONNECTOR_CLASS, CDCSourceConstants.MONGODB_CONNECTOR_CLASS);
+                    //hostname and port pairs of the MongoDB servers in the replica set.
+                    configMap.put(CDCSourceConstants.MONGODB_HOSTS, host + ":" + port);
+                    //unique name that identifies the connector and/or MongoDB replica set or sharded cluster
+                    configMap.put(CDCSourceConstants.MONGODB_NAME, replicaSetName);
+                    //fully-qualified namespaces for MongoDB collections to be monitored
+                    configMap.put(CDCSourceConstants.MONGODB_COLLECTION_WHITELIST, database + "." + tableName);
+                    break;
+                }
                 default:
                     throw new WrongConfigurationException("Unsupported schema. Expected schema: mysql or postgresql" +
-                            "or sqlserver or oracle, Found: " + splittedURL[1]);
+                            "or sqlserver, oracle or mongodb Found: " + splittedURL[1]);
 
             }
 
             //Add general config details to configMap
-            configMap.put(CDCSourceConstants.DATABASE_USER, username);
-            configMap.put(CDCSourceConstants.DATABASE_PASSWORD, password);
+            if (!isMongodb) {
+                configMap.put(CDCSourceConstants.DATABASE_USER, username);
+                configMap.put(CDCSourceConstants.DATABASE_PASSWORD, password);
+            } else {
+                configMap.put(CDCSourceConstants.MONGODB_USER, username);
+                configMap.put(CDCSourceConstants.MONGODB_PASSWORD, password);
+            }
 
             if (serverID == CDCSourceConstants.DEFAULT_SERVER_ID) {
                 Random random = new Random();
@@ -191,7 +225,7 @@ public class CDCSourceUtil {
                     historyFileDirectory + siddhiStreamName + ".dat");
 
             //set connector property: name
-            configMap.put("name", siddhiAppName + siddhiStreamName);
+            configMap.put(CDCSourceConstants.CONNECTOR_NAME, siddhiAppName + siddhiStreamName);
 
             //set additional connector properties using comma separated key value pair string
             for (Map.Entry<String, String> entry : getConnectorPropertiesMap(connectorProperties).entrySet()) {

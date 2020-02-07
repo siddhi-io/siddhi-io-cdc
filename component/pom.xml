@@ -28,6 +28,11 @@
     <name>Siddhi IO CDC extension</name>
     <dependencies>
         <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>${json.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.log4j.wso2</groupId>
             <artifactId>log4j</artifactId>
         </dependency>
@@ -50,6 +55,10 @@
         <dependency>
             <groupId>io.debezium</groupId>
             <artifactId>debezium-connector-postgres</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.debezium</groupId>
+            <artifactId>debezium-connector-mongodb</artifactId>
         </dependency>
         <dependency>
             <groupId>io.siddhi</groupId>
@@ -84,6 +93,11 @@
         <dependency>
             <groupId>io.siddhi.extension.store.rdbms</groupId>
             <artifactId>siddhi-store-rdbms</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.siddhi.extension.store.mongodb</groupId>
+            <artifactId>siddhi-store-mongodb</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -562,6 +576,8 @@
                             org.apache.kafka.connect.*,
                             org.apache.kafka.common.*,
                             org.apache.kafka.clients.*,
+                            org.antlr.*,
+                            org.json.*,
                         </Private-Package>
                         <Import-Package>
                             io.siddhi.annotation.*;version="${siddhi.import.version.range}",
@@ -569,7 +585,6 @@
                             io.siddhi.query.*;version="${siddhi.import.version.range}",
                             *;resolution:=optional
                         </Import-Package>
-                        <DynamicImport-Package>*</DynamicImport-Package>
                         <Include-Resource>
                             META-INF=target/classes/META-INF,
                             META-INF/services=${project.build.directory}/dependencies/connect-runtime/META-INF/services,
