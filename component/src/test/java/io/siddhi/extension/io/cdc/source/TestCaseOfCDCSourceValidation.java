@@ -103,7 +103,7 @@ public class TestCaseOfCDCSourceValidation {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String wrongURL = "jdbc:mysql://0.0.0.0.0:3306/SimpleDB";
+        String wrongURL = "jdbc:mysql://0.0.0.0:3306abc/SimpleDB";
 
         //stream definition with invalid operation.
         String inStreamDefinition = "" +
