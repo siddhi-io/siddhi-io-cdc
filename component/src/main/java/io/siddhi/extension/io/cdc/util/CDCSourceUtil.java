@@ -52,8 +52,7 @@ public class CDCSourceUtil {
             switch (splittedURL[1]) {
                 case "mysql": {
                     //Extract url details
-                    String regex = "jdbc:mysql://(\\w*|[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}):" +
-                            "(\\d++)/(\\w*)";
+                    String regex = "jdbc:mysql://([a-zA-Z0-9-_\\.]+):(\\d++)/(\\w*)";
                     Pattern p = Pattern.compile(regex);
                     Matcher matcher = p.matcher(url);
                     if (matcher.find()) {
@@ -77,8 +76,7 @@ public class CDCSourceUtil {
                 }
                 case "postgresql": {
                     //Extract url details
-                    String regex = "jdbc:postgresql://(\\w*|[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}):" +
-                            "(\\d++)/(\\w*)";
+                    String regex = "jdbc:postgresql://([a-zA-Z0-9-_\\.]+):(\\d++)/(\\w*)";
                     Pattern p = Pattern.compile(regex);
                     Matcher matcher = p.matcher(url);
                     if (matcher.find()) {
@@ -103,8 +101,7 @@ public class CDCSourceUtil {
                 }
                 case "sqlserver": {
                     //Extract url details
-                    String regex = "jdbc:sqlserver://(\\w*|[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}):" +
-                            "(\\d++);databaseName=(\\w*)";
+                    String regex = "jdbc:sqlserver://([a-zA-Z0-9-_\\.]+):(\\d++);databaseName=(\\w*)";
                     Pattern p = Pattern.compile(regex);
                     Matcher matcher = p.matcher(url);
                     if (matcher.find()) {
@@ -162,8 +159,7 @@ public class CDCSourceUtil {
                 case "mongodb": {
                     //Extract url details
                     isMongodb = true;
-                    String regex = "jdbc:mongodb://(\\w*|(\\w*)/[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}):" +
-                            "(\\d++)/(\\w*)";
+                    String regex = "jdbc:mongodb://(\\w*|(\\w*)/[a-zA-Z0-9-_\\.]+):(\\d++)/(\\w*)";
                     Pattern p = Pattern.compile(regex);
                     Matcher matcher = p.matcher(url);
                     String replicaSetName;
