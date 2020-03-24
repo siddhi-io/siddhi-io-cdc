@@ -41,7 +41,7 @@ In addition to that, there are some prerequisites that need to be met based on t
 Currently MySQL, PostgreSQL and SQLServer are supported in Listening Mode.
 To capture the change events, databases have to be configured as shown below.
 
-* MySQL - https://debezium.io/docs/connectors/mysql/#setting-up-mysql
+* MySQL - https://debezium.io/documentation/reference/1.0/assemblies/cdc-mysql-connector/as_setup-the-mysql-server.html
 * PostgreSQL - https://debezium.io/docs/connectors/postgresql/#setting-up-PostgreSQL
 * SQLServer - https://debezium.io/docs/connectors/sqlserver/#setting-up-sqlserver
 
