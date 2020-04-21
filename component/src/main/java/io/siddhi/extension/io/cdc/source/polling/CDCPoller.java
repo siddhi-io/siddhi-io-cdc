@@ -22,6 +22,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.siddhi.core.stream.input.source.SourceEventListener;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.extension.io.cdc.source.metrics.PollingMetrics;
 import io.siddhi.extension.io.cdc.source.polling.strategies.DefaultPollingStrategy;
 import io.siddhi.extension.io.cdc.source.polling.strategies.PollingStrategy;
 import io.siddhi.extension.io.cdc.source.polling.strategies.WaitOnMissingRecordPollingStrategy;
@@ -36,6 +37,7 @@ import org.wso2.carbon.datasource.core.exception.DataSourceException;
 
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -66,7 +68,8 @@ public class CDCPoller implements Runnable {
                      String datasourceName, String jndiResource,
                      String pollingColumn, int pollingInterval, String poolPropertyString,
                      SourceEventListener sourceEventListener, ConfigReader configReader, boolean waitOnMissedRecord,
-                     int missedRecordWaitingTimeout, String appName) {
+                     int missedRecordWaitingTimeout, String appName, PollingMetrics pollingMetrics,
+                     ExecutorService executorService) {
         this.url = url;
         this.tableName = tableName;
         this.username = username;
@@ -88,11 +91,12 @@ public class CDCPoller implements Runnable {
         if (waitOnMissedRecord) {
             log.debug(WaitOnMissingRecordPollingStrategy.class + " is selected as the polling strategy.");
             this.pollingStrategy = new WaitOnMissingRecordPollingStrategy(dataSource, configReader, sourceEventListener,
-                    tableName, pollingColumn, pollingInterval, missedRecordWaitingTimeout, appName);
+                    tableName, pollingColumn, pollingInterval, missedRecordWaitingTimeout, appName, pollingMetrics,
+                    executorService);
         } else {
             log.debug(DefaultPollingStrategy.class + " is selected as the polling strategy.");
             this.pollingStrategy = new DefaultPollingStrategy(dataSource, configReader, sourceEventListener,
-                    tableName, pollingColumn, pollingInterval, appName);
+                    tableName, pollingColumn, pollingInterval, appName, pollingMetrics, executorService);
         }
     }
 

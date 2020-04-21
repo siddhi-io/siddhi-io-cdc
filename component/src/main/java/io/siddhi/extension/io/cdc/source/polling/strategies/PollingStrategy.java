@@ -23,6 +23,8 @@ import io.siddhi.core.stream.input.source.SourceEventListener;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.extension.io.cdc.source.config.Database;
 import io.siddhi.extension.io.cdc.source.config.QueryConfiguration;
+import io.siddhi.extension.io.cdc.source.metrics.CDCStatus;
+import io.siddhi.extension.io.cdc.source.metrics.PollingMetrics;
 import io.siddhi.extension.io.cdc.source.polling.CDCPollingModeException;
 import io.siddhi.extension.io.cdc.util.CDCPollingUtil;
 import io.siddhi.extension.io.cdc.util.CDCSourceConstants;
@@ -37,6 +39,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -62,15 +65,20 @@ public abstract class PollingStrategy {
     protected ReentrantLock pauseLock = new ReentrantLock();
     protected Condition pauseLockCondition = pauseLock.newCondition();
     protected String tableName;
+    protected PollingMetrics pollingMetrics;
+    protected ExecutorService executorService;
 
     public PollingStrategy(HikariDataSource dataSource, ConfigReader configReader,
-                           SourceEventListener sourceEventListener, String tableName, String appName) {
+                           SourceEventListener sourceEventListener, String tableName, String appName,
+                           PollingMetrics pollingMetrics, ExecutorService executorService) {
         this.dataSource = dataSource;
         this.configReader = configReader;
         this.sourceEventListener = sourceEventListener;
         this.tableName = tableName;
         this.appName = appName;
         this.streamName = sourceEventListener.getStreamDefinition().getId();
+        this.pollingMetrics = pollingMetrics;
+        this.executorService = executorService;
     }
 
     public abstract void poll();
@@ -176,6 +184,11 @@ public abstract class PollingStrategy {
 
     protected void handleEvent(Map detailsMap) {
         sourceEventListener.onEvent(detailsMap, null);
+        executorService.execute(() -> {
+            pollingMetrics.getEventCountMetric().inc();
+            pollingMetrics.setCDCStatus(CDCStatus.CONSUMING);
+            pollingMetrics.setLastReceivedTime(System.currentTimeMillis());
+        });
     }
 
     protected String buildError(String message, Object... args) {

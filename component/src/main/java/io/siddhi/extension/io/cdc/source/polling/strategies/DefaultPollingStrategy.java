@@ -21,6 +21,7 @@ package io.siddhi.extension.io.cdc.source.polling.strategies;
 import com.zaxxer.hikari.HikariDataSource;
 import io.siddhi.core.stream.input.source.SourceEventListener;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.extension.io.cdc.source.metrics.PollingMetrics;
 import io.siddhi.extension.io.cdc.source.polling.CDCPollingModeException;
 import io.siddhi.extension.io.cdc.util.CDCPollingUtil;
 import org.apache.log4j.Logger;
@@ -33,6 +34,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Default implementation of the polling strategy. This uses {@code pollingColumn} and {@code pollingInterval} to poll
@@ -47,8 +49,9 @@ public class DefaultPollingStrategy extends PollingStrategy {
 
     public DefaultPollingStrategy(HikariDataSource dataSource, ConfigReader configReader,
                                   SourceEventListener sourceEventListener, String tableName, String pollingColumn,
-                                  int pollingInterval, String appName) {
-        super(dataSource, configReader, sourceEventListener, tableName, appName);
+                                  int pollingInterval, String appName, PollingMetrics pollingMetrics,
+                                  ExecutorService executorService) {
+        super(dataSource, configReader, sourceEventListener, tableName, appName, pollingMetrics, executorService);
         this.pollingColumn = pollingColumn;
         this.pollingInterval = pollingInterval;
     }
@@ -97,7 +100,9 @@ public class DefaultPollingStrategy extends PollingStrategy {
                     statement.setString(1, lastReadPollingColumnValue);
                     resultSet = statement.executeQuery();
                     metadata = resultSet.getMetaData();
+                    int eventsPerPollingInterval = 0;
                     while (resultSet.next()) {
+                        eventsPerPollingInterval++;
                         detailsMap = new HashMap<>();
                         for (int i = 1; i <= metadata.getColumnCount(); i++) {
                             String key = metadata.getColumnName(i);
@@ -107,6 +112,7 @@ public class DefaultPollingStrategy extends PollingStrategy {
                         lastReadPollingColumnValue = resultSet.getString(pollingColumn);
                         handleEvent(detailsMap);
                     }
+                    pollingMetrics.setReceiveEventsPerPollingInterval(eventsPerPollingInterval);
                 } catch (SQLException ex) {
                     log.error(buildError("Error occurred while processing records in table %s.", tableName), ex);
                 } finally {

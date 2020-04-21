@@ -21,6 +21,7 @@ package io.siddhi.extension.io.cdc.source.polling.strategies;
 import com.zaxxer.hikari.HikariDataSource;
 import io.siddhi.core.stream.input.source.SourceEventListener;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.extension.io.cdc.source.metrics.PollingMetrics;
 import io.siddhi.extension.io.cdc.source.polling.CDCPollingModeException;
 import io.siddhi.extension.io.cdc.util.CDCPollingUtil;
 import org.apache.log4j.Logger;
@@ -33,6 +34,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Polling strategy implementation to wait-on-missing records. If the polling strategy identifies a missed record in
@@ -51,8 +53,9 @@ public class WaitOnMissingRecordPollingStrategy extends PollingStrategy {
     public WaitOnMissingRecordPollingStrategy(HikariDataSource dataSource, ConfigReader configReader,
                                               SourceEventListener sourceEventListener, String tableName,
                                               String pollingColumn, int pollingInterval, int waitTimeout,
-                                              String appName) {
-        super(dataSource, configReader, sourceEventListener, tableName, appName);
+                                              String appName, PollingMetrics pollingMetrics,
+                                              ExecutorService executorService) {
+        super(dataSource, configReader, sourceEventListener, tableName, appName, pollingMetrics, executorService);
         this.pollingColumn = pollingColumn;
         this.pollingInterval = pollingInterval;
         this.waitTimeout = waitTimeout;
@@ -103,7 +106,9 @@ public class WaitOnMissingRecordPollingStrategy extends PollingStrategy {
                     statement.setInt(1, lastReadPollingColumnValue);
                     resultSet = statement.executeQuery();
                     metadata = resultSet.getMetaData();
+                    int eventsPerPollingInterval = 0;
                     while (resultSet.next()) {
+                        eventsPerPollingInterval++;
                         boolean isTimedout = false;
                         int currentPollingColumnValue = resultSet.getInt(pollingColumn);
                         if (currentPollingColumnValue - lastReadPollingColumnValue > 1) {
@@ -144,6 +149,8 @@ public class WaitOnMissingRecordPollingStrategy extends PollingStrategy {
                         lastReadPollingColumnValue = resultSet.getInt(pollingColumn);
                         handleEvent(detailsMap);
                     }
+                    pollingMetrics.setReceiveEventsPerPollingInterval(eventsPerPollingInterval);
+                    System.out.println("Event Per Polling: " + eventsPerPollingInterval);
                 } catch (SQLException e) {
                     log.error(buildError("Error occurred while processing records in table %s.", tableName), e);
                 } finally {
