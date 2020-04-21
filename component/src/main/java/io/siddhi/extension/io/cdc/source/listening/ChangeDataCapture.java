@@ -23,9 +23,12 @@ import io.debezium.embedded.EmbeddedEngine;
 import io.debezium.embedded.spi.OffsetCommitPolicy;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.stream.input.source.SourceEventListener;
+import io.siddhi.extension.io.cdc.source.metrics.CDCStatus;
+import io.siddhi.extension.io.cdc.source.metrics.ListeningMetrics;
 import org.apache.kafka.connect.connector.ConnectRecord;
 
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -39,10 +42,15 @@ public abstract class ChangeDataCapture {
     private ReentrantLock lock = new ReentrantLock();
     private Condition condition = lock.newCondition();
     private boolean paused = false;
+    private ListeningMetrics metrics;
+    private ExecutorService executorService;
 
-    public ChangeDataCapture(String operation, SourceEventListener sourceEventListener) {
+    public ChangeDataCapture(String operation, SourceEventListener sourceEventListener, ListeningMetrics metrics,
+                             ExecutorService executorService) {
         this.operation = operation;
         this.sourceEventListener = sourceEventListener;
+        this.metrics = metrics;
+        this.executorService = executorService;
     }
 
     /**
@@ -111,6 +119,11 @@ public abstract class ChangeDataCapture {
         detailsMap = createMap(connectRecord, operation);
         if (!detailsMap.isEmpty()) {
             sourceEventListener.onEvent(detailsMap, null);
+            executorService.execute(() -> {
+                metrics.getEventCountMetric().inc();
+                metrics.setCDCStatus(CDCStatus.CONSUMING);
+                metrics.setLastReceivedTime(System.currentTimeMillis());
+            });
         }
     }
 

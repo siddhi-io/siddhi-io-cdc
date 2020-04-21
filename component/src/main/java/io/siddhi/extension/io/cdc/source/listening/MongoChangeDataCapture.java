@@ -19,6 +19,7 @@
 package io.siddhi.extension.io.cdc.source.listening;
 
 import io.siddhi.core.stream.input.source.SourceEventListener;
+import io.siddhi.extension.io.cdc.source.metrics.ListeningMetrics;
 import io.siddhi.extension.io.cdc.util.CDCSourceConstants;
 import org.apache.kafka.connect.connector.ConnectRecord;
 import org.apache.kafka.connect.data.Struct;
@@ -30,6 +31,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 /**
  * This class is for capturing change data for MongoDB using debezium embedded engine.
@@ -37,8 +39,9 @@ import java.util.Map;
 public class MongoChangeDataCapture extends ChangeDataCapture {
     private static final Logger log = Logger.getLogger(MongoChangeDataCapture.class);
 
-    public MongoChangeDataCapture(String operation, SourceEventListener sourceEventListener) {
-        super(operation, sourceEventListener);
+    public MongoChangeDataCapture(String operation, SourceEventListener sourceEventListener, ListeningMetrics metrics,
+                                  ExecutorService executorService) {
+        super(operation, sourceEventListener, metrics, executorService);
     }
 
     Map<String, Object> createMap(ConnectRecord connectRecord, String operation) {
