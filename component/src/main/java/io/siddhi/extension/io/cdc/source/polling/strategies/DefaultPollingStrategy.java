@@ -21,6 +21,7 @@ package io.siddhi.extension.io.cdc.source.polling.strategies;
 import com.zaxxer.hikari.HikariDataSource;
 import io.siddhi.core.stream.input.source.SourceEventListener;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.extension.io.cdc.source.metrics.CDCStatus;
 import io.siddhi.extension.io.cdc.source.metrics.PollingMetrics;
 import io.siddhi.extension.io.cdc.source.polling.CDCPollingModeException;
 import io.siddhi.extension.io.cdc.util.CDCPollingUtil;
@@ -96,11 +97,13 @@ public class DefaultPollingStrategy extends PollingStrategy {
                         pauseLock.unlock();
                     }
                 }
+                int eventsPerPollingInterval = 0;
+                long startedTime = System.currentTimeMillis();
+                boolean isError = false;
                 try {
                     statement.setString(1, lastReadPollingColumnValue);
                     resultSet = statement.executeQuery();
                     metadata = resultSet.getMetaData();
-                    int eventsPerPollingInterval = 0;
                     while (resultSet.next()) {
                         eventsPerPollingInterval++;
                         detailsMap = new HashMap<>();
@@ -112,19 +115,29 @@ public class DefaultPollingStrategy extends PollingStrategy {
                         lastReadPollingColumnValue = resultSet.getString(pollingColumn);
                         handleEvent(detailsMap);
                     }
-                    pollingMetrics.setReceiveEventsPerPollingInterval(eventsPerPollingInterval);
+                    if (pollingMetrics != null) {
+                        pollingMetrics.setReceiveEventsPerPollingInterval(eventsPerPollingInterval);
+                    }
+//                    System.out.println("Events Per Polling: " + eventsPerPollingInterval);
                 } catch (SQLException ex) {
+                    isError = true;
                     log.error(buildError("Error occurred while processing records in table %s.", tableName), ex);
                 } finally {
                     CDCPollingUtil.cleanupConnection(resultSet, null, null);
                 }
                 try {
+                    if (pollingMetrics != null){
+                        CDCStatus cdcStatus = isError ? CDCStatus.ERROR : CDCStatus.SUCCESS;
+                        pollingMetrics.pollingDetailsMetric(eventsPerPollingInterval, startedTime,
+                                System.currentTimeMillis() - startedTime, cdcStatus);
+                    }
                     Thread.sleep((long) pollingInterval * 1000);
                 } catch (InterruptedException e) {
                     log.error(buildError("Error while polling the table %s.", tableName), e);
                 }
             }
         } catch (SQLException ex) {
+            pollingMetrics.setCDCStatus(CDCStatus.ERROR);
             throw new CDCPollingModeException(buildError("Error in polling for changes on %s.", tableName), ex);
         } finally {
             CDCPollingUtil.cleanupConnection(resultSet, statement, connection);

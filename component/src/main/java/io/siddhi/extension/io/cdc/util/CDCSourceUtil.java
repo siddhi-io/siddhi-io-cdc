@@ -20,6 +20,7 @@ package io.siddhi.extension.io.cdc.util;
 
 import io.siddhi.extension.io.cdc.source.listening.InMemoryOffsetBackingStore;
 import io.siddhi.extension.io.cdc.source.listening.WrongConfigurationException;
+import io.siddhi.extension.io.cdc.source.metrics.ListeningMetrics;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 
 import java.util.HashMap;
@@ -35,7 +36,8 @@ public class CDCSourceUtil {
     public static Map<String, Object> getConfigMap(String username, String password, String url, String tableName,
                                                    String historyFileDirectory, String siddhiAppName,
                                                    String siddhiStreamName, int serverID, String serverName,
-                                                   String connectorProperties, int cdcSourceHashCode)
+                                                   String connectorProperties, int cdcSourceHashCode,
+                                                   ListeningMetrics metrics)
             throws WrongConfigurationException {
         Map<String, Object> configMap = new HashMap<>();
         String host;
@@ -72,6 +74,9 @@ public class CDCSourceUtil {
 
                     //Add other MySQL specific details to configMap.
                     configMap.put(CDCSourceConstants.CONNECTOR_CLASS, CDCSourceConstants.MYSQL_CONNECTOR_CLASS);
+                    if (metrics != null) {
+                        metrics.setDbType("MySQL");
+                    }
                     break;
                 }
                 case "postgresql": {
@@ -97,6 +102,9 @@ public class CDCSourceUtil {
 
                     //Add other PostgreSQL specific details to configMap.
                     configMap.put(CDCSourceConstants.CONNECTOR_CLASS, CDCSourceConstants.POSTGRESQL_CONNECTOR_CLASS);
+                    if (metrics != null) {
+                        metrics.setDbType("PostgreSQL");
+                    }
                     break;
                 }
                 case "sqlserver": {
@@ -121,6 +129,9 @@ public class CDCSourceUtil {
 
                     //Add other SQLServer specific details to configMap.
                     configMap.put(CDCSourceConstants.CONNECTOR_CLASS, CDCSourceConstants.SQLSERVER_CONNECTOR_CLASS);
+                    if (metrics != null) {
+                        metrics.setDbType("SQL Server");
+                    }
                     break;
                 }
                 case "oracle": {
@@ -154,6 +165,9 @@ public class CDCSourceUtil {
                             String.format("%s.%s", pdbName != null ? pdbName : database, tableName));
                     configMap.put(CDCSourceConstants.DATABASE_DBNAME, database);
                     configMap.put(CDCSourceConstants.CONNECTOR_CLASS, CDCSourceConstants.ORACLE_CONNECTOR_CLASS);
+                    if (metrics != null) {
+                        metrics.setDbType("Oracle");
+                    }
                     break;
                 }
                 case "mongodb": {
@@ -181,12 +195,21 @@ public class CDCSourceUtil {
                     configMap.put(CDCSourceConstants.MONGODB_NAME, replicaSetName);
                     //fully-qualified namespaces for MongoDB collections to be monitored
                     configMap.put(CDCSourceConstants.MONGODB_COLLECTION_WHITELIST, database + "." + tableName);
+                    if (metrics != null) {
+                        metrics.setDbType("MongoDB");
+                    }
                     break;
                 }
                 default:
                     throw new WrongConfigurationException("Unsupported schema. Expected schema: mysql or postgresql" +
                             "or sqlserver, oracle or mongodb Found: " + splittedURL[1]);
 
+            }
+            if (metrics != null) {
+                metrics.setHost(host /*+ ":" + port*/);
+                metrics.setDatabaseName(database);
+                metrics.getEventCountMetric().inc(0);
+                metrics.getTotalEventCounterMetric().inc(0);
             }
 
             //Add general config details to configMap

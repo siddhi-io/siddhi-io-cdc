@@ -42,8 +42,8 @@ public abstract class ChangeDataCapture {
     private ReentrantLock lock = new ReentrantLock();
     private Condition condition = lock.newCondition();
     private boolean paused = false;
-    private ListeningMetrics metrics;
-    private ExecutorService executorService;
+    private final ListeningMetrics metrics;
+    private final ExecutorService executorService;
 
     public ChangeDataCapture(String operation, SourceEventListener sourceEventListener, ListeningMetrics metrics,
                              ExecutorService executorService) {
@@ -77,6 +77,7 @@ public abstract class ChangeDataCapture {
                 .using(completionCallback)
                 .using(config);
         if (builder == null) {
+            metrics.setCDCStatus(CDCStatus.ERROR);
             throw new SiddhiAppRuntimeException("CDC Engine create failed. Check parameters.");
         } else {
             EmbeddedEngine engine = builder.notifying(this::handleEvent).build();
@@ -119,11 +120,14 @@ public abstract class ChangeDataCapture {
         detailsMap = createMap(connectRecord, operation);
         if (!detailsMap.isEmpty()) {
             sourceEventListener.onEvent(detailsMap, null);
-            executorService.execute(() -> {
-                metrics.getEventCountMetric().inc();
-                metrics.setCDCStatus(CDCStatus.CONSUMING);
-                metrics.setLastReceivedTime(System.currentTimeMillis());
-            });
+            if (metrics != null) {
+                executorService.execute(() -> {
+                    metrics.getEventCountMetric().inc();
+                    metrics.getTotalEventCounterMetric().inc();
+                    metrics.setCDCStatus(CDCStatus.CONSUMING);
+                    metrics.setLastReceivedTime(System.currentTimeMillis());
+                });
+            }
         }
     }
 

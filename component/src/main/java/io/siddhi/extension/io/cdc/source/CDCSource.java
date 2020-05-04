@@ -40,6 +40,7 @@ import io.siddhi.extension.io.cdc.source.listening.MongoChangeDataCapture;
 import io.siddhi.extension.io.cdc.source.listening.RdbmsChangeDataCapture;
 import io.siddhi.extension.io.cdc.source.listening.WrongConfigurationException;
 import io.siddhi.extension.io.cdc.source.metrics.ListeningMetrics;
+import io.siddhi.extension.io.cdc.source.metrics.Metrics;
 import io.siddhi.extension.io.cdc.source.metrics.PollingMetrics;
 import io.siddhi.extension.io.cdc.source.polling.CDCPoller;
 import io.siddhi.extension.io.cdc.util.CDCSourceConstants;
@@ -47,6 +48,7 @@ import io.siddhi.extension.io.cdc.util.CDCSourceUtil;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import javassist.bytecode.analysis.Executor;
 import org.apache.log4j.Logger;
+import org.wso2.carbon.si.metrics.core.internal.MetricsDataHolder;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -255,7 +257,16 @@ import java.util.concurrent.Executors;
                         type = DataType.INT,
                         optional = true,
                         defaultValue = "-1"
-                )
+                ),
+                @Parameter(
+                        name = CDCSourceConstants.POLLING_HISTORY_SIZE,
+                        description = "Should be use when metrics are enabled, Define the number of polling details " +
+                                "that should expose to metrics, Ex: if polling.history.size is 20, then it will " +
+                                "expose details of last 20 polling",
+                        type = DataType.INT,
+                        defaultValue = "10",
+                        optional = true
+                ),
         },
         examples = {
                 @Example(
@@ -361,8 +372,8 @@ public class CDCSource extends Source<CDCSource.CdcState> {
     private CDCSourceObjectKeeper cdcSourceObjectKeeper = CDCSourceObjectKeeper.getCdcSourceObjectKeeper();
     private String carbonHome;
     private CDCPoller cdcPoller;
-    private ListeningMetrics metrics;
-    private PollingMetrics pollingMetrics;
+    private Metrics metrics;
+//    private PollingMetrics pollingMetrics;
     private String siddhiAppName;
     private ExecutorService siddhiAppContextExecutorService;
 
@@ -411,21 +422,18 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                         + File.separator + siddhiAppName + File.separator;
 
                 validateListeningModeParameters(optionHolder);
-                String dbType = "";
-                if (url.toLowerCase(Locale.ENGLISH).contains("jdbc:mongodb")) {
-                    dbType = "MongoDB";
-                } else {
-                    dbType = "RDBMS";
-                }
 
-                metrics = new ListeningMetrics(siddhiAppName, url, tableName, dbType, operation);
+                if (MetricsDataHolder.getInstance().getMetricService() != null &&
+                        MetricsDataHolder.getInstance().getMetricManagementService().isEnabled()) {
+                    metrics = new ListeningMetrics(siddhiAppName, url, tableName, operation);
+                }
                 //send sourceEventListener and preferred operation to changeDataCapture object
                 if (url.toLowerCase(Locale.ENGLISH).contains("jdbc:mongodb")) {
-                    changeDataCapture = new MongoChangeDataCapture(operation, sourceEventListener, metrics,
-                            siddhiAppContextExecutorService);
+                    changeDataCapture = new MongoChangeDataCapture(operation, sourceEventListener,
+                            (ListeningMetrics) metrics, siddhiAppContextExecutorService);
                 } else {
-                    changeDataCapture = new RdbmsChangeDataCapture(operation, sourceEventListener, metrics,
-                            siddhiAppContextExecutorService);
+                    changeDataCapture = new RdbmsChangeDataCapture(operation, sourceEventListener,
+                            (ListeningMetrics) metrics, siddhiAppContextExecutorService);
                 }
 
                 //create the folder for history file if not exists
@@ -440,7 +448,7 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                 try {
                     Map<String, Object> configMap = CDCSourceUtil.getConfigMap(username, password, url, tableName,
                             historyFileDirectory, siddhiAppName, streamName, serverID, serverName, connectorProperties,
-                            this.hashCode());
+                            this.hashCode(), (ListeningMetrics) metrics);
                     changeDataCapture.setConfig(configMap);
                 } catch (WrongConfigurationException ex) {
                     throw new SiddhiAppCreationException("The cdc source couldn't get started because of invalid" +
@@ -464,22 +472,27 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                 int missedRecordWaitingTimeout = Integer.parseInt(
                         optionHolder.validateAndGetStaticValue(
                                 CDCSourceConstants.MISSED_RECORD_WAITING_TIMEOUT, "-1"));
-
                 if (isDatasourceNameAvailable) {
                     String datasourceName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.DATASOURCE_NAME);
-                    pollingMetrics = new PollingMetrics(siddhiAppName, datasourceName, tableName);
+                    if (MetricsDataHolder.getInstance().getMetricService() != null &&
+                            MetricsDataHolder.getInstance().getMetricManagementService().isEnabled()) {
+                        metrics = new PollingMetrics(siddhiAppName, datasourceName, tableName);
+                    }
                     cdcPoller = new CDCPoller(null, null, null, tableName, null,
                             datasourceName, null, pollingColumn, pollingInterval,
                             poolPropertyString, sourceEventListener, configReader, waitOnMissedRecord,
-                            missedRecordWaitingTimeout, siddhiAppName, pollingMetrics,
+                            missedRecordWaitingTimeout, siddhiAppName, (PollingMetrics) metrics,
                             siddhiAppContext.getExecutorService());
                 } else if (isJndiResourceAvailable) {
                     String jndiResource = optionHolder.validateAndGetStaticValue(CDCSourceConstants.JNDI_RESOURCE);
-                    pollingMetrics = new PollingMetrics(siddhiAppName, jndiResource, tableName);
+                    if (MetricsDataHolder.getInstance().getMetricService() != null &&
+                            MetricsDataHolder.getInstance().getMetricManagementService().isEnabled()) {
+                        metrics = new PollingMetrics(siddhiAppName, jndiResource, tableName);
+                    }
                     cdcPoller = new CDCPoller(null, null, null, tableName, null,
                             null, jndiResource, pollingColumn, pollingInterval, poolPropertyString,
                             sourceEventListener, configReader, waitOnMissedRecord, missedRecordWaitingTimeout,
-                            siddhiAppName, pollingMetrics, siddhiAppContext.getExecutorService());
+                            siddhiAppName, (PollingMetrics) metrics, siddhiAppContext.getExecutorService());
                 } else {
                     String driverClassName;
                     try {
@@ -487,7 +500,10 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                         url = optionHolder.validateAndGetOption(CDCSourceConstants.DATABASE_CONNECTION_URL).getValue();
                         username = optionHolder.validateAndGetOption(CDCSourceConstants.USERNAME).getValue();
                         password = optionHolder.validateAndGetOption(CDCSourceConstants.PASSWORD).getValue();
-                        pollingMetrics = new PollingMetrics(siddhiAppName, url, tableName);
+                        if (MetricsDataHolder.getInstance().getMetricService() != null &&
+                                MetricsDataHolder.getInstance().getMetricManagementService().isEnabled()) {
+                            metrics = new PollingMetrics(siddhiAppName, url, tableName);
+                        }
                     } catch (SiddhiAppValidationException ex) {
                         throw new SiddhiAppValidationException(ex.getMessage() + " Alternatively, define "
                                 + CDCSourceConstants.DATASOURCE_NAME + " or " + CDCSourceConstants.JNDI_RESOURCE +
@@ -496,7 +512,12 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                     cdcPoller = new CDCPoller(url, username, password, tableName, driverClassName,
                             null, null, pollingColumn, pollingInterval, poolPropertyString,
                             sourceEventListener, configReader, waitOnMissedRecord, missedRecordWaitingTimeout,
-                            siddhiAppName, pollingMetrics, siddhiAppContext.getExecutorService());
+                            siddhiAppName, (PollingMetrics) metrics, siddhiAppContext.getExecutorService());
+                }
+                if (metrics != null) {
+                    int pollingHistorySize = Integer.parseInt(optionHolder.validateAndGetStaticValue(
+                            CDCSourceConstants.POLLING_HISTORY_SIZE, "10"));
+                    ((PollingMetrics)metrics).setPollingHistorySize(pollingHistorySize);
                 }
                 break;
             default:
@@ -528,7 +549,6 @@ public class CDCSource extends Source<CDCSource.CdcState> {
 
                 EmbeddedEngine engine = changeDataCapture.getEngine(completionCallback);
                 executorService.execute(engine);
-                ListeningMetrics.updateFileStatus(siddhiAppContextExecutorService, siddhiAppName);
                 break;
             case CDCSourceConstants.MODE_POLLING:
                 //create a completion callback to handle exceptions from CDCPoller
@@ -545,10 +565,12 @@ public class CDCSource extends Source<CDCSource.CdcState> {
 
                 cdcPoller.setCompletionCallback(cdcCompletionCallback);
                 executorService.execute(cdcPoller);
-                PollingMetrics.updateFileStatus(siddhiAppContextExecutorService, siddhiAppName);
                 break;
             default:
                 break; //Never get executed since mode is validated.
+        }
+        if (metrics != null) {
+            metrics.updateFileStatus(siddhiAppContextExecutorService, siddhiAppName);
         }
     }
 

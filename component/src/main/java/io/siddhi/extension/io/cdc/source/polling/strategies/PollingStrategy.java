@@ -105,6 +105,12 @@ public abstract class PollingStrategy {
         Connection conn;
         try {
             conn = this.dataSource.getConnection();
+            if (pollingMetrics != null) {
+                pollingMetrics.setDatabaseName(conn.getCatalog());
+                pollingMetrics.setHost(conn.getMetaData().getUserName());
+                pollingMetrics.setDbType(conn.getMetaData().getDatabaseProductName());
+                pollingMetrics.getEventCountMetric().inc(0);
+            }
             log.debug("A connection is initialized.");
         } catch (SQLException e) {
             throw new CDCPollingModeException(buildError("Error initializing datasource connection."), e);
@@ -184,11 +190,13 @@ public abstract class PollingStrategy {
 
     protected void handleEvent(Map detailsMap) {
         sourceEventListener.onEvent(detailsMap, null);
-        executorService.execute(() -> {
-            pollingMetrics.getEventCountMetric().inc();
-            pollingMetrics.setCDCStatus(CDCStatus.CONSUMING);
-            pollingMetrics.setLastReceivedTime(System.currentTimeMillis());
-        });
+        if (pollingMetrics != null) {
+            executorService.execute(() -> {
+                pollingMetrics.getEventCountMetric().inc();
+                pollingMetrics.setCDCStatus(CDCStatus.CONSUMING);
+                pollingMetrics.setLastReceivedTime(System.currentTimeMillis());
+            });
+        }
     }
 
     protected String buildError(String message, Object... args) {
