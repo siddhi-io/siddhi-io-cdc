@@ -192,6 +192,13 @@
                 <artifactId>connect-api</artifactId>
                 <version>${kafka.connect.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.analytics</groupId>
+                <artifactId>org.wso2.carbon.si.metrics.core</artifactId>
+                <version>${carbon.analytics.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
     <build>
@@ -264,6 +271,9 @@
         <kafka.connect.version>2.3.0</kafka.connect.version>
         <mongodb.connector.version>3.4.0</mongodb.connector.version>
         <json.version>20190722</json.version>
+        <carbon.analytics.version>3.0.35-SNAPSHOT</carbon.analytics.version>
+        <org.yaml.snakeyaml.version.range>[1.2.0,2.0.0)</org.yaml.snakeyaml.version.range>
+        <com.zaxxer.hikari.version.range>[1.0.0,4.0.0)</com.zaxxer.hikari.version.range>
     </properties>
     <scm>
         <url>https://github.com/siddhi-io/siddhi-io-cdc.git</url>

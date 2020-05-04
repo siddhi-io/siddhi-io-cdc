@@ -46,7 +46,6 @@ import io.siddhi.extension.io.cdc.source.polling.CDCPoller;
 import io.siddhi.extension.io.cdc.util.CDCSourceConstants;
 import io.siddhi.extension.io.cdc.util.CDCSourceUtil;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
-import javassist.bytecode.analysis.Executor;
 import org.apache.log4j.Logger;
 import org.wso2.carbon.si.metrics.core.internal.MetricsDataHolder;
 
@@ -373,7 +372,6 @@ public class CDCSource extends Source<CDCSource.CdcState> {
     private String carbonHome;
     private CDCPoller cdcPoller;
     private Metrics metrics;
-//    private PollingMetrics pollingMetrics;
     private String siddhiAppName;
     private ExecutorService siddhiAppContextExecutorService;
 
@@ -517,7 +515,7 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                 if (metrics != null) {
                     int pollingHistorySize = Integer.parseInt(optionHolder.validateAndGetStaticValue(
                             CDCSourceConstants.POLLING_HISTORY_SIZE, "10"));
-                    ((PollingMetrics)metrics).setPollingHistorySize(pollingHistorySize);
+                    ((PollingMetrics) metrics).setPollingHistorySize(pollingHistorySize);
                 }
                 break;
             default:
@@ -570,7 +568,7 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                 break; //Never get executed since mode is validated.
         }
         if (metrics != null) {
-            metrics.updateFileStatus(siddhiAppContextExecutorService, siddhiAppName);
+            metrics.updateTableStatus(siddhiAppContextExecutorService, siddhiAppName);
         }
     }
 

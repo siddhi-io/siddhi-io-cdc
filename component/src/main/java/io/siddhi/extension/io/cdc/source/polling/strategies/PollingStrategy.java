@@ -106,9 +106,9 @@ public abstract class PollingStrategy {
         try {
             conn = this.dataSource.getConnection();
             if (pollingMetrics != null) {
-                pollingMetrics.setDatabaseName(conn.getCatalog());
                 pollingMetrics.setHost(conn.getMetaData().getUserName());
                 pollingMetrics.setDbType(conn.getMetaData().getDatabaseProductName());
+                pollingMetrics.setDatabaseName(conn.getCatalog());
                 pollingMetrics.getEventCountMetric().inc(0);
             }
             log.debug("A connection is initialized.");

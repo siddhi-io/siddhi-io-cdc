@@ -1,54 +1,67 @@
+/*
+ * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package io.siddhi.extension.io.cdc.source.metrics;
 
+import org.apache.log4j.Logger;
 import org.wso2.carbon.metrics.core.Counter;
 import org.wso2.carbon.metrics.core.Level;
 import org.wso2.carbon.si.metrics.core.internal.MetricsDataHolder;
 
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
-public class PollingMetrics extends Metrics{
+/**
+ * Class which holds the metrics for cdc polling mode.
+ */
+public class PollingMetrics extends Metrics {
 
-/*    private static final Map<Metrics.CDCDatabase, Long> cdcLastReceivedTimeMap = new HashMap<>();
-    private static final Map<Metrics.CDCDatabase, CDCStatus> cdcStatusMap = new HashMap<>();
-    private static final Map<String, Boolean> cdcStatusServiceStartedMap = new ConcurrentHashMap<>();*/
-
-    private Queue<String> pollingDetails = new LinkedList<>();
+    private static final Logger log  = Logger.getLogger(PollingMetrics.class);
+    private final Queue<String> pollingDetails = new LinkedList<>();
     private int receiveEventsPerPollingInterval;
-    private int pollingHistorySize = 5;
+    private int pollingHistorySize;
 
     public PollingMetrics(String siddhiAppName, String dbURL, String tableName) {
         super(siddhiAppName, dbURL, tableName);
-        cdcStatusServiceStartedMap.putIfAbsent(siddhiAppName, false);
+        CDC_STATUS_SERVICE_STARTED_MAP.putIfAbsent(siddhiAppName, false);
     }
 
     @Override
-    public void updateFileStatus(ExecutorService executorService, String siddhiAppName) {
-        if (!cdcStatusServiceStartedMap.get(siddhiAppName)) {
-            cdcStatusServiceStartedMap.replace(siddhiAppName, true);
+    public void updateTableStatus(ExecutorService executorService, String siddhiAppName) {
+        if (!CDC_STATUS_SERVICE_STARTED_MAP.get(siddhiAppName)) {
+            CDC_STATUS_SERVICE_STARTED_MAP.replace(siddhiAppName, true);
             executorService.execute(() -> {
-                while (cdcStatusServiceStartedMap.get(siddhiAppName)) {
-                    if (!cdcStatusMap.isEmpty()) {
-                        cdcLastReceivedTimeMap.forEach((cdcDatabase, lastPublishedTime) -> {
+                while (CDC_STATUS_SERVICE_STARTED_MAP.get(siddhiAppName)) {
+                    if (!CDC_STATUS_MAP.isEmpty()) {
+                        CDC_LAST_RECEIVED_TIME_MAP.forEach((cdcDatabase, lastPublishedTime) -> {
                             if (cdcDatabase.siddhiAppName.equals(siddhiAppName)) {
                                 long idleTime = System.currentTimeMillis() - lastPublishedTime;
                                 if (idleTime / 1000 > 8) {
-                                    cdcStatusMap.replace(cdcDatabase, CDCStatus.IDLE);
+                                    CDC_STATUS_MAP.replace(cdcDatabase, CDCStatus.IDLE);
                                 }
                             }
                         });
                     }
-                    /*cdcStatusMap.forEach((cdcDatabase, cdcStatus) -> System.out.println(
-                            "URL: " + cdcDatabase.cdcURL + ", Status: " + cdcStatus + ", Thread ID: "
-                            + Thread.currentThread().getId()));*/
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        log.error(siddhiAppName + ": Error while updating the tables status.");
                     }
                 }
             });
@@ -58,8 +71,8 @@ public class PollingMetrics extends Metrics{
     @Override
     public Counter getEventCountMetric() {
         return MetricsDataHolder.getInstance().getMetricService()
-                .counter(String.format("io.siddhi.SiddhiApps.%s.Siddhi.Cdc.Source.Polling.event.count.%s.%s.%s.%s",
-                        siddhiAppName, dbType, databaseName, tableName, getDatabaseURL()), Level.INFO);
+                .counter(String.format("io.siddhi.SiddhiApps.%s.Siddhi.Cdc.Source.Polling.event.count.%s.%s.%s.%s.%s",
+                        siddhiAppName, dbType, host, databaseName, tableName, getDatabaseURL()), Level.INFO);
     }
 
     @Override
@@ -68,8 +81,8 @@ public class PollingMetrics extends Metrics{
                 .gauge(String.format("io.siddhi.SiddhiApps.%s.Siddhi.Cdc.Source.Polling.%s.%s",
                         siddhiAppName, "last_receive_time", getDatabaseURL()),
                         Level.INFO, () -> {
-                            if (cdcLastReceivedTimeMap.containsKey(cdcDatabase)) {
-                                return cdcLastReceivedTimeMap.get(cdcDatabase);
+                            if (CDC_LAST_RECEIVED_TIME_MAP.containsKey(cdcDatabase)) {
+                                return CDC_LAST_RECEIVED_TIME_MAP.get(cdcDatabase);
                             }
                             return 0L;
                         });
@@ -81,8 +94,9 @@ public class PollingMetrics extends Metrics{
                 .gauge(String.format("io.siddhi.SiddhiApps.%s.Siddhi.Cdc.Source.Polling.%s.%s",
                         siddhiAppName, "idle_time", getDatabaseURL()),
                         Level.INFO, () -> {
-                            if (cdcLastReceivedTimeMap.containsKey(cdcDatabase)) {
-                                return (System.currentTimeMillis() - cdcLastReceivedTimeMap.get(cdcDatabase)) / 1000;
+                            if (CDC_LAST_RECEIVED_TIME_MAP.containsKey(cdcDatabase)) {
+                                return (System.currentTimeMillis() - CDC_LAST_RECEIVED_TIME_MAP.get(cdcDatabase))
+                                        / 1000;
                             }
                             return 0L;
                         });
@@ -94,8 +108,8 @@ public class PollingMetrics extends Metrics{
                 .gauge(String.format("io.siddhi.SiddhiApps.%s.Siddhi.Cdc.Source.Polling.%s.%s",
                         siddhiAppName, "db_status", getDatabaseURL()),
                         Level.INFO, () -> {
-                            if (cdcStatusMap.containsKey(cdcDatabase)) {
-                                return cdcStatusMap.get(cdcDatabase).ordinal();
+                            if (CDC_STATUS_MAP.containsKey(cdcDatabase)) {
+                                return CDC_STATUS_MAP.get(cdcDatabase).ordinal();
                             }
                             return -1;
                         });
@@ -114,7 +128,7 @@ public class PollingMetrics extends Metrics{
         MetricsDataHolder.getInstance().getMetricService()
                 .gauge(metricName, Level.INFO, () -> events);
         pollingDetails.add(metricName);
-        if (pollingDetails.size() > pollingHistorySize ) {
+        if (pollingDetails.size() > pollingHistorySize) {
             String poll = pollingDetails.poll();
             MetricsDataHolder.getInstance().getMetricService().remove(poll);
         }
@@ -123,19 +137,19 @@ public class PollingMetrics extends Metrics{
     @Override
     public synchronized void setCDCStatus(CDCStatus cdcStatus) {
         if (cdcStatus == CDCStatus.ERROR) {
-            if (cdcStatusMap.containsKey(cdcDatabase)) {
-                cdcStatusMap.replace(cdcDatabase, CDCStatus.ERROR);
+            if (CDC_STATUS_MAP.containsKey(cdcDatabase)) {
+                CDC_STATUS_MAP.replace(cdcDatabase, CDCStatus.ERROR);
             } else {
-                cdcStatusMap.put(cdcDatabase, CDCStatus.ERROR);
+                CDC_STATUS_MAP.put(cdcDatabase, CDCStatus.ERROR);
                 setCDCDBStatusMetric();
             }
         } else {
-            if (cdcStatusMap.containsKey(cdcDatabase)) {
-                if (cdcStatusMap.get(cdcDatabase) != CDCStatus.ERROR) {
-                    cdcStatusMap.replace(cdcDatabase, CDCStatus.CONSUMING);
+            if (CDC_STATUS_MAP.containsKey(cdcDatabase)) {
+                if (CDC_STATUS_MAP.get(cdcDatabase) != CDCStatus.ERROR) {
+                    CDC_STATUS_MAP.replace(cdcDatabase, CDCStatus.CONSUMING);
                 }
             } else {
-                cdcStatusMap.put(cdcDatabase, CDCStatus.CONSUMING);
+                CDC_STATUS_MAP.put(cdcDatabase, CDCStatus.CONSUMING);
                 setCDCDBStatusMetric();
             }
         }
@@ -143,12 +157,12 @@ public class PollingMetrics extends Metrics{
 
     @Override
     public synchronized void setLastReceivedTime(long lastPublishedTime) {
-        if (cdcLastReceivedTimeMap.containsKey(cdcDatabase)) {
-            if (cdcLastReceivedTimeMap.get(cdcDatabase) < lastPublishedTime) {
-                cdcLastReceivedTimeMap.replace(cdcDatabase, lastPublishedTime);
+        if (CDC_LAST_RECEIVED_TIME_MAP.containsKey(cdcDatabase)) {
+            if (CDC_LAST_RECEIVED_TIME_MAP.get(cdcDatabase) < lastPublishedTime) {
+                CDC_LAST_RECEIVED_TIME_MAP.replace(cdcDatabase, lastPublishedTime);
             }
         } else {
-            cdcLastReceivedTimeMap.put(cdcDatabase, lastPublishedTime);
+            CDC_LAST_RECEIVED_TIME_MAP.put(cdcDatabase, lastPublishedTime);
             lastReceivedTimeMetric();
             setEventsInLastPollingMetric();
             idleTimeMetric();

@@ -115,10 +115,6 @@ public class DefaultPollingStrategy extends PollingStrategy {
                         lastReadPollingColumnValue = resultSet.getString(pollingColumn);
                         handleEvent(detailsMap);
                     }
-                    if (pollingMetrics != null) {
-                        pollingMetrics.setReceiveEventsPerPollingInterval(eventsPerPollingInterval);
-                    }
-//                    System.out.println("Events Per Polling: " + eventsPerPollingInterval);
                 } catch (SQLException ex) {
                     isError = true;
                     log.error(buildError("Error occurred while processing records in table %s.", tableName), ex);
@@ -126,7 +122,8 @@ public class DefaultPollingStrategy extends PollingStrategy {
                     CDCPollingUtil.cleanupConnection(resultSet, null, null);
                 }
                 try {
-                    if (pollingMetrics != null){
+                    if (pollingMetrics != null) {
+                        pollingMetrics.setReceiveEventsPerPollingInterval(eventsPerPollingInterval);
                         CDCStatus cdcStatus = isError ? CDCStatus.ERROR : CDCStatus.SUCCESS;
                         pollingMetrics.pollingDetailsMetric(eventsPerPollingInterval, startedTime,
                                 System.currentTimeMillis() - startedTime, cdcStatus);

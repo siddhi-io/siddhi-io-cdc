@@ -1,17 +1,37 @@
+/*
+ * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package io.siddhi.extension.io.cdc.source.metrics;
 
+import org.apache.log4j.Logger;
 import org.wso2.carbon.metrics.core.Counter;
 import org.wso2.carbon.metrics.core.Level;
 import org.wso2.carbon.si.metrics.core.internal.MetricsDataHolder;
 
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
-public class ListeningMetrics extends Metrics{
+/**
+ * Class which holds the metrics for cdc listening mode.
+ */
+public class ListeningMetrics extends Metrics {
 
+    private static final Logger log = Logger.getLogger(ListeningMetrics.class);
     private final String operationType;
     private boolean isLastReceivedTimeMetricsRegistered;
     private long lastReceivedTime;
@@ -19,36 +39,29 @@ public class ListeningMetrics extends Metrics{
     public ListeningMetrics(String siddhiAppName, String dbURL, String tableName, String operationType) {
         super(siddhiAppName, dbURL, tableName);
         this.operationType = operationType.substring(0, 1).toUpperCase(Locale.ENGLISH) + operationType.substring(1);
-        cdcStatusServiceStartedMap.putIfAbsent(siddhiAppName, false);
+        CDC_STATUS_SERVICE_STARTED_MAP.putIfAbsent(siddhiAppName, false);
     }
 
     @Override
-    public  void updateFileStatus(ExecutorService executorService, String siddhiAppName) {
-        if (!cdcStatusServiceStartedMap.get(siddhiAppName)) {
-            cdcStatusServiceStartedMap.replace(siddhiAppName, true);
+    public  void updateTableStatus(ExecutorService executorService, String siddhiAppName) {
+        if (!CDC_STATUS_SERVICE_STARTED_MAP.get(siddhiAppName)) {
+            CDC_STATUS_SERVICE_STARTED_MAP.replace(siddhiAppName, true);
             executorService.execute(() -> {
-                while (cdcStatusServiceStartedMap.get(siddhiAppName)) {
-                    if (!cdcStatusMap.isEmpty()) {
-                        cdcLastReceivedTimeMap.forEach((cdcDatabase, lastPublishedTime) -> {
+                while (CDC_STATUS_SERVICE_STARTED_MAP.get(siddhiAppName)) {
+                    if (!CDC_STATUS_MAP.isEmpty()) {
+                        CDC_LAST_RECEIVED_TIME_MAP.forEach((cdcDatabase, lastPublishedTime) -> {
                             if (cdcDatabase.siddhiAppName.equals(siddhiAppName)) {
                                 long idleTime = System.currentTimeMillis() - lastPublishedTime;
                                 if (idleTime / 1000 > 8) {
-                                    cdcStatusMap.replace(cdcDatabase, CDCStatus.IDLE);
+                                    CDC_STATUS_MAP.replace(cdcDatabase, CDCStatus.IDLE);
                                 }
                             }
                         });
                     }
-                    /*if (cdcStatusMap.isEmpty()) {
-                        continue;
-                    }
-                    cdcStatusMap.forEach((cdcDatabase, cdcStatus) ->
-                            System.out.println("DB:: " + cdcDatabase.cdcURL + ", " + cdcStatus + ",  ThreadID: " +
-                                    Thread.currentThread().getId()));*/
-                    // TODO: 4/20/20 Remove
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        log.error(siddhiAppName + ": Error while updating the tables status.");
                     }
                 }
             });
@@ -58,9 +71,9 @@ public class ListeningMetrics extends Metrics{
     @Override
     public Counter getEventCountMetric() {
         return MetricsDataHolder.getInstance().getMetricService()
-                .counter(String.format("io.siddhi.SiddhiApps.%s.Siddhi.Cdc.Source.Listening.event.count.%s.%s.%s.%s.%s",
-                        siddhiAppName, dbType, operationType, databaseName, tableName, getDatabaseURL()),
-                        Level.INFO);
+                .counter(String.format("io.siddhi.SiddhiApps.%s.Siddhi.Cdc.Source.Listening.event.count." +
+                                "%s.%s.%s.%s.%s.%s", siddhiAppName, dbType, host, operationType, databaseName,
+                        tableName, getDatabaseURL()), Level.INFO);
     }
 
     public Counter getTotalEventCounterMetric() {
@@ -75,8 +88,8 @@ public class ListeningMetrics extends Metrics{
                 .gauge(String.format("io.siddhi.SiddhiApps.%s.Siddhi.Cdc.Source.Listening.%s.%s",
                         siddhiAppName, "last_receive_time", getDatabaseURL()),
                         Level.INFO, () -> {
-                            if (cdcLastReceivedTimeMap.containsKey(cdcDatabase)) {
-                                return cdcLastReceivedTimeMap.get(cdcDatabase);
+                            if (CDC_LAST_RECEIVED_TIME_MAP.containsKey(cdcDatabase)) {
+                                return CDC_LAST_RECEIVED_TIME_MAP.get(cdcDatabase);
                             }
                             return 0L;
                         });
@@ -87,7 +100,11 @@ public class ListeningMetrics extends Metrics{
             MetricsDataHolder.getInstance().getMetricService()
                     .gauge(String.format("io.siddhi.SiddhiApps.%s.Siddhi.Cdc.Source.Listening.%s.%s.%s",
                             siddhiAppName, "last_receive_time_by_operation", operationType, getDatabaseURL()),
-                            Level.INFO, () -> lastReceivedTime);
+                            Level.INFO, () -> {
+                                synchronized (this) {
+                                    return lastReceivedTime;
+                                }
+                            });
             isLastReceivedTimeMetricsRegistered = true;
         }
     }
@@ -98,8 +115,9 @@ public class ListeningMetrics extends Metrics{
                 .gauge(String.format("io.siddhi.SiddhiApps.%s.Siddhi.Cdc.Source.Listening.%s.%s",
                         siddhiAppName, "idle_time", getDatabaseURL()),
                         Level.INFO, () -> {
-                            if (cdcLastReceivedTimeMap.containsKey(cdcDatabase)) {
-                                return (System.currentTimeMillis() - cdcLastReceivedTimeMap.get(cdcDatabase)) / 1000;
+                            if (CDC_LAST_RECEIVED_TIME_MAP.containsKey(cdcDatabase)) {
+                                return (System.currentTimeMillis() - CDC_LAST_RECEIVED_TIME_MAP.get(cdcDatabase))
+                                        / 1000;
                             }
                             return 0L;
                         });
@@ -111,8 +129,8 @@ public class ListeningMetrics extends Metrics{
                 .gauge(String.format("io.siddhi.SiddhiApps.%s.Siddhi.Cdc.Source.Listening.%s.%s",
                         siddhiAppName, "db_status", getDatabaseURL()),
                         Level.INFO, () -> {
-                            if (cdcStatusMap.containsKey(cdcDatabase)) {
-                                return cdcStatusMap.get(cdcDatabase).ordinal();
+                            if (CDC_STATUS_MAP.containsKey(cdcDatabase)) {
+                                return CDC_STATUS_MAP.get(cdcDatabase).ordinal();
                             }
                             return -1;
                         });
@@ -120,22 +138,11 @@ public class ListeningMetrics extends Metrics{
 
     @Override
     public synchronized void setCDCStatus(CDCStatus cdcStatus) {
-        if (cdcStatus == CDCStatus.ERROR) {
-            if (cdcStatusMap.containsKey(cdcDatabase)) {
-                cdcStatusMap.replace(cdcDatabase, CDCStatus.ERROR);
-            } else {
-                cdcStatusMap.put(cdcDatabase, CDCStatus.ERROR);
-                setCDCDBStatusMetric();
-            }
+        if (CDC_STATUS_MAP.containsKey(cdcDatabase)) {
+                CDC_STATUS_MAP.replace(cdcDatabase, cdcStatus);
         } else {
-            if (cdcStatusMap.containsKey(cdcDatabase)) {
-                if (cdcStatusMap.get(cdcDatabase) != CDCStatus.ERROR) {
-                    cdcStatusMap.replace(cdcDatabase, CDCStatus.CONSUMING);
-                }
-            } else {
-               cdcStatusMap.put(cdcDatabase, CDCStatus.CONSUMING);
-               setCDCDBStatusMetric();
-            }
+            CDC_STATUS_MAP.put(cdcDatabase, cdcStatus);
+            setCDCDBStatusMetric();
         }
     }
 
@@ -143,16 +150,15 @@ public class ListeningMetrics extends Metrics{
     public synchronized void setLastReceivedTime(long lastReceivedTime) {
         this.lastReceivedTime = lastReceivedTime;
         setLastReceivedTimeByOperationMetric();
-        if (cdcLastReceivedTimeMap.containsKey(cdcDatabase)) {
-            if (cdcLastReceivedTimeMap.get(cdcDatabase) < lastReceivedTime) {
-                cdcLastReceivedTimeMap.replace(cdcDatabase, lastReceivedTime);
+        if (CDC_LAST_RECEIVED_TIME_MAP.containsKey(cdcDatabase)) {
+            if (CDC_LAST_RECEIVED_TIME_MAP.get(cdcDatabase) < lastReceivedTime) {
+                CDC_LAST_RECEIVED_TIME_MAP.replace(cdcDatabase, lastReceivedTime);
             }
         } else {
-            cdcLastReceivedTimeMap.put(cdcDatabase, lastReceivedTime);
+            CDC_LAST_RECEIVED_TIME_MAP.put(cdcDatabase, lastReceivedTime);
             lastReceivedTimeMetric();
             idleTimeMetric();
         }
     }
-
 
 }

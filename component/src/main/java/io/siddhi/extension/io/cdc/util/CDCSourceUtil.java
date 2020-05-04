@@ -206,7 +206,7 @@ public class CDCSourceUtil {
 
             }
             if (metrics != null) {
-                metrics.setHost(host /*+ ":" + port*/);
+                metrics.setHost(host);
                 metrics.setDatabaseName(database);
                 metrics.getEventCountMetric().inc(0);
                 metrics.getTotalEventCounterMetric().inc(0);
