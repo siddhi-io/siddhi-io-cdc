@@ -34,6 +34,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -94,6 +95,85 @@ public class TestCaseOfCDCPollingMode {
         eventCount.set(0);
         eventArrived.set(false);
         currentEvent = new Event();
+    }
+
+    @Test
+    public void testCDCPollingModeCronSupport() throws InterruptedException {
+        log.info("----------------------------------------------------------------------------------------");
+        log.info("CDC TestCase: Polling mode with Cron Expression.");
+        log.info("----------------------------------------------------------------------------------------");
+        long[] time = new long[3];
+        String pollingTableName = "loginTable1";
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        int pollingInterval = 1;
+        String cdcinStreamDefinition = "@source(type = 'cdc', mode='polling'," +
+                " polling.column='" + pollingColumn + "'," +
+                " jdbc.driver.name='" + jdbcDriverName + "'," +
+                " url = '" + databaseURL + "'," +
+                " username = '" + username + "'," +
+                " password = '" + password + "'," +
+                " cron.expression = '*/5 * * * * ?'," +
+                " table.name = '" + pollingTableName + "', polling.interval = '" + pollingInterval + "'," +
+                " @map(type='keyvalue'))" +
+                " define stream istm (id string, name string);\n";
+
+        String rdbmsStoreDefinition = "define stream insertionStream (id string, name string);" +
+                "@Store(type='rdbms', jdbc.url='" + databaseURL + "'," +
+                " username='" + username + "', password='" + password + "' ," +
+                " jdbc.driver.name='" + jdbcDriverName + "')" +
+                " define table loginTable1 (id string, name string);";
+
+        String rdbmsQuery = "@info(name='query3') " +
+                "from insertionStream " +
+                "insert into loginTable1;";
+
+        QueryCallback rdbmsQueryCallback = new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                for (Event event : inEvents) {
+                    log.info("insert done: " + event);
+                }
+            }
+        };
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cdcinStreamDefinition +
+                rdbmsStoreDefinition + rdbmsQuery);
+        siddhiAppRuntime.addCallback("query3", rdbmsQueryCallback);
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("insertionStream");
+        Object[] insertingObject = new Object[]{"e007", "testEmployer"};
+        Object[] insertingObject1 = new Object[]{"e008", "testEmployer"};
+        StreamCallback insertionStreamCallback = new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                for (Event event : events) {
+                    int n = eventCount.getAndIncrement();
+                    log.info(eventCount + ". " + event + " at Time " + new Date(System.currentTimeMillis()));
+                    time[n] = System.currentTimeMillis();
+                    if (n == 0) {
+                        Assert.assertEquals(insertingObject, event.getData());
+                    } else if (n == 1) {
+                        Assert.assertEquals(insertingObject1, event.getData());
+                    } else {
+                        Assert.fail("More events received than expected.");
+                    }
+                }
+            }
+        };
+        siddhiAppRuntime.addCallback("istm", insertionStreamCallback);
+        siddhiAppRuntime.start();
+        Thread.sleep(5000);
+        inputHandler.send(insertingObject);
+        SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
+        inputHandler.send(insertingObject1);
+        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+        long val = time[1] - time[0];
+        log.info("Difference between " + time[1] + " and " + time[0] + " : " + val);
+        if (val < 4000) {
+            Assert.fail("Cron Time is not satisfied");
+        }
+        siddhiAppRuntime.shutdown();
     }
 
     /**

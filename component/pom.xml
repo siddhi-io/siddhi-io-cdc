@@ -568,7 +568,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            io.siddhi.extension.io.cdc.*,
+                            io.siddhi.extension.io.cdc.*;version="${project.version}"
                         </Export-Package>
                         <Private-Package>
                             com.github.shyiko.*,
@@ -585,6 +585,7 @@
                             io.siddhi.query.*;version="${siddhi.import.version.range}",
                             *;resolution:=optional
                         </Import-Package>
+                        <DynamicImport-Package>*</DynamicImport-Package>
                         <Include-Resource>
                             META-INF=target/classes/META-INF,
                             META-INF/services=${project.build.directory}/dependencies/connect-runtime/META-INF/services,
