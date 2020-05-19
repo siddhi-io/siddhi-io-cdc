@@ -241,7 +241,7 @@ import static org.quartz.CronExpression.isValidExpression;
                         name = "wait.on.missed.record",
                         description = "Indicates whether the process needs to wait on missing/out-of-order records. " +
                                 "\nWhen this flag is set to 'true' the process will be held once it identifies a " +
-                                "missing record. The missing recrod is identified by the sequence of the " +
+                                "missing record. The missing record is identified by the sequence of the " +
                                 "polling.column value. This can be used only with number fields and not recommended " +
                                 "to use with time values as it will not be sequential." +
                                 "\nThis should be enabled ONLY where the records can be written out-of-order, (eg. " +
@@ -261,9 +261,10 @@ import static org.quartz.CronExpression.isValidExpression;
                 ),
                 @Parameter(
                         name = "cron.expression",
-                        description = "This is used to specify a timestamp in cron expression. " +
-                                "The file or files in the given dir.uri or file.uri will be processed when the " +
-                                "given expression satisfied by the system time.",
+                        description = "This is used to specify a timestamp in cron expression." +
+                                "The records which has been inserted or updated is printed when the " +
+                                "given expression satisfied by the system time. This parameter is applicable only " +
+                                "when the mode is 'polling'.",
                         optional = true,
                         type = {DataType.STRING},
                         defaultValue = "None"
@@ -375,6 +376,7 @@ public class CDCSource extends Source<CDCSource.CdcState> {
     private CDCPoller cdcPoller;
     private String cronExpression = null;
     private CronConfiguration cronConfiguration;
+    private boolean waitOnMissedRecord;
 
     @Override
     protected ServiceDeploymentInfo exposeServiceDeploymentInfo() {
@@ -465,10 +467,9 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                 } else {
                     cronExpression = null;
                 }
-                validatePollingModeParameters();
                 String poolPropertyString = optionHolder.validateAndGetStaticValue(CDCSourceConstants.POOL_PROPERTIES,
                         null);
-                boolean waitOnMissedRecord = Boolean.parseBoolean(
+                waitOnMissedRecord = Boolean.parseBoolean(
                         optionHolder.validateAndGetStaticValue(CDCSourceConstants.WAIT_ON_MISSED_RECORD, "false"));
                 int missedRecordWaitingTimeout = Integer.parseInt(
                         optionHolder.validateAndGetStaticValue(
@@ -503,6 +504,7 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                             sourceEventListener, configReader, waitOnMissedRecord, missedRecordWaitingTimeout,
                             siddhiAppName, cronConfiguration);
                 }
+                validatePollingModeParameters();
                 break;
             default:
                 throw new SiddhiAppValidationException("Unsupported " + CDCSourceConstants.MODE + ": " + mode);
@@ -654,6 +656,11 @@ public class CDCSource extends Source<CDCSource.CdcState> {
         } else if (!historyFileDirectory.endsWith(File.separator)) {
             historyFileDirectory = historyFileDirectory + File.separator;
         }
+
+        if (optionHolder.isOptionExists(CDCSourceConstants.CRON_EXPRESSION)) {
+            throw new SiddhiAppCreationException("Parameter: " + CDCSourceConstants.CRON_EXPRESSION + " should" +
+                    " not be defined for listening mode");
+        }
     }
 
     /**
@@ -663,6 +670,10 @@ public class CDCSource extends Source<CDCSource.CdcState> {
         if (pollingInterval < 0) {
             throw new SiddhiAppValidationException(CDCSourceConstants.POLLING_INTERVAL + " should be a " +
                     "non negative integer. Current mode: " + CDCSourceConstants.MODE_POLLING);
+        }
+        if (waitOnMissedRecord && cronExpression != null) {
+            throw new SiddhiAppCreationException("If waitOnMissedRecord is true then " +
+                    CDCSourceConstants.CRON_EXPRESSION + " must be null. ");
         }
         cronConfiguration.setCronExpression(cronExpression);
     }

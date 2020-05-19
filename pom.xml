@@ -16,7 +16,8 @@
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.wso2</groupId>
         <artifactId>wso2</artifactId>
@@ -192,6 +193,11 @@
                 <artifactId>connect-api</artifactId>
                 <version>${kafka.connect.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>${org.snake.yaml.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
@@ -264,6 +270,7 @@
         <kafka.connect.version>2.3.0</kafka.connect.version>
         <mongodb.connector.version>3.4.0</mongodb.connector.version>
         <json.version>20190722</json.version>
+        <org.snake.yaml.version>1.23</org.snake.yaml.version>
     </properties>
     <scm>
         <url>https://github.com/siddhi-io/siddhi-io-cdc.git</url>

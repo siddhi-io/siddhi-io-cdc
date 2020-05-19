@@ -22,6 +22,7 @@ import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.exception.CannotRestoreSiddhiAppStateException;
+import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.stream.output.StreamCallback;
@@ -173,6 +174,46 @@ public class TestCaseOfCDCPollingMode {
         if (val < 4000) {
             Assert.fail("Cron Time is not satisfied");
         }
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void testCronSupportWithWaitOnMissedRecord() throws InterruptedException {
+        log.info("----------------------------------------------------------------------------------------");
+        log.info("CDC TestCase: Polling mode with Cron Expression and WaitOnMissedRecord.");
+        log.info("----------------------------------------------------------------------------------------");
+        String pollingTableName = "loginTable1";
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        int pollingInterval = 1;
+        String cdcinStreamDefinition = "@source(type = 'cdc', mode='polling'," +
+                " polling.column='" + pollingColumn + "'," +
+                " jdbc.driver.name='" + jdbcDriverName + "'," +
+                " url = '" + databaseURL + "'," +
+                " username = '" + username + "'," +
+                " password = '" + password + "'," +
+                " cron.expression = '*/5 * * * * ?'," +
+                " wait.on.missed.record = 'true'," +
+                " missed.record.waiting.timeout = '10'," +
+                " table.name = '" + pollingTableName + "', polling.interval = '" + pollingInterval + "'," +
+                " @map(type='keyvalue'))" +
+                " define stream istm (id string, name string);\n";
+
+        String rdbmsStoreDefinition = "define stream insertionStream (id string, name string);" +
+                "@Store(type='rdbms', jdbc.url='" + databaseURL + "'," +
+                " username='" + username + "', password='" + password + "' ," +
+                " jdbc.driver.name='" + jdbcDriverName + "')" +
+                " define table loginTable1 (id string, name string);";
+
+        String rdbmsQuery = "@info(name='query3') " +
+                "from insertionStream " +
+                "insert into loginTable1;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cdcinStreamDefinition +
+                rdbmsStoreDefinition + rdbmsQuery);
+        siddhiAppRuntime.start();
+        Thread.sleep(5000);
+        SiddhiTestHelper.waitForEvents(waitTime, 0, eventCount, timeout);
         siddhiAppRuntime.shutdown();
     }
 

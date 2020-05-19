@@ -94,9 +94,9 @@ public class CDCSourceConstants {
 
     // Constants for Cron Support
     public static final String CRON_EXPRESSION = "cron.expression";
-    public static final String JOB_GROUP = "JobGroup";
-    public static final String JOB_NAME = "JobName";
-    public static final String TRIGGER_NAME = "TriggerName";
-    public static final String TRIGGER_GROUP = "TriggerGroup";
+    public static final String JOB_GROUP = "CDCPollingGroup";
+    public static final String JOB_NAME = "CDCPollingJobName";
+    public static final String TRIGGER_NAME = "CDCCronTriggerName";
+    public static final String TRIGGER_GROUP = "CDCCronTriggerGroup";
     public static final String POLLING_STRATEGY = "PollingStrategy";
 }
