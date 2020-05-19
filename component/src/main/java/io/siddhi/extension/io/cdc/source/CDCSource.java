@@ -390,7 +390,14 @@ public class CDCSource extends Source<CDCSource.CdcState> {
         String tableName = optionHolder.validateAndGetOption(CDCSourceConstants.TABLE_NAME).getValue();
         siddhiAppName = siddhiAppContext.getName();
         this.siddhiAppContextExecutorService = siddhiAppContext.getExecutorService();
-
+        boolean isPrometheusReporterRunning = false;
+        if (MetricsDataHolder.getInstance().getMetricService() != null &&
+                MetricsDataHolder.getInstance().getMetricManagementService().isEnabled()) {
+            if (MetricsDataHolder.getInstance().getMetricManagementService().isReporterRunning(
+                    "prometheus")) {
+                isPrometheusReporterRunning = true;
+            }
+        }
         switch (mode) {
             case CDCSourceConstants.MODE_LISTENING:
                 String url = optionHolder.validateAndGetOption(CDCSourceConstants.DATABASE_CONNECTION_URL).getValue();
@@ -423,7 +430,9 @@ public class CDCSource extends Source<CDCSource.CdcState> {
 
                 if (MetricsDataHolder.getInstance().getMetricService() != null &&
                         MetricsDataHolder.getInstance().getMetricManagementService().isEnabled()) {
-                    metrics = new ListeningMetrics(siddhiAppName, url, tableName, operation);
+                    if (isPrometheusReporterRunning) {
+                        metrics = new ListeningMetrics(siddhiAppName, url, tableName, operation);
+                    }
                 }
                 //send sourceEventListener and preferred operation to changeDataCapture object
                 if (url.toLowerCase(Locale.ENGLISH).contains("jdbc:mongodb")) {
@@ -472,8 +481,7 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                                 CDCSourceConstants.MISSED_RECORD_WAITING_TIMEOUT, "-1"));
                 if (isDatasourceNameAvailable) {
                     String datasourceName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.DATASOURCE_NAME);
-                    if (MetricsDataHolder.getInstance().getMetricService() != null &&
-                            MetricsDataHolder.getInstance().getMetricManagementService().isEnabled()) {
+                    if (isPrometheusReporterRunning) {
                         metrics = new PollingMetrics(siddhiAppName, datasourceName, tableName);
                     }
                     cdcPoller = new CDCPoller(null, null, null, tableName, null,
@@ -483,8 +491,7 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                             siddhiAppContext.getExecutorService());
                 } else if (isJndiResourceAvailable) {
                     String jndiResource = optionHolder.validateAndGetStaticValue(CDCSourceConstants.JNDI_RESOURCE);
-                    if (MetricsDataHolder.getInstance().getMetricService() != null &&
-                            MetricsDataHolder.getInstance().getMetricManagementService().isEnabled()) {
+                    if (isPrometheusReporterRunning) {
                         metrics = new PollingMetrics(siddhiAppName, jndiResource, tableName);
                     }
                     cdcPoller = new CDCPoller(null, null, null, tableName, null,
@@ -498,8 +505,7 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                         url = optionHolder.validateAndGetOption(CDCSourceConstants.DATABASE_CONNECTION_URL).getValue();
                         username = optionHolder.validateAndGetOption(CDCSourceConstants.USERNAME).getValue();
                         password = optionHolder.validateAndGetOption(CDCSourceConstants.PASSWORD).getValue();
-                        if (MetricsDataHolder.getInstance().getMetricService() != null &&
-                                MetricsDataHolder.getInstance().getMetricManagementService().isEnabled()) {
+                        if (isPrometheusReporterRunning) {
                             metrics = new PollingMetrics(siddhiAppName, url, tableName);
                         }
                     } catch (SiddhiAppValidationException ex) {
