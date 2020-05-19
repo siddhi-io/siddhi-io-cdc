@@ -71,8 +71,9 @@ public class PollingMetrics extends Metrics {
     @Override
     public Counter getEventCountMetric() {
         return MetricsDataHolder.getInstance().getMetricService()
-                .counter(String.format("io.siddhi.SiddhiApps.%s.Siddhi.Cdc.Source.Polling.event.count.%s.%s.%s.%s.%s",
-                        siddhiAppName, dbType, host, databaseName, tableName, getDatabaseURL()), Level.INFO);
+                .counter(String.format("io.siddhi.SiddhiApps.%s.Siddhi.Cdc.Source.Polling.event.count.%s.%s.host." +
+                                "%s.%s.%s", siddhiAppName, dbType, host, databaseName, tableName, getDatabaseURL()),
+                        Level.INFO);
     }
 
     @Override

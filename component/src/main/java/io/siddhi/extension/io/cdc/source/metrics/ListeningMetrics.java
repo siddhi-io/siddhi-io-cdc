@@ -49,9 +49,9 @@ public class ListeningMetrics extends Metrics {
             executorService.execute(() -> {
                 while (CDC_STATUS_SERVICE_STARTED_MAP.get(siddhiAppName)) {
                     if (!CDC_STATUS_MAP.isEmpty()) {
-                        CDC_LAST_RECEIVED_TIME_MAP.forEach((cdcDatabase, lastPublishedTime) -> {
+                        CDC_LAST_RECEIVED_TIME_MAP.forEach((cdcDatabase, lastReceiveTime) -> {
                             if (cdcDatabase.siddhiAppName.equals(siddhiAppName)) {
-                                long idleTime = System.currentTimeMillis() - lastPublishedTime;
+                                long idleTime = System.currentTimeMillis() - lastReceiveTime;
                                 if (idleTime / 1000 > 8) {
                                     CDC_STATUS_MAP.replace(cdcDatabase, CDCStatus.IDLE);
                                 }
@@ -72,7 +72,7 @@ public class ListeningMetrics extends Metrics {
     public Counter getEventCountMetric() {
         return MetricsDataHolder.getInstance().getMetricService()
                 .counter(String.format("io.siddhi.SiddhiApps.%s.Siddhi.Cdc.Source.Listening.event.count." +
-                                "%s.%s.%s.%s.%s.%s", siddhiAppName, dbType, host, operationType, databaseName,
+                                "%s.%s.host.%s.%s.%s.%s", siddhiAppName, dbType, host, operationType, databaseName,
                         tableName, getDatabaseURL()), Level.INFO);
     }
 
