@@ -170,6 +170,11 @@ public class PollingMetrics extends Metrics {
         }
     }
 
+    @Override
+    protected String getDatabaseURL() {
+            return host + "/" + tableName;
+    }
+
     public void setReceiveEventsPerPollingInterval(int receiveEventsPerPollingInterval) {
         this.receiveEventsPerPollingInterval = receiveEventsPerPollingInterval;
     }

@@ -24,6 +24,7 @@ import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.extension.io.cdc.source.config.Database;
 import io.siddhi.extension.io.cdc.source.config.QueryConfiguration;
 import io.siddhi.extension.io.cdc.source.metrics.CDCStatus;
+import io.siddhi.extension.io.cdc.source.metrics.MetricsUtils;
 import io.siddhi.extension.io.cdc.source.metrics.PollingMetrics;
 import io.siddhi.extension.io.cdc.source.polling.CDCPollingModeException;
 import io.siddhi.extension.io.cdc.util.CDCPollingUtil;
@@ -106,7 +107,7 @@ public abstract class PollingStrategy {
         try {
             conn = this.dataSource.getConnection();
             if (pollingMetrics != null) {
-                pollingMetrics.setHost(conn.getMetaData().getUserName());
+                pollingMetrics.setHost(MetricsUtils.getShortenJDBCURL(conn.getMetaData().getURL()));
                 pollingMetrics.setDbType(conn.getMetaData().getDatabaseProductName());
                 pollingMetrics.setDatabaseName(conn.getCatalog());
                 pollingMetrics.getEventCountMetric().inc(0);
