@@ -70,6 +70,12 @@ public abstract class Metrics {
         return dbType + ":" + host + "/" + databaseName + "/" + tableName;
     }
 
+    public Counter getTotalReadsMetrics() { //to count the total reads from siddhi app level.
+        return MetricsDataHolder.getInstance().getMetricService()
+                .counter(String.format("io.siddhi.SiddhiApps.%s.Siddhi.Total.Reads.%s", siddhiAppName, "cdc"),
+                        Level.INFO);
+    }
+
     public void setHost(String host) {
         this.host = host;
     }
@@ -113,4 +119,4 @@ public abstract class Metrics {
         }
     }
 }
-// TODO: 5/4/20 Test on K8
+

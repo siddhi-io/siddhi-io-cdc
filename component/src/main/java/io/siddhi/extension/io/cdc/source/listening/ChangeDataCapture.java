@@ -23,12 +23,12 @@ import io.debezium.embedded.EmbeddedEngine;
 import io.debezium.embedded.spi.OffsetCommitPolicy;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.stream.input.source.SourceEventListener;
+import io.siddhi.core.stream.input.source.SourceMapper;
 import io.siddhi.extension.io.cdc.source.metrics.CDCStatus;
 import io.siddhi.extension.io.cdc.source.metrics.ListeningMetrics;
 import org.apache.kafka.connect.connector.ConnectRecord;
 
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -43,14 +43,12 @@ public abstract class ChangeDataCapture {
     private Condition condition = lock.newCondition();
     private boolean paused = false;
     private final ListeningMetrics metrics;
-    private final ExecutorService executorService;
+    private long previousEventCount;
 
-    public ChangeDataCapture(String operation, SourceEventListener sourceEventListener, ListeningMetrics metrics,
-                             ExecutorService executorService) {
+    public ChangeDataCapture(String operation, SourceEventListener sourceEventListener, ListeningMetrics metrics) {
         this.operation = operation;
         this.sourceEventListener = sourceEventListener;
         this.metrics = metrics;
-        this.executorService = executorService;
     }
 
     /**
@@ -77,7 +75,9 @@ public abstract class ChangeDataCapture {
                 .using(completionCallback)
                 .using(config);
         if (builder == null) {
-            metrics.setCDCStatus(CDCStatus.ERROR);
+            if (metrics != null) {
+                metrics.setCDCStatus(CDCStatus.ERROR);
+            }
             throw new SiddhiAppRuntimeException("CDC Engine create failed. Check parameters.");
         } else {
             EmbeddedEngine engine = builder.notifying(this::handleEvent).build();
@@ -119,14 +119,16 @@ public abstract class ChangeDataCapture {
         }
         detailsMap = createMap(connectRecord, operation);
         if (!detailsMap.isEmpty()) {
+            previousEventCount = ((SourceMapper) sourceEventListener).getEventCount();
             sourceEventListener.onEvent(detailsMap, null);
             if (metrics != null) {
-                executorService.execute(() -> {
-                    metrics.getEventCountMetric().inc();
-                    metrics.getTotalEventCounterMetric().inc();
-                    metrics.setCDCStatus(CDCStatus.CONSUMING);
-                    metrics.setLastReceivedTime(System.currentTimeMillis());
-                });
+                metrics.getTotalReadsMetrics().inc();
+                metrics.getEventCountMetric().inc();
+                metrics.getTotalEventCounterMetric().inc();
+                long eventCount = ((SourceMapper) sourceEventListener).getEventCount() - previousEventCount;
+                metrics.getValidEventCountMetric().inc(eventCount);
+                metrics.setCDCStatus(CDCStatus.CONSUMING);
+                metrics.setLastReceivedTime(System.currentTimeMillis());
             }
         }
     }

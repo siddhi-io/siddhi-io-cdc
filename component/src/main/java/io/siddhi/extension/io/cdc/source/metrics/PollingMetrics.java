@@ -76,6 +76,18 @@ public class PollingMetrics extends Metrics {
                         Level.INFO);
     }
 
+    public Counter getValidEventCountMetric() {
+        return MetricsDataHolder.getInstance().getMetricService().counter(
+                String.format("io.siddhi.SiddhiApps.%s.Siddhi.Cdc.Source.Polling.%s.%s",
+                        siddhiAppName, "total_valid_events_count",  getDatabaseURL()), Level.INFO);
+    }
+
+    private Counter getTotalErrorCountMetric() {
+        return MetricsDataHolder.getInstance().getMetricService().counter(
+                String.format("io.siddhi.SiddhiApps.%s.Siddhi.Cdc.Source.Polling.%s.%s",
+                        siddhiAppName, "total_error_count",  getDatabaseURL()), Level.INFO);
+    }
+
     @Override
     protected void lastReceivedTimeMetric() {
         MetricsDataHolder.getInstance().getMetricService()
@@ -138,21 +150,13 @@ public class PollingMetrics extends Metrics {
     @Override
     public synchronized void setCDCStatus(CDCStatus cdcStatus) {
         if (cdcStatus == CDCStatus.ERROR) {
-            if (CDC_STATUS_MAP.containsKey(cdcDatabase)) {
-                CDC_STATUS_MAP.replace(cdcDatabase, CDCStatus.ERROR);
-            } else {
-                CDC_STATUS_MAP.put(cdcDatabase, CDCStatus.ERROR);
-                setCDCDBStatusMetric();
-            }
+            getTotalErrorCountMetric().inc();
+        }
+        if (CDC_STATUS_MAP.containsKey(cdcDatabase)) {
+            CDC_STATUS_MAP.replace(cdcDatabase, cdcStatus);
         } else {
-            if (CDC_STATUS_MAP.containsKey(cdcDatabase)) {
-                if (CDC_STATUS_MAP.get(cdcDatabase) != CDCStatus.ERROR) {
-                    CDC_STATUS_MAP.replace(cdcDatabase, CDCStatus.CONSUMING);
-                }
-            } else {
-                CDC_STATUS_MAP.put(cdcDatabase, CDCStatus.CONSUMING);
-                setCDCDBStatusMetric();
-            }
+            CDC_STATUS_MAP.put(cdcDatabase, cdcStatus);
+            setCDCDBStatusMetric();
         }
     }
 
@@ -167,6 +171,7 @@ public class PollingMetrics extends Metrics {
             lastReceivedTimeMetric();
             setEventsInLastPollingMetric();
             idleTimeMetric();
+            getTotalErrorCountMetric();
         }
     }
 

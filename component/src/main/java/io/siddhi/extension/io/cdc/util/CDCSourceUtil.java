@@ -208,8 +208,10 @@ public class CDCSourceUtil {
             if (metrics != null) {
                 metrics.setHost(host);
                 metrics.setDatabaseName(database);
-                metrics.getEventCountMetric().inc(0);
-                metrics.getTotalEventCounterMetric().inc(0);
+                metrics.getTotalReadsMetrics();
+                metrics.getEventCountMetric();
+                metrics.getTotalEventCounterMetric();
+                metrics.getValidEventCountMetric();
             }
 
             //Add general config details to configMap

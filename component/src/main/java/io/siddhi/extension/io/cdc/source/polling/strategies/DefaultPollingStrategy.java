@@ -35,7 +35,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 
 /**
  * Default implementation of the polling strategy. This uses {@code pollingColumn} and {@code pollingInterval} to poll
@@ -50,9 +49,8 @@ public class DefaultPollingStrategy extends PollingStrategy {
 
     public DefaultPollingStrategy(HikariDataSource dataSource, ConfigReader configReader,
                                   SourceEventListener sourceEventListener, String tableName, String pollingColumn,
-                                  int pollingInterval, String appName, PollingMetrics pollingMetrics,
-                                  ExecutorService executorService) {
-        super(dataSource, configReader, sourceEventListener, tableName, appName, pollingMetrics, executorService);
+                                  int pollingInterval, String appName, PollingMetrics pollingMetrics) {
+        super(dataSource, configReader, sourceEventListener, tableName, appName, pollingMetrics);
         this.pollingColumn = pollingColumn;
         this.pollingInterval = pollingInterval;
     }
@@ -116,25 +114,31 @@ public class DefaultPollingStrategy extends PollingStrategy {
                         handleEvent(detailsMap);
                     }
                 } catch (SQLException ex) {
-                    isError = true;
+                    if (metrics != null) {
+                        isError = true;
+                        metrics.setCDCStatus(CDCStatus.ERROR);
+                    }
                     log.error(buildError("Error occurred while processing records in table %s.", tableName), ex);
                 } finally {
                     CDCPollingUtil.cleanupConnection(resultSet, null, null);
                 }
                 try {
-                    if (pollingMetrics != null) {
-                        pollingMetrics.setReceiveEventsPerPollingInterval(eventsPerPollingInterval);
+                    if (metrics != null) {
+                        metrics.setReceiveEventsPerPollingInterval(eventsPerPollingInterval);
                         CDCStatus cdcStatus = isError ? CDCStatus.ERROR : CDCStatus.SUCCESS;
-                        pollingMetrics.pollingDetailsMetric(eventsPerPollingInterval, startedTime,
+                        metrics.pollingDetailsMetric(eventsPerPollingInterval, startedTime,
                                 System.currentTimeMillis() - startedTime, cdcStatus);
                     }
                     Thread.sleep((long) pollingInterval * 1000);
                 } catch (InterruptedException e) {
+                    if (metrics != null) {
+                        metrics.setCDCStatus(CDCStatus.ERROR);
+                    }
                     log.error(buildError("Error while polling the table %s.", tableName), e);
                 }
             }
         } catch (SQLException ex) {
-            pollingMetrics.setCDCStatus(CDCStatus.ERROR);
+            metrics.setCDCStatus(CDCStatus.ERROR);
             throw new CDCPollingModeException(buildError("Error in polling for changes on %s.", tableName), ex);
         } finally {
             CDCPollingUtil.cleanupConnection(resultSet, statement, connection);

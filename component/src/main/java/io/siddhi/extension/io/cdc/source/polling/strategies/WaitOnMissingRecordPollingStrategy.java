@@ -35,7 +35,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 
 /**
  * Polling strategy implementation to wait-on-missing records. If the polling strategy identifies a missed record in
@@ -54,9 +53,8 @@ public class WaitOnMissingRecordPollingStrategy extends PollingStrategy {
     public WaitOnMissingRecordPollingStrategy(HikariDataSource dataSource, ConfigReader configReader,
                                               SourceEventListener sourceEventListener, String tableName,
                                               String pollingColumn, int pollingInterval, int waitTimeout,
-                                              String appName, PollingMetrics pollingMetrics,
-                                              ExecutorService executorService) {
-        super(dataSource, configReader, sourceEventListener, tableName, appName, pollingMetrics, executorService);
+                                              String appName, PollingMetrics pollingMetrics) {
+        super(dataSource, configReader, sourceEventListener, tableName, appName, pollingMetrics);
         this.pollingColumn = pollingColumn;
         this.pollingInterval = pollingInterval;
         this.waitTimeout = waitTimeout;
@@ -153,20 +151,26 @@ public class WaitOnMissingRecordPollingStrategy extends PollingStrategy {
                         handleEvent(detailsMap);
                     }
                 } catch (SQLException e) {
-                    isError = true;
+                    if (metrics != null) {
+                        isError = true;
+                        metrics.setCDCStatus(CDCStatus.ERROR);
+                    }
                     log.error(buildError("Error occurred while processing records in table %s.", tableName), e);
                 } finally {
                     CDCPollingUtil.cleanupConnection(resultSet, null, null);
                 }
                 try {
-                    if (pollingMetrics != null) {
-                        pollingMetrics.setReceiveEventsPerPollingInterval(eventsPerPollingInterval);
+                    if (metrics != null) {
+                        metrics.setReceiveEventsPerPollingInterval(eventsPerPollingInterval);
                         CDCStatus cdcStatus = isError ? CDCStatus.ERROR : CDCStatus.SUCCESS;
-                        pollingMetrics.pollingDetailsMetric(eventsPerPollingInterval, startedTime,
+                        metrics.pollingDetailsMetric(eventsPerPollingInterval, startedTime,
                                 System.currentTimeMillis() - startedTime, cdcStatus);
                     }
                     Thread.sleep((long) pollingInterval * 1000);
                 } catch (InterruptedException e) {
+                    if (metrics != null) {
+                        metrics.setCDCStatus(CDCStatus.ERROR);
+                    }
                     log.error(buildError("Error while polling the table %s.", tableName), e);
                 }
             }

@@ -69,17 +69,29 @@ public class ListeningMetrics extends Metrics {
     }
 
     @Override
-    public Counter getEventCountMetric() {
+    public Counter getEventCountMetric() { //counts events per operation.
         return MetricsDataHolder.getInstance().getMetricService()
                 .counter(String.format("io.siddhi.SiddhiApps.%s.Siddhi.Cdc.Source.Listening.event.count." +
                                 "%s.%s.host.%s.%s.%s.%s", siddhiAppName, dbType, host, operationType, databaseName,
                         tableName, getDatabaseURL()), Level.INFO);
     }
 
-    public Counter getTotalEventCounterMetric() {
+    public Counter getTotalEventCounterMetric() { //count events per table.
         return MetricsDataHolder.getInstance().getMetricService()
                 .counter(String.format("io.siddhi.SiddhiApps.%s.Siddhi.Cdc.Source.Listening.events.per.table.%s.%s",
                         siddhiAppName, tableName, getDatabaseURL()), Level.INFO);
+    }
+
+    public Counter getValidEventCountMetric() {
+        return MetricsDataHolder.getInstance().getMetricService().counter(
+                String.format("io.siddhi.SiddhiApps.%s.Siddhi.Cdc.Source.Listening.%s.%s",
+                        siddhiAppName, "total_valid_events_count",  getDatabaseURL()), Level.INFO);
+    }
+
+    private Counter getTotalErrorCountMetric() {
+        return MetricsDataHolder.getInstance().getMetricService().counter(
+                String.format("io.siddhi.SiddhiApps.%s.Siddhi.Cdc.Source.Listening.%s.%s",
+                        siddhiAppName, "total_error_count",  getDatabaseURL()), Level.INFO);
     }
 
     @Override
@@ -138,6 +150,9 @@ public class ListeningMetrics extends Metrics {
 
     @Override
     public synchronized void setCDCStatus(CDCStatus cdcStatus) {
+        if (cdcStatus == CDCStatus.ERROR) {
+            getTotalErrorCountMetric().inc();
+        }
         if (CDC_STATUS_MAP.containsKey(cdcDatabase)) {
                 CDC_STATUS_MAP.replace(cdcDatabase, cdcStatus);
         } else {
@@ -158,6 +173,7 @@ public class ListeningMetrics extends Metrics {
             CDC_LAST_RECEIVED_TIME_MAP.put(cdcDatabase, lastReceivedTime);
             lastReceivedTimeMetric();
             idleTimeMetric();
+            getTotalErrorCountMetric();
         }
     }
 

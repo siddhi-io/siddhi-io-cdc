@@ -20,6 +20,7 @@ package io.siddhi.extension.io.cdc.source.polling.strategies;
 
 import com.zaxxer.hikari.HikariDataSource;
 import io.siddhi.core.stream.input.source.SourceEventListener;
+import io.siddhi.core.stream.input.source.SourceMapper;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.extension.io.cdc.source.config.Database;
 import io.siddhi.extension.io.cdc.source.config.QueryConfiguration;
@@ -40,7 +41,6 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -66,20 +66,18 @@ public abstract class PollingStrategy {
     protected ReentrantLock pauseLock = new ReentrantLock();
     protected Condition pauseLockCondition = pauseLock.newCondition();
     protected String tableName;
-    protected PollingMetrics pollingMetrics;
-    protected ExecutorService executorService;
+    protected PollingMetrics metrics;
 
     public PollingStrategy(HikariDataSource dataSource, ConfigReader configReader,
                            SourceEventListener sourceEventListener, String tableName, String appName,
-                           PollingMetrics pollingMetrics, ExecutorService executorService) {
+                           PollingMetrics metrics) {
         this.dataSource = dataSource;
         this.configReader = configReader;
         this.sourceEventListener = sourceEventListener;
         this.tableName = tableName;
         this.appName = appName;
         this.streamName = sourceEventListener.getStreamDefinition().getId();
-        this.pollingMetrics = pollingMetrics;
-        this.executorService = executorService;
+        this.metrics = metrics;
     }
 
     public abstract void poll();
@@ -106,14 +104,19 @@ public abstract class PollingStrategy {
         Connection conn;
         try {
             conn = this.dataSource.getConnection();
-            if (pollingMetrics != null) {
-                pollingMetrics.setHost(MetricsUtils.getShortenJDBCURL(conn.getMetaData().getURL()));
-                pollingMetrics.setDbType(conn.getMetaData().getDatabaseProductName());
-                pollingMetrics.setDatabaseName(conn.getCatalog());
-                pollingMetrics.getEventCountMetric().inc(0);
+            if (metrics != null) {
+                metrics.setHost(MetricsUtils.getShortenJDBCURL(conn.getMetaData().getURL()));
+                metrics.setDbType(conn.getMetaData().getDatabaseProductName());
+                metrics.setDatabaseName(conn.getCatalog());
+                metrics.getTotalReadsMetrics();
+                metrics.getEventCountMetric();
+                metrics.getValidEventCountMetric();
             }
             log.debug("A connection is initialized.");
         } catch (SQLException e) {
+            if (metrics != null) {
+                metrics.setCDCStatus(CDCStatus.ERROR);
+            }
             throw new CDCPollingModeException(buildError("Error initializing datasource connection."), e);
         }
         return conn;
@@ -130,6 +133,9 @@ public abstract class PollingStrategy {
                 DatabaseMetaData dmd = conn.getMetaData();
                 databaseName = dmd.getDatabaseProductName();
             } catch (SQLException e) {
+                if (metrics != null) {
+                    metrics.setCDCStatus(CDCStatus.ERROR);
+                }
                 throw new CDCPollingModeException(buildError("Error in looking up database type."), e);
             } finally {
                 CDCPollingUtil.cleanupConnection(null, null, conn);
@@ -160,6 +166,9 @@ public abstract class PollingStrategy {
                         try {
                             inputStream.close();
                         } catch (IOException e) {
+                            if (metrics != null) {
+                                metrics.setCDCStatus(CDCStatus.ERROR);
+                            }
                             log.error(buildError("Failed to close the input stream for %s.", SELECT_QUERY_CONFIG_FILE));
                         }
                     }
@@ -177,6 +186,9 @@ public abstract class PollingStrategy {
             }
 
             if (selectQueryStructure.isEmpty()) {
+                if (metrics != null) {
+                    metrics.setCDCStatus(CDCStatus.ERROR);
+                }
                 throw new CDCPollingModeException(buildError("Unsupported database: %s. Configure system " +
                                 "parameter: %s.%s.", databaseName, databaseName, RECORD_SELECT_QUERY));
             }
@@ -190,13 +202,15 @@ public abstract class PollingStrategy {
     }
 
     protected void handleEvent(Map detailsMap) {
+        long previousEventCount = ((SourceMapper) sourceEventListener).getEventCount();
         sourceEventListener.onEvent(detailsMap, null);
-        if (pollingMetrics != null) {
-            executorService.execute(() -> {
-                pollingMetrics.getEventCountMetric().inc();
-                pollingMetrics.setCDCStatus(CDCStatus.CONSUMING);
-                pollingMetrics.setLastReceivedTime(System.currentTimeMillis());
-            });
+        if (metrics != null) {
+            metrics.getTotalReadsMetrics().inc();
+            metrics.getEventCountMetric().inc();
+            long eventCount = ((SourceMapper) sourceEventListener).getEventCount() - previousEventCount;
+            metrics.getValidEventCountMetric().inc(eventCount);
+            metrics.setCDCStatus(CDCStatus.CONSUMING);
+            metrics.setLastReceivedTime(System.currentTimeMillis());
         }
     }
 

@@ -39,6 +39,7 @@ import io.siddhi.extension.io.cdc.source.listening.ChangeDataCapture;
 import io.siddhi.extension.io.cdc.source.listening.MongoChangeDataCapture;
 import io.siddhi.extension.io.cdc.source.listening.RdbmsChangeDataCapture;
 import io.siddhi.extension.io.cdc.source.listening.WrongConfigurationException;
+import io.siddhi.extension.io.cdc.source.metrics.CDCStatus;
 import io.siddhi.extension.io.cdc.source.metrics.ListeningMetrics;
 import io.siddhi.extension.io.cdc.source.metrics.Metrics;
 import io.siddhi.extension.io.cdc.source.metrics.PollingMetrics;
@@ -437,10 +438,10 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                 //send sourceEventListener and preferred operation to changeDataCapture object
                 if (url.toLowerCase(Locale.ENGLISH).contains("jdbc:mongodb")) {
                     changeDataCapture = new MongoChangeDataCapture(operation, sourceEventListener,
-                            (ListeningMetrics) metrics, siddhiAppContextExecutorService);
+                            (ListeningMetrics) metrics);
                 } else {
                     changeDataCapture = new RdbmsChangeDataCapture(operation, sourceEventListener,
-                            (ListeningMetrics) metrics, siddhiAppContextExecutorService);
+                            (ListeningMetrics) metrics);
                 }
 
                 //create the folder for history file if not exists
@@ -487,8 +488,7 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                     cdcPoller = new CDCPoller(null, null, null, tableName, null,
                             datasourceName, null, pollingColumn, pollingInterval,
                             poolPropertyString, sourceEventListener, configReader, waitOnMissedRecord,
-                            missedRecordWaitingTimeout, siddhiAppName, (PollingMetrics) metrics,
-                            siddhiAppContext.getExecutorService());
+                            missedRecordWaitingTimeout, siddhiAppName, (PollingMetrics) metrics);
                 } else if (isJndiResourceAvailable) {
                     String jndiResource = optionHolder.validateAndGetStaticValue(CDCSourceConstants.JNDI_RESOURCE);
                     if (isPrometheusReporterRunning) {
@@ -497,7 +497,7 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                     cdcPoller = new CDCPoller(null, null, null, tableName, null,
                             null, jndiResource, pollingColumn, pollingInterval, poolPropertyString,
                             sourceEventListener, configReader, waitOnMissedRecord, missedRecordWaitingTimeout,
-                            siddhiAppName, (PollingMetrics) metrics, siddhiAppContext.getExecutorService());
+                            siddhiAppName, (PollingMetrics) metrics);
                 } else {
                     String driverClassName;
                     try {
@@ -516,7 +516,7 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                     cdcPoller = new CDCPoller(url, username, password, tableName, driverClassName,
                             null, null, pollingColumn, pollingInterval, poolPropertyString,
                             sourceEventListener, configReader, waitOnMissedRecord, missedRecordWaitingTimeout,
-                            siddhiAppName, (PollingMetrics) metrics, siddhiAppContext.getExecutorService());
+                            siddhiAppName, (PollingMetrics) metrics);
                 }
                 if (metrics != null) {
                     int pollingHistorySize = Integer.parseInt(optionHolder.validateAndGetStaticValue(
@@ -548,6 +548,9 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                     if (!success) {
                         connectionCallback.onError(new ConnectionUnavailableException(
                                 "Connection to the database lost.", error));
+                        if (metrics != null) {
+                            metrics.setCDCStatus(CDCStatus.ERROR);
+                        }
                     }
                 };
 

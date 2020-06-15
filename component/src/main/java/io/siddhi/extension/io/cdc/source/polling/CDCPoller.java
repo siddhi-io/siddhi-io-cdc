@@ -37,7 +37,6 @@ import org.wso2.carbon.datasource.core.exception.DataSourceException;
 
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.ExecutorService;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -68,8 +67,7 @@ public class CDCPoller implements Runnable {
                      String datasourceName, String jndiResource,
                      String pollingColumn, int pollingInterval, String poolPropertyString,
                      SourceEventListener sourceEventListener, ConfigReader configReader, boolean waitOnMissedRecord,
-                     int missedRecordWaitingTimeout, String appName, PollingMetrics pollingMetrics,
-                     ExecutorService executorService) {
+                     int missedRecordWaitingTimeout, String appName, PollingMetrics pollingMetrics) {
         this.url = url;
         this.tableName = tableName;
         this.username = username;
@@ -91,12 +89,11 @@ public class CDCPoller implements Runnable {
         if (waitOnMissedRecord) {
             log.debug(WaitOnMissingRecordPollingStrategy.class + " is selected as the polling strategy.");
             this.pollingStrategy = new WaitOnMissingRecordPollingStrategy(dataSource, configReader, sourceEventListener,
-                    tableName, pollingColumn, pollingInterval, missedRecordWaitingTimeout, appName, pollingMetrics,
-                    executorService);
+                    tableName, pollingColumn, pollingInterval, missedRecordWaitingTimeout, appName, pollingMetrics);
         } else {
             log.debug(DefaultPollingStrategy.class + " is selected as the polling strategy.");
             this.pollingStrategy = new DefaultPollingStrategy(dataSource, configReader, sourceEventListener,
-                    tableName, pollingColumn, pollingInterval, appName, pollingMetrics, executorService);
+                    tableName, pollingColumn, pollingInterval, appName, pollingMetrics);
         }
     }
 
