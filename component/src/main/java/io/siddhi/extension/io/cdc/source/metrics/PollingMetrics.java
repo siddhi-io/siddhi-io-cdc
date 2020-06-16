@@ -82,7 +82,7 @@ public class PollingMetrics extends Metrics {
                         siddhiAppName, "total_valid_events_count",  getDatabaseURL()), Level.INFO);
     }
 
-    private Counter getTotalErrorCountMetric() {
+    public Counter getTotalErrorCountMetric() {
         return MetricsDataHolder.getInstance().getMetricService().counter(
                 String.format("io.siddhi.SiddhiApps.%s.Siddhi.Cdc.Source.Polling.%s.%s",
                         siddhiAppName, "total_error_count",  getDatabaseURL()), Level.INFO);
@@ -171,7 +171,6 @@ public class PollingMetrics extends Metrics {
             lastReceivedTimeMetric();
             setEventsInLastPollingMetric();
             idleTimeMetric();
-            getTotalErrorCountMetric();
         }
     }
 

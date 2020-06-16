@@ -111,6 +111,7 @@ public abstract class PollingStrategy {
                 metrics.getTotalReadsMetrics();
                 metrics.getEventCountMetric();
                 metrics.getValidEventCountMetric();
+                metrics.getTotalErrorCountMetric();
             }
             log.debug("A connection is initialized.");
         } catch (SQLException e) {
