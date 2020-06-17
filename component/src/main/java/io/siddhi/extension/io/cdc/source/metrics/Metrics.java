@@ -38,11 +38,11 @@ public abstract class Metrics {
     static final Map<String, Boolean> CDC_STATUS_SERVICE_STARTED_MAP = new ConcurrentHashMap<>();
 
     protected final String siddhiAppName;
+    protected final String tableName;
+    protected final CDCDatabase cdcDatabase;
     protected String host;
     protected String databaseName;
-    protected final String tableName;
     protected String dbType;
-    protected final CDCDatabase cdcDatabase;
 
     public Metrics(String siddhiAppName, String url, String tableName) {
         this.siddhiAppName = siddhiAppName;

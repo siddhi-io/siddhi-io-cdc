@@ -43,7 +43,7 @@ public class ListeningMetrics extends Metrics {
     }
 
     @Override
-    public  void updateTableStatus(ExecutorService executorService, String siddhiAppName) {
+    public void updateTableStatus(ExecutorService executorService, String siddhiAppName) {
         if (!CDC_STATUS_SERVICE_STARTED_MAP.get(siddhiAppName)) {
             CDC_STATUS_SERVICE_STARTED_MAP.replace(siddhiAppName, true);
             executorService.execute(() -> {
@@ -85,13 +85,13 @@ public class ListeningMetrics extends Metrics {
     public Counter getValidEventCountMetric() {
         return MetricsDataHolder.getInstance().getMetricService().counter(
                 String.format("io.siddhi.SiddhiApps.%s.Siddhi.Cdc.Source.Listening.%s.%s",
-                        siddhiAppName, "total_valid_events_count",  getDatabaseURL()), Level.INFO);
+                        siddhiAppName, "total_valid_events_count", getDatabaseURL()), Level.INFO);
     }
 
     private Counter getTotalErrorCountMetric() {
         return MetricsDataHolder.getInstance().getMetricService().counter(
                 String.format("io.siddhi.SiddhiApps.%s.Siddhi.Cdc.Source.Listening.%s.%s",
-                        siddhiAppName, "total_error_count",  getDatabaseURL()), Level.INFO);
+                        siddhiAppName, "total_error_count", getDatabaseURL()), Level.INFO);
     }
 
     @Override
@@ -154,7 +154,7 @@ public class ListeningMetrics extends Metrics {
             getTotalErrorCountMetric().inc();
         }
         if (CDC_STATUS_MAP.containsKey(cdcDatabase)) {
-                CDC_STATUS_MAP.replace(cdcDatabase, cdcStatus);
+            CDC_STATUS_MAP.replace(cdcDatabase, cdcStatus);
         } else {
             CDC_STATUS_MAP.put(cdcDatabase, cdcStatus);
             setCDCDBStatusMetric();

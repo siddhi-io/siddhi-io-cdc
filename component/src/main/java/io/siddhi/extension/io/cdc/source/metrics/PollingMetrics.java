@@ -32,7 +32,7 @@ import java.util.concurrent.ExecutorService;
  */
 public class PollingMetrics extends Metrics {
 
-    private static final Logger log  = Logger.getLogger(PollingMetrics.class);
+    private static final Logger log = Logger.getLogger(PollingMetrics.class);
     private final Queue<String> pollingDetails = new LinkedList<>();
     private int receiveEventsPerPollingInterval;
     private int pollingHistorySize;
@@ -79,13 +79,13 @@ public class PollingMetrics extends Metrics {
     public Counter getValidEventCountMetric() {
         return MetricsDataHolder.getInstance().getMetricService().counter(
                 String.format("io.siddhi.SiddhiApps.%s.Siddhi.Cdc.Source.Polling.%s.%s",
-                        siddhiAppName, "total_valid_events_count",  getDatabaseURL()), Level.INFO);
+                        siddhiAppName, "total_valid_events_count", getDatabaseURL()), Level.INFO);
     }
 
     public Counter getTotalErrorCountMetric() {
         return MetricsDataHolder.getInstance().getMetricService().counter(
                 String.format("io.siddhi.SiddhiApps.%s.Siddhi.Cdc.Source.Polling.%s.%s",
-                        siddhiAppName, "total_error_count",  getDatabaseURL()), Level.INFO);
+                        siddhiAppName, "total_error_count", getDatabaseURL()), Level.INFO);
     }
 
     @Override
@@ -176,7 +176,7 @@ public class PollingMetrics extends Metrics {
 
     @Override
     protected String getDatabaseURL() {
-            return host + "/" + tableName;
+        return host + "/" + tableName;
     }
 
     public void setReceiveEventsPerPollingInterval(int receiveEventsPerPollingInterval) {

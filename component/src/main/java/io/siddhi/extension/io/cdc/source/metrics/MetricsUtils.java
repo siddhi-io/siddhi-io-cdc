@@ -67,7 +67,7 @@ public class MetricsUtils {
                 break;
             }
             case "oracle": {
-                url  = new StringBuilder(url).reverse().toString();
+                url = new StringBuilder(url).reverse().toString();
                 url = url.replaceAll("@.*?:", "@");
                 url = new StringBuilder(url).reverse().toString();
                 int index = url.indexOf('@');
