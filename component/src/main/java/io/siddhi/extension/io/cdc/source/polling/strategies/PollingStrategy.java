@@ -50,18 +50,17 @@ public abstract class PollingStrategy {
     private static final String PLACE_HOLDER_CONDITION = "{{CONDITION}}";
     private static final String SELECT_QUERY_CONFIG_FILE = "query-config.yaml";
     private static final String RECORD_SELECT_QUERY = "recordSelectQuery";
-
+    protected boolean paused = false;
+    protected ReentrantLock pauseLock = new ReentrantLock();
+    protected Condition pauseLockCondition = pauseLock.newCondition();
+    protected String tableName;
     private HikariDataSource dataSource;
     private String selectQueryStructure = "";
     private ConfigReader configReader;
     private SourceEventListener sourceEventListener;
     private String appName;
     private String streamName;
-
-    protected boolean paused = false;
-    protected ReentrantLock pauseLock = new ReentrantLock();
-    protected Condition pauseLockCondition = pauseLock.newCondition();
-    protected String tableName;
+    private Connection conn;
 
     public PollingStrategy(HikariDataSource dataSource, ConfigReader configReader,
                            SourceEventListener sourceEventListener, String tableName, String appName) {
@@ -163,7 +162,7 @@ public abstract class PollingStrategy {
 
             if (selectQueryStructure.isEmpty()) {
                 throw new CDCPollingModeException(buildError("Unsupported database: %s. Configure system " +
-                                "parameter: %s.%s.", databaseName, databaseName, RECORD_SELECT_QUERY));
+                        "parameter: %s.%s.", databaseName, databaseName, RECORD_SELECT_QUERY));
             }
         }
         //create the select query with given constraints
