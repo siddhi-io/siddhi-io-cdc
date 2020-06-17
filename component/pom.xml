@@ -141,6 +141,10 @@
             <groupId>org.apache.kafka</groupId>
             <artifactId>connect-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.analytics</groupId>
+            <artifactId>org.wso2.carbon.si.metrics.core</artifactId>
+        </dependency>
     </dependencies>
     <profiles>
         <profile>
@@ -586,6 +590,8 @@
                             io.siddhi.annotation.*;version="${siddhi.import.version.range}",
                             io.siddhi.core.*;version="${siddhi.import.version.range}",
                             io.siddhi.query.*;version="${siddhi.import.version.range}",
+                            com.zaxxer.*;version="${com.zaxxer.hikari.version.range}",
+                            org.yaml.snakeyaml.*;version="${org.yaml.snakeyaml.version.range}",
                             *;resolution:=optional
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>

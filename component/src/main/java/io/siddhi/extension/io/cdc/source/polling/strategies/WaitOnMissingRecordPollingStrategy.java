@@ -21,6 +21,8 @@ package io.siddhi.extension.io.cdc.source.polling.strategies;
 import com.zaxxer.hikari.HikariDataSource;
 import io.siddhi.core.stream.input.source.SourceEventListener;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.extension.io.cdc.source.metrics.CDCStatus;
+import io.siddhi.extension.io.cdc.source.metrics.PollingMetrics;
 import io.siddhi.extension.io.cdc.source.polling.CDCPollingModeException;
 import io.siddhi.extension.io.cdc.util.CDCPollingUtil;
 import org.apache.log4j.Logger;
@@ -51,8 +53,8 @@ public class WaitOnMissingRecordPollingStrategy extends PollingStrategy {
     public WaitOnMissingRecordPollingStrategy(HikariDataSource dataSource, ConfigReader configReader,
                                               SourceEventListener sourceEventListener, String tableName,
                                               String pollingColumn, int pollingInterval, int waitTimeout,
-                                              String appName) {
-        super(dataSource, configReader, sourceEventListener, tableName, appName);
+                                              String appName, PollingMetrics pollingMetrics) {
+        super(dataSource, configReader, sourceEventListener, tableName, appName, pollingMetrics);
         this.pollingColumn = pollingColumn;
         this.pollingInterval = pollingInterval;
         this.waitTimeout = waitTimeout;
@@ -70,6 +72,7 @@ public class WaitOnMissingRecordPollingStrategy extends PollingStrategy {
         long waitingFrom = -1;
         try {
             // If lastReadPollingColumnValue is null, assign it with last record of the table.
+            long startedTime = System.currentTimeMillis();
             if (lastReadPollingColumnValue == null) {
                 selectQuery = getSelectQuery("MAX(" + pollingColumn + ")", "").trim();
                 statement = connection.prepareStatement(selectQuery);
@@ -99,11 +102,14 @@ public class WaitOnMissingRecordPollingStrategy extends PollingStrategy {
                         pauseLock.unlock();
                     }
                 }
+                int eventsPerPollingInterval = 0;
+                boolean isError = false;
                 try {
                     statement.setInt(1, lastReadPollingColumnValue);
                     resultSet = statement.executeQuery();
                     metadata = resultSet.getMetaData();
                     while (resultSet.next()) {
+                        eventsPerPollingInterval++;
                         boolean isTimedout = false;
                         int currentPollingColumnValue = resultSet.getInt(pollingColumn);
                         if (currentPollingColumnValue - lastReadPollingColumnValue > 1) {
@@ -145,13 +151,26 @@ public class WaitOnMissingRecordPollingStrategy extends PollingStrategy {
                         handleEvent(detailsMap);
                     }
                 } catch (SQLException e) {
+                    if (metrics != null) {
+                        isError = true;
+                        metrics.setCDCStatus(CDCStatus.ERROR);
+                    }
                     log.error(buildError("Error occurred while processing records in table %s.", tableName), e);
                 } finally {
                     CDCPollingUtil.cleanupConnection(resultSet, null, null);
                 }
                 try {
+                    if (metrics != null) {
+                        metrics.setReceiveEventsPerPollingInterval(eventsPerPollingInterval);
+                        CDCStatus cdcStatus = isError ? CDCStatus.ERROR : CDCStatus.SUCCESS;
+                        metrics.pollingDetailsMetric(eventsPerPollingInterval, startedTime,
+                                System.currentTimeMillis() - startedTime, cdcStatus);
+                    }
                     Thread.sleep((long) pollingInterval * 1000);
                 } catch (InterruptedException e) {
+                    if (metrics != null) {
+                        metrics.setCDCStatus(CDCStatus.ERROR);
+                    }
                     log.error(buildError("Error while polling the table %s.", tableName), e);
                 }
             }

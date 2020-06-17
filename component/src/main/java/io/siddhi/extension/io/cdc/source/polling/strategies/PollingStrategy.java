@@ -20,9 +20,13 @@ package io.siddhi.extension.io.cdc.source.polling.strategies;
 
 import com.zaxxer.hikari.HikariDataSource;
 import io.siddhi.core.stream.input.source.SourceEventListener;
+import io.siddhi.core.stream.input.source.SourceMapper;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.extension.io.cdc.source.config.Database;
 import io.siddhi.extension.io.cdc.source.config.QueryConfiguration;
+import io.siddhi.extension.io.cdc.source.metrics.CDCStatus;
+import io.siddhi.extension.io.cdc.source.metrics.MetricsUtils;
+import io.siddhi.extension.io.cdc.source.metrics.PollingMetrics;
 import io.siddhi.extension.io.cdc.source.polling.CDCPollingModeException;
 import io.siddhi.extension.io.cdc.util.CDCPollingUtil;
 import io.siddhi.extension.io.cdc.util.CDCSourceConstants;
@@ -50,26 +54,30 @@ public abstract class PollingStrategy {
     private static final String PLACE_HOLDER_CONDITION = "{{CONDITION}}";
     private static final String SELECT_QUERY_CONFIG_FILE = "query-config.yaml";
     private static final String RECORD_SELECT_QUERY = "recordSelectQuery";
-    protected boolean paused = false;
-    protected ReentrantLock pauseLock = new ReentrantLock();
-    protected Condition pauseLockCondition = pauseLock.newCondition();
-    protected String tableName;
+
     private HikariDataSource dataSource;
     private String selectQueryStructure = "";
     private ConfigReader configReader;
     private SourceEventListener sourceEventListener;
     private String appName;
     private String streamName;
-    private Connection conn;
+
+    protected boolean paused = false;
+    protected ReentrantLock pauseLock = new ReentrantLock();
+    protected Condition pauseLockCondition = pauseLock.newCondition();
+    protected String tableName;
+    protected PollingMetrics metrics;
 
     public PollingStrategy(HikariDataSource dataSource, ConfigReader configReader,
-                           SourceEventListener sourceEventListener, String tableName, String appName) {
+                           SourceEventListener sourceEventListener, String tableName, String appName,
+                           PollingMetrics metrics) {
         this.dataSource = dataSource;
         this.configReader = configReader;
         this.sourceEventListener = sourceEventListener;
         this.tableName = tableName;
         this.appName = appName;
         this.streamName = sourceEventListener.getStreamDefinition().getId();
+        this.metrics = metrics;
     }
 
     public abstract void poll();
@@ -96,8 +104,20 @@ public abstract class PollingStrategy {
         Connection conn;
         try {
             conn = this.dataSource.getConnection();
+            if (metrics != null) {
+                metrics.setHost(MetricsUtils.getShortenedJDBCURL(conn.getMetaData().getURL()));
+                metrics.setDbType(conn.getMetaData().getDatabaseProductName());
+                metrics.setDatabaseName(conn.getCatalog());
+                metrics.getTotalReadsMetrics();
+                metrics.getEventCountMetric();
+                metrics.getValidEventCountMetric();
+                metrics.getTotalErrorCountMetric();
+            }
             log.debug("A connection is initialized.");
         } catch (SQLException e) {
+            if (metrics != null) {
+                metrics.setCDCStatus(CDCStatus.ERROR);
+            }
             throw new CDCPollingModeException(buildError("Error initializing datasource connection."), e);
         }
         return conn;
@@ -114,6 +134,9 @@ public abstract class PollingStrategy {
                 DatabaseMetaData dmd = conn.getMetaData();
                 databaseName = dmd.getDatabaseProductName();
             } catch (SQLException e) {
+                if (metrics != null) {
+                    metrics.setCDCStatus(CDCStatus.ERROR);
+                }
                 throw new CDCPollingModeException(buildError("Error in looking up database type."), e);
             } finally {
                 CDCPollingUtil.cleanupConnection(null, null, conn);
@@ -144,6 +167,9 @@ public abstract class PollingStrategy {
                         try {
                             inputStream.close();
                         } catch (IOException e) {
+                            if (metrics != null) {
+                                metrics.setCDCStatus(CDCStatus.ERROR);
+                            }
                             log.error(buildError("Failed to close the input stream for %s.", SELECT_QUERY_CONFIG_FILE));
                         }
                     }
@@ -161,6 +187,9 @@ public abstract class PollingStrategy {
             }
 
             if (selectQueryStructure.isEmpty()) {
+                if (metrics != null) {
+                    metrics.setCDCStatus(CDCStatus.ERROR);
+                }
                 throw new CDCPollingModeException(buildError("Unsupported database: %s. Configure system " +
                         "parameter: %s.%s.", databaseName, databaseName, RECORD_SELECT_QUERY));
             }
@@ -174,7 +203,16 @@ public abstract class PollingStrategy {
     }
 
     protected void handleEvent(Map detailsMap) {
+        long previousEventCount = ((SourceMapper) sourceEventListener).getEventCount();
         sourceEventListener.onEvent(detailsMap, null);
+        if (metrics != null) {
+            metrics.getTotalReadsMetrics().inc();
+            metrics.getEventCountMetric().inc();
+            long eventCount = ((SourceMapper) sourceEventListener).getEventCount() - previousEventCount;
+            metrics.getValidEventCountMetric().inc(eventCount);
+            metrics.setCDCStatus(CDCStatus.CONSUMING);
+            metrics.setLastReceivedTime(System.currentTimeMillis());
+        }
     }
 
     protected String buildError(String message, Object... args) {

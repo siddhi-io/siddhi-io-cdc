@@ -22,6 +22,8 @@ import com.zaxxer.hikari.HikariDataSource;
 import io.siddhi.core.stream.input.source.SourceEventListener;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.extension.io.cdc.source.config.CronConfiguration;
+import io.siddhi.extension.io.cdc.source.metrics.CDCStatus;
+import io.siddhi.extension.io.cdc.source.metrics.PollingMetrics;
 import io.siddhi.extension.io.cdc.source.polling.CDCPollingModeException;
 import io.siddhi.extension.io.cdc.util.CDCPollingUtil;
 import org.apache.log4j.Logger;
@@ -46,11 +48,13 @@ public class DefaultPollingStrategy extends PollingStrategy {
     private int pollingInterval;
     private String lastReadPollingColumnValue;
     private final CronConfiguration cronConfiguration;
+    private int eventsPerPollingInterval;
 
     public DefaultPollingStrategy(HikariDataSource dataSource, ConfigReader configReader,
                                   SourceEventListener sourceEventListener, String tableName, String pollingColumn,
-                                  int pollingInterval, String appName, CronConfiguration cronConfiguration) {
-        super(dataSource, configReader, sourceEventListener, tableName, appName);
+                                  int pollingInterval, String appName, PollingMetrics pollingMetrics,
+                                  CronConfiguration cronConfiguration) {
+        super(dataSource, configReader, sourceEventListener, tableName, appName, pollingMetrics);
         this.pollingColumn = pollingColumn;
         this.pollingInterval = pollingInterval;
         this.cronConfiguration = cronConfiguration;
@@ -77,10 +81,21 @@ public class DefaultPollingStrategy extends PollingStrategy {
                             pauseLock.unlock();
                         }
                     }
-                    printEvent(connection);
+                    long startedTime = System.currentTimeMillis();
+                    eventsPerPollingInterval = 0;
+                    boolean isError = printEvent(connection);
                     try {
+                        if (metrics != null) {
+                            metrics.setReceiveEventsPerPollingInterval(eventsPerPollingInterval);
+                            CDCStatus cdcStatus = isError ? CDCStatus.ERROR : CDCStatus.SUCCESS;
+                            metrics.pollingDetailsMetric(eventsPerPollingInterval, startedTime,
+                                    System.currentTimeMillis() - startedTime, cdcStatus);
+                        }
                         Thread.sleep((long) pollingInterval * 1000);
                     } catch (InterruptedException e) {
+                        if (metrics != null) {
+                            metrics.setCDCStatus(CDCStatus.ERROR);
+                        }
                         log.error(buildError("Error while polling the table %s.", tableName), e);
                     }
                 }
@@ -115,13 +130,13 @@ public class DefaultPollingStrategy extends PollingStrategy {
         }
     }
 
-    public void printEvent(Connection connection) {
+    public boolean printEvent(Connection connection) {
         ResultSet resultSet = null;
         ResultSetMetaData metadata;
         Map<String, Object> detailsMap;
         String selectQuery;
         PreparedStatement statement;
-
+        boolean isError = false;
         try {
             selectQuery = getSelectQuery("*", "WHERE " + pollingColumn + " > ?");
             statement = connection.prepareStatement(selectQuery);
@@ -129,6 +144,7 @@ public class DefaultPollingStrategy extends PollingStrategy {
             resultSet = statement.executeQuery();
             metadata = resultSet.getMetaData();
             while (resultSet.next()) {
+                eventsPerPollingInterval++;
                 detailsMap = new HashMap<>();
                 for (int i = 1; i <= metadata.getColumnCount(); i++) {
                     String key = metadata.getColumnName(i);
@@ -139,9 +155,14 @@ public class DefaultPollingStrategy extends PollingStrategy {
                 handleEvent(detailsMap);
             }
         } catch (SQLException ex) {
+            if (metrics != null) {
+                isError = true;
+                metrics.setCDCStatus(CDCStatus.ERROR);
+            }
             log.error(buildError("Error occurred while processing records in table %s.", tableName), ex);
         } finally {
             CDCPollingUtil.cleanupConnection(resultSet, null, null);
+            return isError;
         }
     }
 

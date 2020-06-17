@@ -20,6 +20,7 @@ package io.siddhi.extension.io.cdc.source.listening;
 
 import io.debezium.data.VariableScaleDecimal;
 import io.siddhi.core.stream.input.source.SourceEventListener;
+import io.siddhi.extension.io.cdc.source.metrics.ListeningMetrics;
 import io.siddhi.extension.io.cdc.util.CDCSourceConstants;
 import org.apache.kafka.connect.connector.ConnectRecord;
 import org.apache.kafka.connect.data.Field;
@@ -39,8 +40,8 @@ import java.util.Optional;
 public class RdbmsChangeDataCapture extends ChangeDataCapture {
     private static final Logger log = Logger.getLogger(RdbmsChangeDataCapture.class);
 
-    public RdbmsChangeDataCapture(String operation, SourceEventListener sourceEventListener) {
-        super(operation, sourceEventListener);
+    public RdbmsChangeDataCapture(String operation, SourceEventListener sourceEventListener, ListeningMetrics metrics) {
+        super(operation, sourceEventListener, metrics);
     }
 
     Map<String, Object> createMap(ConnectRecord connectRecord, String operation) {
