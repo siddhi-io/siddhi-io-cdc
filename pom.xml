@@ -16,7 +16,8 @@
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.wso2</groupId>
         <artifactId>wso2</artifactId>
@@ -192,6 +193,11 @@
                 <artifactId>connect-api</artifactId>
                 <version>${kafka.connect.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>${org.snake.yaml.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.wso2.carbon.analytics</groupId>
@@ -251,8 +257,8 @@
         <version.oracle.driver>12.1.0.2</version.oracle.driver>
         <hikari.version>3.2.0</hikari.version>
         <org.testng.version>6.11</org.testng.version>
-        <siddhi-store-rdbms.version>7.0.6</siddhi-store-rdbms.version>
-        <siddhi-store-mongodb.version>2.1.0</siddhi-store-mongodb.version>
+        <siddhi-store-rdbms.version>7.0.7</siddhi-store-rdbms.version>
+        <siddhi-store-mongodb.version>2.1.1</siddhi-store-mongodb.version>
         <carbon.datasource.core.version>RELEASE</carbon.datasource.core.version>
         <mavan.findbugsplugin.exclude.file>../findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
         <ojdbc6.version>12.1.0.1-atlassian-hosted</ojdbc6.version>
@@ -274,6 +280,7 @@
         <carbon.analytics.version>3.0.36</carbon.analytics.version>
         <org.yaml.snakeyaml.version.range>[1.2.0,2.0.0)</org.yaml.snakeyaml.version.range>
         <com.zaxxer.hikari.version.range>[1.0.0,4.0.0)</com.zaxxer.hikari.version.range>
+        <org.snake.yaml.version>1.23</org.snake.yaml.version>
     </properties>
     <scm>
         <url>https://github.com/siddhi-io/siddhi-io-cdc.git</url>
