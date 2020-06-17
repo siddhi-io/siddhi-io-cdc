@@ -105,7 +105,7 @@ public abstract class PollingStrategy {
         try {
             conn = this.dataSource.getConnection();
             if (metrics != null) {
-                metrics.setHost(MetricsUtils.getShortenJDBCURL(conn.getMetaData().getURL()));
+                metrics.setHost(MetricsUtils.getShortenedJDBCURL(conn.getMetaData().getURL()));
                 metrics.setDbType(conn.getMetaData().getDatabaseProductName());
                 metrics.setDatabaseName(conn.getCatalog());
                 metrics.getTotalReadsMetrics();

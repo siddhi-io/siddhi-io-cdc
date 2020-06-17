@@ -22,7 +22,7 @@ package io.siddhi.extension.io.cdc.source.metrics;
  */
 public class MetricsUtils {
 
-    private static String getShortenURL(String jdbcURL) {
+    private static String getShortenedURL(String jdbcURL) {
         if (jdbcURL.length() <= 30) {
             return jdbcURL;
         }
@@ -42,7 +42,7 @@ public class MetricsUtils {
         return jdbcURL.substring(0, i) + "..";
     }
 
-    public static String getShortenJDBCURL(String url) {
+    public static String getShortenedJDBCURL(String url) {
         String[] splittedURL = url.split(":");
         String formattedURL;
         switch (splittedURL[1]) {
@@ -105,6 +105,6 @@ public class MetricsUtils {
                 formattedURL = url;
             }
         }
-        return getShortenURL(formattedURL);
+        return getShortenedURL(formattedURL);
     }
 }
