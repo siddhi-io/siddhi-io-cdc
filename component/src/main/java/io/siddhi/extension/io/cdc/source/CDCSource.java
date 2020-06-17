@@ -377,6 +377,7 @@ public class CDCSource extends Source<CDCSource.CdcState> {
     private String cronExpression = null;
     private CronConfiguration cronConfiguration;
     private boolean waitOnMissedRecord;
+    private EmbeddedEngine engine;
 
     @Override
     protected ServiceDeploymentInfo exposeServiceDeploymentInfo() {
@@ -533,7 +534,7 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                     }
                 };
 
-                EmbeddedEngine engine = changeDataCapture.getEngine(completionCallback);
+                engine = changeDataCapture.getEngine(completionCallback);
                 executorService.execute(engine);
                 break;
             case CDCSourceConstants.MODE_POLLING:
@@ -578,6 +579,9 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                             " due to " + e.getMessage(), e);
                 }
             }
+            cdcPoller.stop();
+        } else if (mode.equals(CDCSourceConstants.MODE_LISTENING)) {
+            engine.stop();
         }
     }
 
