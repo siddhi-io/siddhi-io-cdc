@@ -372,6 +372,7 @@ public class CDCSource extends Source<CDCSource.CdcState> {
     private CDCSourceObjectKeeper cdcSourceObjectKeeper = CDCSourceObjectKeeper.getCdcSourceObjectKeeper();
     private String carbonHome;
     private CDCPoller cdcPoller;
+    private EmbeddedEngine engine;
     private Metrics metrics;
     private String siddhiAppName;
     private ExecutorService siddhiAppContextExecutorService;
@@ -532,7 +533,7 @@ public class CDCSource extends Source<CDCSource.CdcState> {
 
     @Override
     public Class[] getOutputEventClasses() {
-        return new Class[] {Map.class};
+        return new Class[]{Map.class};
     }
 
     @Override
@@ -554,7 +555,7 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                     }
                 };
 
-                EmbeddedEngine engine = changeDataCapture.getEngine(completionCallback);
+                engine = changeDataCapture.getEngine(completionCallback);
                 executorService.execute(engine);
                 break;
             case CDCSourceConstants.MODE_POLLING:
@@ -584,13 +585,9 @@ public class CDCSource extends Source<CDCSource.CdcState> {
     @Override
     public void disconnect() {
         if (mode.equals(CDCSourceConstants.MODE_POLLING)) {
-            cdcPoller.pause();
-            if (cdcPoller.isLocalDataSource()) {
-                cdcPoller.getDataSource().close();
-                if (log.isDebugEnabled()) {
-                    log.debug("Closing the pool for CDC polling mode.");
-                }
-            }
+            cdcPoller.stop();
+        } else if (mode.equals(CDCSourceConstants.MODE_LISTENING)) {
+            engine.stop();
         }
     }
 

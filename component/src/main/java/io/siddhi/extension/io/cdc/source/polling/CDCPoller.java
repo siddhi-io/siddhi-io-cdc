@@ -37,7 +37,6 @@ import org.wso2.carbon.datasource.core.exception.DataSourceException;
 
 import java.util.List;
 import java.util.Properties;
-
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
@@ -176,6 +175,15 @@ public class CDCPoller implements Runnable {
 
     public void pause() {
         pollingStrategy.pause();
+    }
+
+    public void stop() {
+        if (isLocalDataSource) {
+            dataSource.close();
+            if (log.isDebugEnabled()) {
+                log.debug("Closing the pool for CDC polling mode.");
+            }
+        }
     }
 
     public void resume() {

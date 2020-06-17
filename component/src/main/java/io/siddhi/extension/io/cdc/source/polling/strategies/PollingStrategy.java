@@ -191,7 +191,7 @@ public abstract class PollingStrategy {
                     metrics.setCDCStatus(CDCStatus.ERROR);
                 }
                 throw new CDCPollingModeException(buildError("Unsupported database: %s. Configure system " +
-                                "parameter: %s.%s.", databaseName, databaseName, RECORD_SELECT_QUERY));
+                        "parameter: %s.%s.", databaseName, databaseName, RECORD_SELECT_QUERY));
             }
         }
         //create the select query with given constraints
