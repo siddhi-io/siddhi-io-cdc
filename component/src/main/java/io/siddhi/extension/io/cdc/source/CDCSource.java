@@ -34,6 +34,7 @@ import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.transport.OptionHolder;
+import io.siddhi.extension.io.cdc.source.config.CronConfiguration;
 import io.siddhi.extension.io.cdc.source.listening.CDCSourceObjectKeeper;
 import io.siddhi.extension.io.cdc.source.listening.ChangeDataCapture;
 import io.siddhi.extension.io.cdc.source.listening.MongoChangeDataCapture;
@@ -44,6 +45,9 @@ import io.siddhi.extension.io.cdc.util.CDCSourceConstants;
 import io.siddhi.extension.io.cdc.util.CDCSourceUtil;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.apache.log4j.Logger;
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -52,6 +56,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import static org.quartz.CronExpression.isValidExpression;
 
 /**
  * Extension to the siddhi to retrieve Database Changes - implementation of cdc source.
@@ -235,7 +241,7 @@ import java.util.concurrent.Executors;
                         name = "wait.on.missed.record",
                         description = "Indicates whether the process needs to wait on missing/out-of-order records. " +
                                 "\nWhen this flag is set to 'true' the process will be held once it identifies a " +
-                                "missing record. The missing recrod is identified by the sequence of the " +
+                                "missing record. The missing record is identified by the sequence of the " +
                                 "polling.column value. This can be used only with number fields and not recommended " +
                                 "to use with time values as it will not be sequential." +
                                 "\nThis should be enabled ONLY where the records can be written out-of-order, (eg. " +
@@ -252,6 +258,16 @@ import java.util.concurrent.Executors;
                         type = DataType.INT,
                         optional = true,
                         defaultValue = "-1"
+                ),
+                @Parameter(
+                        name = "cron.expression",
+                        description = "This is used to specify a timestamp in cron expression." +
+                                "The records which has been inserted or updated is printed when the " +
+                                "given expression satisfied by the system time. This parameter is applicable only " +
+                                "when the mode is 'polling'.",
+                        optional = true,
+                        type = {DataType.STRING},
+                        defaultValue = "None"
                 )
         },
         examples = {
@@ -358,6 +374,9 @@ public class CDCSource extends Source<CDCSource.CdcState> {
     private CDCSourceObjectKeeper cdcSourceObjectKeeper = CDCSourceObjectKeeper.getCdcSourceObjectKeeper();
     private String carbonHome;
     private CDCPoller cdcPoller;
+    private String cronExpression = null;
+    private CronConfiguration cronConfiguration;
+    private boolean waitOnMissedRecord;
     private EmbeddedEngine engine;
 
     @Override
@@ -370,6 +389,7 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                                        String[] requestedTransportPropertyNames, ConfigReader configReader,
                                        SiddhiAppContext siddhiAppContext) {
         //initialize mode
+        this.cronConfiguration = new CronConfiguration();
         mode = optionHolder.validateAndGetStaticValue(CDCSourceConstants.MODE, CDCSourceConstants.MODE_LISTENING);
         //initialize common mandatory parameters
         String tableName = optionHolder.validateAndGetOption(CDCSourceConstants.TABLE_NAME).getValue();
@@ -440,10 +460,17 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                 pollingInterval = Integer.parseInt(
                         optionHolder.validateAndGetStaticValue(CDCSourceConstants.POLLING_INTERVAL,
                                 Integer.toString(CDCSourceConstants.DEFAULT_POLLING_INTERVAL_SECONDS)));
-                validatePollingModeParameters();
+                if (optionHolder.isOptionExists(CDCSourceConstants.CRON_EXPRESSION)) {
+                    cronExpression = optionHolder.validateAndGetStaticValue(CDCSourceConstants.CRON_EXPRESSION, null);
+                    if (!isValidExpression(cronExpression)) {
+                        throw new SiddhiAppCreationException("Cron Expression " + cronExpression + " is not valid.");
+                    }
+                } else {
+                    cronExpression = null;
+                }
                 String poolPropertyString = optionHolder.validateAndGetStaticValue(CDCSourceConstants.POOL_PROPERTIES,
                         null);
-                boolean waitOnMissedRecord = Boolean.parseBoolean(
+                waitOnMissedRecord = Boolean.parseBoolean(
                         optionHolder.validateAndGetStaticValue(CDCSourceConstants.WAIT_ON_MISSED_RECORD, "false"));
                 int missedRecordWaitingTimeout = Integer.parseInt(
                         optionHolder.validateAndGetStaticValue(
@@ -454,13 +481,13 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                     cdcPoller = new CDCPoller(null, null, null, tableName, null,
                             datasourceName, null, pollingColumn, pollingInterval,
                             poolPropertyString, sourceEventListener, configReader, waitOnMissedRecord,
-                            missedRecordWaitingTimeout, siddhiAppName);
+                            missedRecordWaitingTimeout, siddhiAppName, cronConfiguration);
                 } else if (isJndiResourceAvailable) {
                     String jndiResource = optionHolder.validateAndGetStaticValue(CDCSourceConstants.JNDI_RESOURCE);
                     cdcPoller = new CDCPoller(null, null, null, tableName, null,
                             null, jndiResource, pollingColumn, pollingInterval, poolPropertyString,
                             sourceEventListener, configReader, waitOnMissedRecord, missedRecordWaitingTimeout,
-                            siddhiAppName);
+                            siddhiAppName, cronConfiguration);
                 } else {
                     String driverClassName;
                     try {
@@ -476,8 +503,9 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                     cdcPoller = new CDCPoller(url, username, password, tableName, driverClassName,
                             null, null, pollingColumn, pollingInterval, poolPropertyString,
                             sourceEventListener, configReader, waitOnMissedRecord, missedRecordWaitingTimeout,
-                            siddhiAppName);
+                            siddhiAppName, cronConfiguration);
                 }
+                validatePollingModeParameters();
                 break;
             default:
                 throw new SiddhiAppValidationException("Unsupported " + CDCSourceConstants.MODE + ": " + mode);
@@ -533,6 +561,24 @@ public class CDCSource extends Source<CDCSource.CdcState> {
     @Override
     public void disconnect() {
         if (mode.equals(CDCSourceConstants.MODE_POLLING)) {
+            cdcPoller.pause();
+            if (cdcPoller.isLocalDataSource()) {
+                cdcPoller.getDataSource().close();
+                if (log.isDebugEnabled()) {
+                    log.debug("Closing the pool for CDC polling mode.");
+                }
+            }
+            if (cronExpression != null) {
+                try {
+                    Scheduler scheduler = cronConfiguration.getScheduler();
+                    if (scheduler != null) {
+                        scheduler.deleteJob(new JobKey(CDCSourceConstants.JOB_NAME, CDCSourceConstants.JOB_GROUP));
+                    }
+                } catch (SchedulerException e) {
+                    throw new SiddhiAppRuntimeException("Failed to delete the cron job of the siddhi app" +
+                            " due to " + e.getMessage(), e);
+                }
+            }
             cdcPoller.stop();
         } else if (mode.equals(CDCSourceConstants.MODE_LISTENING)) {
             engine.stop();
@@ -614,6 +660,11 @@ public class CDCSource extends Source<CDCSource.CdcState> {
         } else if (!historyFileDirectory.endsWith(File.separator)) {
             historyFileDirectory = historyFileDirectory + File.separator;
         }
+
+        if (optionHolder.isOptionExists(CDCSourceConstants.CRON_EXPRESSION)) {
+            throw new SiddhiAppCreationException("Parameter: " + CDCSourceConstants.CRON_EXPRESSION + " should" +
+                    " not be defined for listening mode");
+        }
     }
 
     /**
@@ -624,6 +675,11 @@ public class CDCSource extends Source<CDCSource.CdcState> {
             throw new SiddhiAppValidationException(CDCSourceConstants.POLLING_INTERVAL + " should be a " +
                     "non negative integer. Current mode: " + CDCSourceConstants.MODE_POLLING);
         }
+        if (waitOnMissedRecord && cronExpression != null) {
+            throw new SiddhiAppCreationException("If waitOnMissedRecord is true then " +
+                    CDCSourceConstants.CRON_EXPRESSION + " must be null. ");
+        }
+        cronConfiguration.setCronExpression(cronExpression);
     }
 
     class CdcState extends State {

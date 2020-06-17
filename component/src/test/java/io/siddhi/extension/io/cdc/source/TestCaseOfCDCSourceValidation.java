@@ -420,4 +420,37 @@ public class TestCaseOfCDCSourceValidation {
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
         siddhiAppRuntime.shutdown();
     }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void cdcCronValidationWithMode() throws InterruptedException {
+        log.info("------------------------------------------------------------------------------------------------");
+        log.info("CDC TestCase: Validate parameter: cron.expression with listening mode");
+        log.info("------------------------------------------------------------------------------------------------");
+
+        String mode = "listening";
+
+        SiddhiAppRuntime siddhiAppRuntime;
+        String streamDefinition;
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String query = ("@info(name = 'query1') " +
+                "from istm " +
+                "select *  " +
+                "insert into outputStream;");
+
+        streamDefinition = "@app:name('cdcTesting')" +
+                "@source(type = 'cdc', mode = '" + mode + "'," +
+                " url = '" + databaseURL + "'," +
+                " username = '" + username + "'," +
+                " password = '" + password + "'," +
+                " table.name = '" + tableName + "', " +
+                " cron.expression = '*/5 * * * * *'," +
+                " operation = 'insert', " +
+                " @map(type='keyvalue'))" +
+                "define stream istm (id string, name string);";
+
+        siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streamDefinition + query);
+        siddhiAppRuntime.start();
+        SiddhiTestHelper.waitForEvents(waitTime, 0, eventCount, timeout);
+        siddhiAppRuntime.shutdown();
+    }
 }

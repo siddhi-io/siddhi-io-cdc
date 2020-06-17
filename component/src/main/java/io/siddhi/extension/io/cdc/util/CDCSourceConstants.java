@@ -91,4 +91,12 @@ public class CDCSourceConstants {
     public static final String MONGO_SET = "$set";
     public static final String MONGO_OBJECT_NUMBER_LONG = "$numberLong";
     public static final String MONGO_OBJECT_NUMBER_DECIMAL = "$numberDecimal";
+
+    // Constants for Cron Support
+    public static final String CRON_EXPRESSION = "cron.expression";
+    public static final String JOB_GROUP = "CDCPollingGroup";
+    public static final String JOB_NAME = "CDCPollingJobName";
+    public static final String TRIGGER_NAME = "CDCCronTriggerName";
+    public static final String TRIGGER_GROUP = "CDCCronTriggerGroup";
+    public static final String POLLING_STRATEGY = "PollingStrategy";
 }

@@ -21,6 +21,7 @@ package io.siddhi.extension.io.cdc.source.polling.strategies;
 import com.zaxxer.hikari.HikariDataSource;
 import io.siddhi.core.stream.input.source.SourceEventListener;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.extension.io.cdc.source.config.CronConfiguration;
 import io.siddhi.extension.io.cdc.source.polling.CDCPollingModeException;
 import io.siddhi.extension.io.cdc.util.CDCPollingUtil;
 import org.apache.log4j.Logger;
@@ -44,26 +45,56 @@ public class DefaultPollingStrategy extends PollingStrategy {
     private String pollingColumn;
     private int pollingInterval;
     private String lastReadPollingColumnValue;
+    private final CronConfiguration cronConfiguration;
 
     public DefaultPollingStrategy(HikariDataSource dataSource, ConfigReader configReader,
                                   SourceEventListener sourceEventListener, String tableName, String pollingColumn,
-                                  int pollingInterval, String appName) {
+                                  int pollingInterval, String appName, CronConfiguration cronConfiguration) {
         super(dataSource, configReader, sourceEventListener, tableName, appName);
         this.pollingColumn = pollingColumn;
         this.pollingInterval = pollingInterval;
+        this.cronConfiguration = cronConfiguration;
     }
 
     @Override
     public void poll() {
-        String selectQuery;
-        ResultSetMetaData metadata;
-        Map<String, Object> detailsMap;
         Connection connection = getConnection();
-        PreparedStatement statement = null;
-        ResultSet resultSet = null;
-
         try {
-            //If lastReadPollingColumnValue is null, assign it with last record of the table.
+            lastReadPollingColumnValue = getLastReadPollingColumnValue(connection);
+            if (cronConfiguration.getCronExpression() != null) {
+                printEvent(connection);
+            } else {
+                while (true) {
+                    if (paused) {
+                        pauseLock.lock();
+                        try {
+                            while (paused) {
+                                pauseLockCondition.await();
+                            }
+                        } catch (InterruptedException ie) {
+                            Thread.currentThread().interrupt();
+                        } finally {
+                            pauseLock.unlock();
+                        }
+                    }
+                    printEvent(connection);
+                    try {
+                        Thread.sleep((long) pollingInterval * 1000);
+                    } catch (InterruptedException e) {
+                        log.error(buildError("Error while polling the table %s.", tableName), e);
+                    }
+                }
+            }
+        } finally {
+            CDCPollingUtil.cleanupConnection(null, null, connection);
+        }
+    }
+
+    public String getLastReadPollingColumnValue(Connection connection) {
+        String selectQuery;
+        PreparedStatement statement;
+        ResultSet resultSet = null;
+        try {
             if (lastReadPollingColumnValue == null) {
                 selectQuery = getSelectQuery("MAX(" + pollingColumn + ")", "").trim();
                 statement = connection.prepareStatement(selectQuery);
@@ -76,52 +107,41 @@ public class DefaultPollingStrategy extends PollingStrategy {
                     lastReadPollingColumnValue = "-1";
                 }
             }
-
-            selectQuery = getSelectQuery("*", "WHERE " + pollingColumn + " > ?");
-            statement = connection.prepareStatement(selectQuery);
-
-            while (true) {
-                if (paused) {
-                    pauseLock.lock();
-                    try {
-                        while (paused) {
-                            pauseLockCondition.await();
-                        }
-                    } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
-                    } finally {
-                        pauseLock.unlock();
-                    }
-                }
-                try {
-                    statement.setString(1, lastReadPollingColumnValue);
-                    resultSet = statement.executeQuery();
-                    metadata = resultSet.getMetaData();
-                    while (resultSet.next()) {
-                        detailsMap = new HashMap<>();
-                        for (int i = 1; i <= metadata.getColumnCount(); i++) {
-                            String key = metadata.getColumnName(i);
-                            Object value = resultSet.getObject(key);
-                            detailsMap.put(key.toLowerCase(Locale.ENGLISH), value);
-                        }
-                        lastReadPollingColumnValue = resultSet.getString(pollingColumn);
-                        handleEvent(detailsMap);
-                    }
-                } catch (SQLException ex) {
-                    log.error(buildError("Error occurred while processing records in table %s.", tableName), ex);
-                } finally {
-                    CDCPollingUtil.cleanupConnection(resultSet, null, null);
-                }
-                try {
-                    Thread.sleep((long) pollingInterval * 1000);
-                } catch (InterruptedException e) {
-                    log.error(buildError("Error while polling the table %s.", tableName), e);
-                }
-            }
+            return lastReadPollingColumnValue;
         } catch (SQLException ex) {
             throw new CDCPollingModeException(buildError("Error in polling for changes on %s.", tableName), ex);
         } finally {
-            CDCPollingUtil.cleanupConnection(resultSet, statement, connection);
+            CDCPollingUtil.cleanupConnection(resultSet, null, null);
+        }
+    }
+
+    public void printEvent(Connection connection) {
+        ResultSet resultSet = null;
+        ResultSetMetaData metadata;
+        Map<String, Object> detailsMap;
+        String selectQuery;
+        PreparedStatement statement;
+
+        try {
+            selectQuery = getSelectQuery("*", "WHERE " + pollingColumn + " > ?");
+            statement = connection.prepareStatement(selectQuery);
+            statement.setString(1, lastReadPollingColumnValue);
+            resultSet = statement.executeQuery();
+            metadata = resultSet.getMetaData();
+            while (resultSet.next()) {
+                detailsMap = new HashMap<>();
+                for (int i = 1; i <= metadata.getColumnCount(); i++) {
+                    String key = metadata.getColumnName(i);
+                    Object value = resultSet.getObject(key);
+                    detailsMap.put(key.toLowerCase(Locale.ENGLISH), value);
+                }
+                lastReadPollingColumnValue = resultSet.getString(pollingColumn);
+                handleEvent(detailsMap);
+            }
+        } catch (SQLException ex) {
+            log.error(buildError("Error occurred while processing records in table %s.", tableName), ex);
+        } finally {
+            CDCPollingUtil.cleanupConnection(resultSet, null, null);
         }
     }
 
