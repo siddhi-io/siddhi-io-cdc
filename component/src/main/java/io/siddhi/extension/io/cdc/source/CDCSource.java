@@ -416,10 +416,8 @@ public class CDCSource extends Source<CDCSource.CdcState> {
         if (MetricsDataHolder.getInstance().getMetricService() != null &&
                 MetricsDataHolder.getInstance().getMetricManagementService().isEnabled()) {
             try {
-                if (MetricsDataHolder.getInstance().getMetricManagementService().isReporterRunning(
-                        "prometheus")) {
-                    isPrometheusReporterRunning = true;
-                }
+                isPrometheusReporterRunning = MetricsDataHolder.getInstance().getMetricManagementService()
+                        .isReporterRunning("prometheus");
             } catch (IllegalArgumentException e) {
                 log.debug("Prometheus reporter is not running. Hence cdc metrics will not be initialise.");
             }
@@ -464,7 +462,6 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                     changeDataCapture = new RdbmsChangeDataCapture(operation, sourceEventListener,
                             (ListeningMetrics) metrics);
                 }
-
                 //create the folder for history file if not exists
                 File directory = new File(historyFileDirectory);
                 if (!directory.exists()) {
@@ -582,7 +579,6 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                         }
                     }
                 };
-
                 engine = changeDataCapture.getEngine(completionCallback);
                 executorService.execute(engine);
                 break;
@@ -598,7 +594,6 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                         throw new SiddhiAppRuntimeException("CDC Polling mode run failed.", error);
                     }
                 };
-
                 cdcPoller.setCompletionCallback(cdcCompletionCallback);
                 executorService.execute(cdcPoller);
                 break;
@@ -640,7 +635,6 @@ public class CDCSource extends Source<CDCSource.CdcState> {
     @Override
     public void destroy() {
         this.disconnect();
-
         if (mode.equals(CDCSourceConstants.MODE_LISTENING)) {
             //Remove this CDCSource object from the CDCObjectKeeper.
             cdcSourceObjectKeeper.removeObject(this.hashCode());
