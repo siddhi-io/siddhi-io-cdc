@@ -27,7 +27,7 @@ public class MetricsUtils {
             return jdbcURL;
         }
         int n = jdbcURL.length();
-        int i = 30; // to get last 30 characters
+        int i = 30; // to get first 30 characters
         char c = jdbcURL.charAt(i);
         while (Character.isLetterOrDigit(c)) {
             if (i == n - 1) {
