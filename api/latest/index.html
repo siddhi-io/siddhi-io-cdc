@@ -114,7 +114,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#api-docs-v206" tabindex="1" class="md-skip">
+      <a href="#api-docs-v207" tabindex="1" class="md-skip">
         Skip to content
       </a>
     
@@ -338,6 +338,18 @@
   
 </nav>
     
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../2.0.7/" title="2.0.7" class="md-nav__link">
+      2.0.7
+    </a>
   </li>
 
         
@@ -585,9 +597,9 @@
                   <a href="https://github.com/siddhi-io/siddhi-io-cdc/blob/master/api/latest.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="api-docs-v206">API Docs - v2.0.6</h1>
+                <h1 id="api-docs-v207">API Docs - v2.0.7</h1>
 <div class="admonition info">
-<p class="admonition-title">Tested Siddhi Core version: <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/">5.1.7</a></em></p>
+<p class="admonition-title">Tested Siddhi Core version: <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/">5.1.13</a></em></p>
 <p>It could also support other Siddhi Core minor versions.</p>
 </div>
 <h2 id="source">Source</h2>
@@ -600,7 +612,7 @@
   </pre><p style="word-wrap: break-word;margin: 0;"><br>&nbsp;&nbsp;once ojdbc and xstreams jars are converted to OSGi copy the generated jars to the <code>&lt;distribution&gt;/lib</code>. Currently siddhi-io-cdc only supports the oracle database distributions 12 and above<br><br>See parameter: mode for supported databases and change events.</p>
 <p></p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
-<pre><code>@source(type=&quot;cdc&quot;, url=&quot;&lt;STRING&gt;&quot;, mode=&quot;&lt;STRING&gt;&quot;, jdbc.driver.name=&quot;&lt;STRING&gt;&quot;, username=&quot;&lt;STRING&gt;&quot;, password=&quot;&lt;STRING&gt;&quot;, pool.properties=&quot;&lt;STRING&gt;&quot;, datasource.name=&quot;&lt;STRING&gt;&quot;, table.name=&quot;&lt;STRING&gt;&quot;, polling.column=&quot;&lt;STRING&gt;&quot;, polling.interval=&quot;&lt;INT&gt;&quot;, operation=&quot;&lt;STRING&gt;&quot;, connector.properties=&quot;&lt;STRING&gt;&quot;, database.server.id=&quot;&lt;STRING&gt;&quot;, database.server.name=&quot;&lt;STRING&gt;&quot;, wait.on.missed.record=&quot;&lt;BOOL&gt;&quot;, missed.record.waiting.timeout=&quot;&lt;INT&gt;&quot;, @map(...)))
+<pre><code>@source(type=&quot;cdc&quot;, url=&quot;&lt;STRING&gt;&quot;, mode=&quot;&lt;STRING&gt;&quot;, jdbc.driver.name=&quot;&lt;STRING&gt;&quot;, username=&quot;&lt;STRING&gt;&quot;, password=&quot;&lt;STRING&gt;&quot;, pool.properties=&quot;&lt;STRING&gt;&quot;, datasource.name=&quot;&lt;STRING&gt;&quot;, table.name=&quot;&lt;STRING&gt;&quot;, polling.column=&quot;&lt;STRING&gt;&quot;, polling.interval=&quot;&lt;INT&gt;&quot;, operation=&quot;&lt;STRING&gt;&quot;, connector.properties=&quot;&lt;STRING&gt;&quot;, database.server.id=&quot;&lt;STRING&gt;&quot;, database.server.name=&quot;&lt;STRING&gt;&quot;, wait.on.missed.record=&quot;&lt;BOOL&gt;&quot;, missed.record.waiting.timeout=&quot;&lt;INT&gt;&quot;, polling.history.size=&quot;&lt;INT&gt;&quot;, cron.expression=&quot;&lt;STRING&gt;&quot;, @map(...)))
 </code></pre>
 
 <p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -727,7 +739,7 @@
     </tr>
     <tr>
         <td style="vertical-align: top">wait.on.missed.record</td>
-        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">Indicates whether the process needs to wait on missing/out-of-order records. <br>When this flag is set to 'true' the process will be held once it identifies a missing record. The missing recrod is identified by the sequence of the polling.column value. This can be used only with number fields and not recommended to use with time values as it will not be sequential.<br>This should be enabled ONLY where the records can be written out-of-order, (eg. concurrent writers) as this degrades the performance.</p></td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">Indicates whether the process needs to wait on missing/out-of-order records. <br>When this flag is set to 'true' the process will be held once it identifies a missing record. The missing record is identified by the sequence of the polling.column value. This can be used only with number fields and not recommended to use with time values as it will not be sequential.<br>This should be enabled ONLY where the records can be written out-of-order, (eg. concurrent writers) as this degrades the performance.</p></td>
         <td style="vertical-align: top">false</td>
         <td style="vertical-align: top">BOOL</td>
         <td style="vertical-align: top">Yes</td>
@@ -738,6 +750,22 @@
         <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">The timeout (specified in seconds) to retry for missing/out-of-order record. This should be used along with the wait.on.missed.record parameter. If the parameter is not set, the process will indefinitely wait for the missing record.</p></td>
         <td style="vertical-align: top">-1</td>
         <td style="vertical-align: top">INT</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">polling.history.size</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">Should be use when metrics are enabled, Define the number of polling details that should expose to metrics, Ex: if polling.history.size is 20, then it will expose details of last 20 polling</p></td>
+        <td style="vertical-align: top">10</td>
+        <td style="vertical-align: top">INT</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">cron.expression</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">This is used to specify a timestamp in cron expression.The records which has been inserted or updated is printed when the given expression satisfied by the system time. This parameter is applicable only when the mode is 'polling'.</p></td>
+        <td style="vertical-align: top">None</td>
+        <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
     </tr>
@@ -887,13 +915,13 @@ define stream insertSweetProductionStream (ID int, NAME string, WEIGHT int);
           </a>
         
         
-          <a href="../2.0.6/" title="2.0.6" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../2.0.7/" title="2.0.7" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                2.0.6
+                2.0.7
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
