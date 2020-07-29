@@ -29,7 +29,7 @@
     </modules>
     <groupId>io.siddhi.extension.io.cdc</groupId>
     <artifactId>siddhi-io-cdc-parent</artifactId>
-    <version>2.0.8</version>
+    <version>2.0.9-SNAPSHOT</version>
     <name>Siddhi I/O cdc</name>
     <dependencyManagement>
         <dependencies>
@@ -283,6 +283,6 @@
         <url>https://github.com/siddhi-io/siddhi-io-cdc.git</url>
         <developerConnection>scm:git:https://github.com/siddhi-io/siddhi-io-cdc.git</developerConnection>
         <connection>scm:git:https://github.com/siddhi-io/siddhi-io-cdc.git</connection>
-        <tag>v2.0.8</tag>
+        <tag>HEAD</tag>
     </scm>
 </project>
