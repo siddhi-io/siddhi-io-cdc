@@ -37,7 +37,7 @@ public class CDCSourceUtil {
                                                    String historyFileDirectory, String siddhiAppName,
                                                    String siddhiStreamName, int serverID, String serverName,
                                                    String connectorProperties, int cdcSourceHashCode,
-                                                   ListeningMetrics metrics)
+                                                   ListeningMetrics metrics, String pluginName)
             throws WrongConfigurationException {
         Map<String, Object> configMap = new HashMap<>();
         String host;
@@ -99,6 +99,7 @@ public class CDCSourceUtil {
                     configMap.put(CDCSourceConstants.DATABASE_PORT, port);
                     configMap.put(CDCSourceConstants.DATABASE_DBNAME, database);
                     configMap.put(CDCSourceConstants.TABLE_WHITELIST, tableName);
+                    configMap.put(CDCSourceConstants.PLUGIN_NAME, pluginName);
 
                     //Add other PostgreSQL specific details to configMap.
                     configMap.put(CDCSourceConstants.CONNECTOR_CLASS, CDCSourceConstants.POSTGRESQL_CONNECTOR_CLASS);

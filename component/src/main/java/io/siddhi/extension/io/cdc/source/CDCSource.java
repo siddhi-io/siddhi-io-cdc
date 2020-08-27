@@ -410,6 +410,8 @@ public class CDCSource extends Source<CDCSource.CdcState> {
         mode = optionHolder.validateAndGetStaticValue(CDCSourceConstants.MODE, CDCSourceConstants.MODE_LISTENING);
         //initialize common mandatory parameters
         String tableName = optionHolder.validateAndGetOption(CDCSourceConstants.TABLE_NAME).getValue();
+        String pluginName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.PLUGIN_NAME,
+                CDCSourceConstants.DECORDERBUFS_PLUGIN);
         siddhiAppName = siddhiAppContext.getName();
         this.siddhiAppContextExecutorService = siddhiAppContext.getExecutorService();
         boolean isPrometheusReporterRunning = false;
@@ -474,7 +476,7 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                 try {
                     Map<String, Object> configMap = CDCSourceUtil.getConfigMap(username, password, url, tableName,
                             historyFileDirectory, siddhiAppName, streamName, serverID, serverName, connectorProperties,
-                            this.hashCode(), (ListeningMetrics) metrics);
+                            this.hashCode(), (ListeningMetrics) metrics, pluginName);
                     changeDataCapture.setConfig(configMap);
                 } catch (WrongConfigurationException ex) {
                     throw new SiddhiAppCreationException("The cdc source couldn't get started because of invalid" +
