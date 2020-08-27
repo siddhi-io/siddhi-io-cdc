@@ -37,13 +37,15 @@ public class CDCSourceUtil {
                                                    String historyFileDirectory, String siddhiAppName,
                                                    String siddhiStreamName, int serverID, String serverName,
                                                    String connectorProperties, int cdcSourceHashCode,
-                                                   ListeningMetrics metrics)
+                                                   ListeningMetrics metrics, String pluginName)
             throws WrongConfigurationException {
         Map<String, Object> configMap = new HashMap<>();
         String host;
         int port;
         String database;
         Boolean isMongodb = false;
+
+        Map<String, String> connectorPropertiesMap = getConnectorPropertiesMap(connectorProperties);
 
         //Add schema specific details to configMap
         String[] splittedURL = url.split(":");
@@ -99,6 +101,7 @@ public class CDCSourceUtil {
                     configMap.put(CDCSourceConstants.DATABASE_PORT, port);
                     configMap.put(CDCSourceConstants.DATABASE_DBNAME, database);
                     configMap.put(CDCSourceConstants.TABLE_WHITELIST, tableName);
+                    configMap.put(CDCSourceConstants.PLUGIN_NAME, pluginName);
 
                     //Add other PostgreSQL specific details to configMap.
                     configMap.put(CDCSourceConstants.CONNECTOR_CLASS, CDCSourceConstants.POSTGRESQL_CONNECTOR_CLASS);
@@ -148,8 +151,6 @@ public class CDCSourceUtil {
                                 siddhiStreamName + ". Expected url format: jdbc:oracle:<driver>://<host>:<port>/<sid>");
                     }
 
-                    Map<String, String> connectorPropertiesMap = getConnectorPropertiesMap(connectorProperties);
-
                     // Validate required connector properties
                     if (!connectorPropertiesMap.containsKey(CDCSourceConstants.ORACLE_OUTSERVER_PROPERTY_NAME)) {
                         throw new WrongConfigurationException("Required properties " +
@@ -157,11 +158,6 @@ public class CDCSourceUtil {
                                 CDCSourceConstants.CONNECTOR_PROPERTIES + " configurations.");
                     }
 
-                    String pdbName = connectorPropertiesMap.get(CDCSourceConstants.ORACLE_PDB_PROPERTY_NAME);
-
-                    if (pdbName != null) {
-                        configMap.put(CDCSourceConstants.ORACLE_PDB_PROPERTY_NAME, pdbName);
-                    }
                     configMap.put(CDCSourceConstants.DATABASE_HOSTNAME, host);
                     configMap.put(CDCSourceConstants.DATABASE_PORT, port);
                     configMap.put(CDCSourceConstants.TABLE_WHITELIST, tableName);
@@ -251,7 +247,7 @@ public class CDCSourceUtil {
             configMap.put(CDCSourceConstants.CONNECTOR_NAME, siddhiAppName + siddhiStreamName);
 
             //set additional connector properties using comma separated key value pair string
-            for (Map.Entry<String, String> entry : getConnectorPropertiesMap(connectorProperties).entrySet()) {
+            for (Map.Entry<String, String> entry : connectorPropertiesMap.entrySet()) {
                 configMap.put(entry.getKey(), entry.getValue());
             }
             return configMap;

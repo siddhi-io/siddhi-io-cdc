@@ -245,12 +245,12 @@
         <siddhi-map-keyvalue.version>2.0.7</siddhi-map-keyvalue.version>
         <jacoco.plugin.version>0.7.9</jacoco.plugin.version>
         <mysql-binlog-connector-java.version>0.13.0</mysql-binlog-connector-java.version>
-        <debezium-connector-mysql.version>1.1.2.Final</debezium-connector-mysql.version>
-        <debezium-embedded.version>1.1.2.Final</debezium-embedded.version>
-        <debezium-connector-oracle.version>1.1.2.Final</debezium-connector-oracle.version>
-        <debezium-connector-postgres.version>1.1.2.Final</debezium-connector-postgres.version>
-        <debezium-connector-sqlserver.version>1.1.2.Final</debezium-connector-sqlserver.version>
-        <debezium-connector-mongodb.version>1.1.2.Final</debezium-connector-mongodb.version>
+        <debezium-connector-mysql.version>1.2.1.Final</debezium-connector-mysql.version>
+        <debezium-embedded.version>1.2.1.Final</debezium-embedded.version>
+        <debezium-connector-oracle.version>1.2.1.Final</debezium-connector-oracle.version>
+        <debezium-connector-postgres.version>1.2.1.Final</debezium-connector-postgres.version>
+        <debezium-connector-sqlserver.version>1.2.1.Final</debezium-connector-sqlserver.version>
+        <debezium-connector-mongodb.version>1.2.1.Final</debezium-connector-mongodb.version>
         <version.oracle.driver>12.1.0.2</version.oracle.driver>
         <hikari.version>3.2.0</hikari.version>
         <org.testng.version>6.11</org.testng.version>

@@ -41,6 +41,8 @@ public class CDCSourceConstants {
     public static final String CONNECTOR_CLASS = "connector.class";
     public static final String DATABASE_PORT = "database.port";
     public static final String TABLE_WHITELIST = "table.whitelist";
+    public static final String PLUGIN_NAME = "plugin.name";
+    public static final String DECORDERBUFS_PLUGIN = "decoderbufs";
     public static final String DATABASE_DBNAME = "database.dbname";
     public static final String DATABASE_HOSTNAME = "database.hostname";
     public static final String DATABASE_USER = "database.user";
