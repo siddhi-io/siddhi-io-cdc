@@ -159,10 +159,12 @@ public class CDCSourceUtil {
 
                     String pdbName = connectorPropertiesMap.get(CDCSourceConstants.ORACLE_PDB_PROPERTY_NAME);
 
+                    if (pdbName != null) {
+                        configMap.put(CDCSourceConstants.ORACLE_PDB_PROPERTY_NAME, pdbName);
+                    }
                     configMap.put(CDCSourceConstants.DATABASE_HOSTNAME, host);
                     configMap.put(CDCSourceConstants.DATABASE_PORT, port);
-                    configMap.put(CDCSourceConstants.TABLE_WHITELIST,
-                            String.format("%s.%s", pdbName != null ? pdbName : database, tableName));
+                    configMap.put(CDCSourceConstants.TABLE_WHITELIST, tableName);
                     configMap.put(CDCSourceConstants.DATABASE_DBNAME, database);
                     configMap.put(CDCSourceConstants.CONNECTOR_CLASS, CDCSourceConstants.ORACLE_CONNECTOR_CLASS);
                     if (metrics != null) {
