@@ -157,7 +157,7 @@ public class WaitOnMissingRecordPollingStrategy extends PollingStrategy {
                     }
                     log.error(buildError("Error occurred while processing records in table %s.", tableName), e);
                 } finally {
-                    CDCPollingUtil.cleanupConnection(resultSet, null, null);
+                    CDCPollingUtil.cleanupConnection(resultSet, statement, null);
                 }
                 try {
                     if (metrics != null) {

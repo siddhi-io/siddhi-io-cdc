@@ -107,7 +107,7 @@ public class DefaultPollingStrategy extends PollingStrategy {
 
     public String getLastReadPollingColumnValue(Connection connection) {
         String selectQuery;
-        PreparedStatement statement;
+        PreparedStatement statement = null;
         ResultSet resultSet = null;
         try {
             if (lastReadPollingColumnValue == null) {
@@ -126,7 +126,7 @@ public class DefaultPollingStrategy extends PollingStrategy {
         } catch (SQLException ex) {
             throw new CDCPollingModeException(buildError("Error in polling for changes on %s.", tableName), ex);
         } finally {
-            CDCPollingUtil.cleanupConnection(resultSet, null, null);
+            CDCPollingUtil.cleanupConnection(resultSet, statement, null);
         }
     }
 
@@ -135,7 +135,7 @@ public class DefaultPollingStrategy extends PollingStrategy {
         ResultSetMetaData metadata;
         Map<String, Object> detailsMap;
         String selectQuery;
-        PreparedStatement statement;
+        PreparedStatement statement = null;
         boolean isError = false;
         try {
             selectQuery = getSelectQuery("*", "WHERE " + pollingColumn + " > ?");
@@ -161,7 +161,7 @@ public class DefaultPollingStrategy extends PollingStrategy {
             }
             log.error(buildError("Error occurred while processing records in table %s.", tableName), ex);
         } finally {
-            CDCPollingUtil.cleanupConnection(resultSet, null, null);
+            CDCPollingUtil.cleanupConnection(resultSet, statement, null);
             return isError;
         }
     }
