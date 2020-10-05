@@ -94,6 +94,21 @@ import static org.quartz.CronExpression.isValidExpression;
                 "'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'." +
                 "\n\nFor 'polling' mode: Keys are specified as the columns of the table." +
 
+                "In order to connect in to the database table for receive CDC events, url, username, password and " +
+                "driverClassName(in polling mode) can be provided in deployment.yaml file under the siddhi namespace " +
+                "as below, " +
+                "siddhi:\n" +
+                "  extensions:\n" +
+                "    -\n" +
+                "      extension:\n" +
+                "        name: 'cdc'\n" +
+                "        namespace: 'source'\n" +
+                "        properties:\n" +
+                "          url: jdbc:sqlserver://localhost:1433;databaseName=CDC_DATA_STORE\n" +
+                "          password: <password>\n" +
+                "          username: <>\n" +
+                "          driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver " +
+
                 "#### Preparations required for working with Oracle Databases in listening mode\n" +
                 "\n" +
                 "Using the extension in Windows, Mac OSX and AIX are pretty straight forward inorder to achieve the " +
@@ -174,7 +189,7 @@ import static org.quartz.CronExpression.isValidExpression;
                         description = "Name of the wso2 datasource to connect to the database." +
                                 " When datasource name is provided, the URL, username and password are not needed. " +
                                 "A datasource based connection is given more priority over the URL based connection." +
-                                "\n This parameter is applicable only when the mode is set to 'polling', and it can" +
+                                "\n This parameter is applicable only when the mode is set to **polling**, and it can" +
                                 " be applied only when you use this extension with WSO2 Stream Processor.",
                         type = DataType.STRING,
                         defaultValue = "<Empty_String>",
