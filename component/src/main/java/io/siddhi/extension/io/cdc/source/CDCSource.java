@@ -282,6 +282,14 @@ import static org.quartz.CronExpression.isValidExpression;
                         optional = true,
                         type = {DataType.STRING},
                         defaultValue = "None"
+                ),
+                @Parameter(
+                        name = "plugin.name",
+                        description = "This is used when the logical decoding output plugin needed to specify " +
+                                "to create the connection to the database. Mostly this will be required on PostgreSQL.",
+                        optional = true,
+                        type = {DataType.STRING},
+                        defaultValue = "decoderbufs"
                 )
         },
         examples = {
@@ -405,8 +413,14 @@ public class CDCSource extends Source<CDCSource.CdcState> {
     public StateFactory<CdcState> init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
                                        String[] requestedTransportPropertyNames, ConfigReader configReader,
                                        SiddhiAppContext siddhiAppContext) {
+        String url;
+        String username;
+        String password;
+        Map<String, String> deploymentConfigMap = new HashMap();
+        deploymentConfigMap.putAll(configReader.getAllConfigs());
         //initialize mode
         this.cronConfiguration = new CronConfiguration();
+        configReader.getAllConfigs();
         mode = optionHolder.validateAndGetStaticValue(CDCSourceConstants.MODE, CDCSourceConstants.MODE_LISTENING);
         //initialize common mandatory parameters
         String tableName = optionHolder.validateAndGetOption(CDCSourceConstants.TABLE_NAME).getValue();
@@ -424,11 +438,24 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                 log.debug("Prometheus reporter is not running. Hence cdc metrics will not be initialise.");
             }
         }
+        if (deploymentConfigMap.containsKey(CDCSourceConstants.DATABASE_CONNECTION_URL)) {
+            url = deploymentConfigMap.get(CDCSourceConstants.DATABASE_CONNECTION_URL);
+        } else {
+            url = optionHolder.validateAndGetOption(CDCSourceConstants.DATABASE_CONNECTION_URL).getValue();
+        }
+        if (deploymentConfigMap.containsKey(CDCSourceConstants.USERNAME)) {
+            username = deploymentConfigMap.get(CDCSourceConstants.USERNAME);
+        } else {
+            username = optionHolder.validateAndGetOption(CDCSourceConstants.USERNAME).getValue();
+        }
+        if (deploymentConfigMap.containsKey(CDCSourceConstants.PASSWORD)) {
+            password = deploymentConfigMap.get(CDCSourceConstants.PASSWORD);
+        } else {
+            password = optionHolder.validateAndGetOption(CDCSourceConstants.PASSWORD).getValue();
+        }
         switch (mode) {
             case CDCSourceConstants.MODE_LISTENING:
-                String url = optionHolder.validateAndGetOption(CDCSourceConstants.DATABASE_CONNECTION_URL).getValue();
-                String username = optionHolder.validateAndGetOption(CDCSourceConstants.USERNAME).getValue();
-                String password = optionHolder.validateAndGetOption(CDCSourceConstants.PASSWORD).getValue();
+
                 String streamName = sourceEventListener.getStreamDefinition().getId();
 
                 //initialize mandatory parameters
@@ -528,10 +555,12 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                 } else {
                     String driverClassName;
                     try {
-                        driverClassName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.JDBC_DRIVER_NAME);
-                        url = optionHolder.validateAndGetOption(CDCSourceConstants.DATABASE_CONNECTION_URL).getValue();
-                        username = optionHolder.validateAndGetOption(CDCSourceConstants.USERNAME).getValue();
-                        password = optionHolder.validateAndGetOption(CDCSourceConstants.PASSWORD).getValue();
+                        if (deploymentConfigMap.containsKey(CDCSourceConstants.JDBC_DRIVER_NAME)) {
+                            driverClassName = deploymentConfigMap.get(CDCSourceConstants.JDBC_DRIVER_NAME);
+                        } else {
+                            driverClassName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.
+                                    JDBC_DRIVER_NAME);
+                        }
                         if (isPrometheusReporterRunning) {
                             metrics = new PollingMetrics(siddhiAppName, url, tableName);
                         }
