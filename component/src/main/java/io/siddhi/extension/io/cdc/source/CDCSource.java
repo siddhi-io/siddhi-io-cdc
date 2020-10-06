@@ -97,18 +97,19 @@ import static org.quartz.CronExpression.isValidExpression;
                 "In order to connect in to the database table for receive CDC events, url, username, password and " +
                 "driverClassName(in polling mode) can be provided in deployment.yaml file under the siddhi namespace " +
                 "as below, " +
-                "siddhi:\n" +
-                "  extensions:\n" +
-                "    -\n" +
-                "      extension:\n" +
-                "        name: 'cdc'\n" +
-                "        namespace: 'source'\n" +
-                "        properties:\n" +
-                "          url: jdbc:sqlserver://localhost:1433;databaseName=CDC_DATA_STORE\n" +
-                "          password: <password>\n" +
-                "          username: <>\n" +
-                "          driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver " +
-
+                " ```\n" +
+                "  siddhi:\n" +
+                "    extensions:\n" +
+                "      -\n" +
+                "        extension:\n" +
+                "          name: 'cdc'\n" +
+                "          namespace: 'source'\n" +
+                "          properties:\n" +
+                "            url: jdbc:sqlserver://localhost:1433;databaseName=CDC_DATA_STORE\n" +
+                "            password: <password>\n" +
+                "            username: <>\n" +
+                "            driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver " +
+                " ```\n"+
                 "#### Preparations required for working with Oracle Databases in listening mode\n" +
                 "\n" +
                 "Using the extension in Windows, Mac OSX and AIX are pretty straight forward inorder to achieve the " +
@@ -133,7 +134,17 @@ import static org.quartz.CronExpression.isValidExpression;
                 "  once ojdbc and xstreams jars are converted to OSGi copy the generated jars to the " +
                 "`<distribution>/lib`. Currently siddhi-io-cdc only supports the oracle database distributions " +
                 "12 and above" +
-
+                "\n" +
+                "#### Configurations for PostgreSQL\n" +
+                "When using listening mode with PostgreSQL, following properties has to be configured accordingly to " +
+                "create the connection." +
+                "\n" +
+                "slot.name: (default value = debezium) in postgreSQL only one connection can be created from " +
+                "           single slot, so to create multiple connection custom slot.name should be provided. " +
+                "plugin.name: (default value = decoderbufs ) Logical decoding output plugin name which the database " +
+                "is configured with. Other supported values are pgoutput, decoderbufs, wal2json." +
+                "table.name: table name should be provided as <schema_name>.<table_name>. As an example," +
+                " public.customer " +
                 "\n\nSee parameter: mode for supported databases and change events.",
         parameters = {
                 @Parameter(name = CDCSourceConstants.DATABASE_CONNECTION_URL,
