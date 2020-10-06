@@ -109,7 +109,7 @@ import static org.quartz.CronExpression.isValidExpression;
                 "            password: <password>\n" +
                 "            username: <>\n" +
                 "            driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver " +
-                " ```\n"+
+                " ```\n" +
                 "#### Preparations required for working with Oracle Databases in listening mode\n" +
                 "\n" +
                 "Using the extension in Windows, Mac OSX and AIX are pretty straight forward inorder to achieve the " +
