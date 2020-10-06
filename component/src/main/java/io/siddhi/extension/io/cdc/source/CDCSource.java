@@ -674,7 +674,9 @@ public class CDCSource extends Source<CDCSource.CdcState> {
             }
             cdcPoller.stop();
         } else if (mode.equals(CDCSourceConstants.MODE_LISTENING)) {
-            engine.stop();
+            if (engine != null) {
+                engine.stop();
+            }
         }
     }
 
