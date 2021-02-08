@@ -71,7 +71,7 @@ public class CDCSourceUtil {
 
                     //Add extracted url details to configMap.
                     configMap.put(CDCSourceConstants.DATABASE_PORT, port);
-                    configMap.put(CDCSourceConstants.TABLE_WHITELIST, database + "." + tableName);
+                    configMap.put(CDCSourceConstants.TABLE_TABLE_INCLUDE_LIST, database + "." + tableName);
                     configMap.put(CDCSourceConstants.DATABASE_HOSTNAME, host);
 
                     //Add other MySQL specific details to configMap.
@@ -100,7 +100,7 @@ public class CDCSourceUtil {
                     configMap.put(CDCSourceConstants.DATABASE_HOSTNAME, host);
                     configMap.put(CDCSourceConstants.DATABASE_PORT, port);
                     configMap.put(CDCSourceConstants.DATABASE_DBNAME, database);
-                    configMap.put(CDCSourceConstants.TABLE_WHITELIST, tableName);
+                    configMap.put(CDCSourceConstants.TABLE_TABLE_INCLUDE_LIST, tableName);
                     configMap.put(CDCSourceConstants.PLUGIN_NAME, pluginName);
 
                     //Add other PostgreSQL specific details to configMap.
@@ -127,7 +127,7 @@ public class CDCSourceUtil {
                     //Add extracted url details to configMap.
                     configMap.put(CDCSourceConstants.DATABASE_HOSTNAME, host);
                     configMap.put(CDCSourceConstants.DATABASE_PORT, port);
-                    configMap.put(CDCSourceConstants.TABLE_WHITELIST, tableName);
+                    configMap.put(CDCSourceConstants.TABLE_TABLE_INCLUDE_LIST, tableName);
                     configMap.put(CDCSourceConstants.DATABASE_DBNAME, database);
 
                     //Add other SQLServer specific details to configMap.
@@ -160,7 +160,7 @@ public class CDCSourceUtil {
 
                     configMap.put(CDCSourceConstants.DATABASE_HOSTNAME, host);
                     configMap.put(CDCSourceConstants.DATABASE_PORT, port);
-                    configMap.put(CDCSourceConstants.TABLE_WHITELIST, tableName);
+                    configMap.put(CDCSourceConstants.TABLE_TABLE_INCLUDE_LIST, tableName);
                     configMap.put(CDCSourceConstants.DATABASE_DBNAME, database);
                     configMap.put(CDCSourceConstants.CONNECTOR_CLASS, CDCSourceConstants.ORACLE_CONNECTOR_CLASS);
                     if (metrics != null) {
@@ -192,7 +192,7 @@ public class CDCSourceUtil {
                     //unique name that identifies the connector and/or MongoDB replica set or sharded cluster
                     configMap.put(CDCSourceConstants.MONGODB_NAME, replicaSetName);
                     //fully-qualified namespaces for MongoDB collections to be monitored
-                    configMap.put(CDCSourceConstants.MONGODB_COLLECTION_WHITELIST, database + "." + tableName);
+                    configMap.put(CDCSourceConstants.MONGODB_COLLECTION_INCLUDE_LIST, database + "." + tableName);
                     if (metrics != null) {
                         metrics.setDbType("MongoDB");
                     }

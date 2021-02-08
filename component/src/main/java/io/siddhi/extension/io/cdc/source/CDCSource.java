@@ -139,12 +139,12 @@ import static org.quartz.CronExpression.isValidExpression;
                 "When using listening mode with PostgreSQL, following properties has to be configured accordingly to " +
                 "create the connection." +
                 "\n" +
-                "slot.name: (default value = debezium) in postgreSQL only one connection can be created from " +
-                "           single slot, so to create multiple connection custom slot.name should be provided. " +
-                "plugin.name: (default value = decoderbufs ) Logical decoding output plugin name which the database " +
-                "is configured with. Other supported values are pgoutput, decoderbufs, wal2json." +
-                "table.name: table name should be provided as <schema_name>.<table_name>. As an example," +
-                " public.customer " +
+                "***slot.name***: (default value = debezium) in postgreSQL only one connection can be created from " +
+                "           single slot, so to create multiple connection custom slot.name should be provided.\n " +
+                "***plugin.name***: (default value = decoderbufs ) Logical decoding output plugin name which the " +
+                "database is configured with. Other supported values are pgoutput, decoderbufs, wal2json.\n" +
+                "***table.name***: table name should be provided as <schema_name>.<table_name>. As an example," +
+                " public.customer \n" +
                 "\n\nSee parameter: mode for supported databases and change events.",
         parameters = {
                 @Parameter(name = CDCSourceConstants.DATABASE_CONNECTION_URL,
@@ -429,6 +429,7 @@ public class CDCSource extends Source<CDCSource.CdcState> {
     private Metrics metrics;
     private String siddhiAppName;
     private ExecutorService siddhiAppContextExecutorService;
+    private boolean multipleOperationEnable = false;
 
     @Override
     protected ServiceDeploymentInfo exposeServiceDeploymentInfo() {
@@ -753,7 +754,7 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                     " not be defined for listening mode");
         }
 
-        if (!(operation.equalsIgnoreCase(CDCSourceConstants.INSERT)
+        if (!operation.contains(",") && !(operation.equalsIgnoreCase(CDCSourceConstants.INSERT)
                 || operation.equalsIgnoreCase(CDCSourceConstants.UPDATE)
                 || operation.equalsIgnoreCase(CDCSourceConstants.DELETE))) {
             throw new SiddhiAppValidationException("Unsupported operation: '" + operation + "'." +

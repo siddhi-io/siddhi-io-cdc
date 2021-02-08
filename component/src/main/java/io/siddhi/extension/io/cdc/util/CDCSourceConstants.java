@@ -40,7 +40,7 @@ public class CDCSourceConstants {
     public static final String DELETE = "delete";
     public static final String CONNECTOR_CLASS = "connector.class";
     public static final String DATABASE_PORT = "database.port";
-    public static final String TABLE_WHITELIST = "table.whitelist";
+    public static final String TABLE_TABLE_INCLUDE_LIST = "table.include.list";
     public static final String PLUGIN_NAME = "plugin.name";
     public static final String DECORDERBUFS_PLUGIN = "decoderbufs";
     public static final String DATABASE_DBNAME = "database.dbname";
@@ -86,7 +86,7 @@ public class CDCSourceConstants {
     public static final String MONGODB_PASSWORD = "mongodb.password";
     public static final String MONGODB_HOSTS = "mongodb.hosts";
     public static final String MONGODB_NAME = "mongodb.name";
-    public static final String MONGODB_COLLECTION_WHITELIST = "collection.whitelist";
+    public static final String MONGODB_COLLECTION_INCLUDE_LIST = "collection.include.list";
     public static final String MONGO_COLLECTION_OBJECT_ID = "$oid";
     public static final String MONGO_COLLECTION_ID = "id";
     public static final String MONGO_COLLECTION_INSERT_ID = "_id";
@@ -102,4 +102,8 @@ public class CDCSourceConstants {
     public static final String TRIGGER_NAME = "CDCCronTriggerName";
     public static final String TRIGGER_GROUP = "CDCCronTriggerGroup";
     public static final String POLLING_STRATEGY = "PollingStrategy";
+
+    public static final String TRANSPORT_PROPERTIES = "transportProperties";
+    public static final String OPERATION_SEPARATOR = ",";
 }
+

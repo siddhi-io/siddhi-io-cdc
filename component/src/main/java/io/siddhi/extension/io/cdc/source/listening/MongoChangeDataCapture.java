@@ -28,8 +28,10 @@ import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -45,6 +47,7 @@ public class MongoChangeDataCapture extends ChangeDataCapture {
     Map<String, Object> createMap(ConnectRecord connectRecord, String operation) {
         //Map to return
         Map<String, Object> detailsMap = new HashMap<>();
+        List<Object> transportProperties = new ArrayList();
         Struct record = (Struct) connectRecord.value();
         //get the change data object's operation.
         String op;
@@ -62,12 +65,16 @@ public class MongoChangeDataCapture extends ChangeDataCapture {
                 op.equals(CDCSourceConstants.CONNECT_RECORD_UPDATE_OPERATION)) {
             switch (op) {
                 case CDCSourceConstants.CONNECT_RECORD_INSERT_OPERATION:
+                    detailsMap.put(CDCSourceConstants.TRANSPORT_PROPERTIES,
+                            transportProperties.add(CDCSourceConstants.INSERT));
                     //append row details after insert.
                     String insertString = (String) record.get(CDCSourceConstants.AFTER);
                     JSONObject jsonObj = new JSONObject(insertString);
                     detailsMap = getMongoDetailMap(jsonObj);
                     break;
                 case CDCSourceConstants.CONNECT_RECORD_DELETE_OPERATION:
+                    detailsMap.put(CDCSourceConstants.TRANSPORT_PROPERTIES,
+                            transportProperties.add(CDCSourceConstants.DELETE));
                     //append row details before delete.
                     String deleteDocumentId = (String) ((Struct) connectRecord.key())
                             .get(CDCSourceConstants.MONGO_COLLECTION_ID);
@@ -77,6 +84,8 @@ public class MongoChangeDataCapture extends ChangeDataCapture {
 
                     break;
                 case CDCSourceConstants.CONNECT_RECORD_UPDATE_OPERATION:
+                    detailsMap.put(CDCSourceConstants.TRANSPORT_PROPERTIES,
+                            transportProperties.add(CDCSourceConstants.UPDATE));
                     //append row details before update.
                     String updateDocument = (String) record.get(CDCSourceConstants.MONGO_PATCH);
                     JSONObject jsonObj1 = new JSONObject(updateDocument);
