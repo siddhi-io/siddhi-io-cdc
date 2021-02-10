@@ -239,7 +239,12 @@ import static org.quartz.CronExpression.isValidExpression;
                 @Parameter(
                         name = CDCSourceConstants.OPERATION,
                         description = "The change event operation you want to carry out. Possible values are" +
-                                " 'insert', 'update' or 'delete'. This parameter is not case sensitive. " +
+                                " 'insert', 'update', 'delete' or now you can provide multiple operation as coma " +
+                                "separated values. This parameter is not case sensitive.  \n " +
+                                "When provided the multiple operations, the relevant operation for each event will " +
+                                "be return as a transport property **trp:operation** this can be access when mapping " +
+                                "the events. According to the operation, the required fields from the stream has to" +
+                                " be extracted. \n" +
                                 "**It is required to specify a value only when the mode is 'listening'.**\n",
                         type = DataType.STRING
                 ),
