@@ -434,7 +434,6 @@ public class CDCSource extends Source<CDCSource.CdcState> {
     private Metrics metrics;
     private String siddhiAppName;
     private ExecutorService siddhiAppContextExecutorService;
-    private boolean multipleOperationEnable = false;
 
     @Override
     protected ServiceDeploymentInfo exposeServiceDeploymentInfo() {
