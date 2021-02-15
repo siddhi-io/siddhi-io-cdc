@@ -239,7 +239,7 @@ import static org.quartz.CronExpression.isValidExpression;
                 @Parameter(
                         name = CDCSourceConstants.OPERATION,
                         description = "The change event operation you want to carry out. Possible values are" +
-                                " 'insert', 'update', 'delete' or now you can provide multiple operation as coma " +
+                                " 'insert', 'update', 'delete' or you can provide multiple operation as coma " +
                                 "separated values. This parameter is not case sensitive.  \n " +
                                 "When provided the multiple operations, the relevant operation for each event will " +
                                 "be return as a transport property **trp:operation** this can be access when mapping " +
@@ -350,6 +350,19 @@ import static org.quartz.CronExpression.isValidExpression;
                         syntax = "@source(type = 'cdc' , url = 'jdbc:mysql://localhost:3306/SimpleDB', " +
                                 "\nusername = 'cdcuser', password = 'pswd4cdc', " +
                                 "\ntable.name = 'students', operation = 'delete', " +
+                                "\n@map(type='keyvalue', @attributes(before_id = 'before_id'," +
+                                " before_name = 'before_name', name = 'name', id = 'id'," +
+                                " operation= 'trp:operation')))" +
+                                "\ndefine stream inputStream (id string, name string, before_id string," +
+                                " before_name string, operation string);",
+                        description = "In this example, the CDC source listens to the row deletions made in the " +
+                                "'students' table. This table belongs to the 'SimpleDB' database that can be accessed" +
+                                " via the given URL."
+                ),
+                @Example(
+                        syntax = "@source(type = 'cdc' , url = 'jdbc:mysql://localhost:3306/SimpleDB', " +
+                                "\nusername = 'cdcuser', password = 'pswd4cdc', " +
+                                "\ntable.name = 'students', operation = 'insert,update,delete', " +
                                 "\n@map(type='keyvalue', @attributes(before_id = 'before_id'," +
                                 " before_name = 'before_name')))" +
                                 "\ndefine stream inputStream (before_id string, before_name string);",
