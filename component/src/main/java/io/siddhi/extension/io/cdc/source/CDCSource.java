@@ -351,10 +351,8 @@ import static org.quartz.CronExpression.isValidExpression;
                                 "\nusername = 'cdcuser', password = 'pswd4cdc', " +
                                 "\ntable.name = 'students', operation = 'delete', " +
                                 "\n@map(type='keyvalue', @attributes(before_id = 'before_id'," +
-                                " before_name = 'before_name', name = 'name', id = 'id'," +
-                                " operation= 'trp:operation')))" +
-                                "\ndefine stream inputStream (id string, name string, before_id string," +
-                                " before_name string, operation string);",
+                                " before_name = 'before_name')))" +
+                                "\ndefine stream inputStream (before_id string, before_name string);",
                         description = "In this example, the CDC source listens to the row deletions made in the " +
                                 "'students' table. This table belongs to the 'SimpleDB' database that can be accessed" +
                                 " via the given URL."
@@ -364,9 +362,11 @@ import static org.quartz.CronExpression.isValidExpression;
                                 "\nusername = 'cdcuser', password = 'pswd4cdc', " +
                                 "\ntable.name = 'students', operation = 'insert,update,delete', " +
                                 "\n@map(type='keyvalue', @attributes(before_id = 'before_id'," +
-                                " before_name = 'before_name')))" +
-                                "\ndefine stream inputStream (before_id string, before_name string);",
-                        description = "In this example, the CDC source listens to the row deletions made in the " +
+                                " before_name = 'before_name', name = 'name', id = 'id'," +
+                                " operation= 'trp:operation')))" +
+                                "\ndefine stream inputStream (id string, name string, before_id string," +
+                                " before_name string, operation string);",
+                        description = "In this example, the CDC source listens to multiple operations of the " +
                                 "'students' table. This table belongs to the 'SimpleDB' database that can be accessed" +
                                 " via the given URL."
                 ),
