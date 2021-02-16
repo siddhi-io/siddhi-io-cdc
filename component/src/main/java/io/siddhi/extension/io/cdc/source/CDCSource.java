@@ -94,6 +94,22 @@ import static org.quartz.CronExpression.isValidExpression;
                 "'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'." +
                 "\n\nFor 'polling' mode: Keys are specified as the columns of the table." +
 
+                "In order to connect in to the database table for receive CDC events, url, username, password and " +
+                "driverClassName(in polling mode) can be provided in deployment.yaml file under the siddhi namespace " +
+                "as below, " +
+                " ```\n" +
+                "  siddhi:\n" +
+                "    extensions:\n" +
+                "      -\n" +
+                "        extension:\n" +
+                "          name: 'cdc'\n" +
+                "          namespace: 'source'\n" +
+                "          properties:\n" +
+                "            url: jdbc:sqlserver://localhost:1433;databaseName=CDC_DATA_STORE\n" +
+                "            password: <password>\n" +
+                "            username: <>\n" +
+                "            driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver " +
+                " ```\n" +
                 "#### Preparations required for working with Oracle Databases in listening mode\n" +
                 "\n" +
                 "Using the extension in Windows, Mac OSX and AIX are pretty straight forward inorder to achieve the " +
@@ -118,7 +134,17 @@ import static org.quartz.CronExpression.isValidExpression;
                 "  once ojdbc and xstreams jars are converted to OSGi copy the generated jars to the " +
                 "`<distribution>/lib`. Currently siddhi-io-cdc only supports the oracle database distributions " +
                 "12 and above" +
-
+                "\n" +
+                "#### Configurations for PostgreSQL\n" +
+                "When using listening mode with PostgreSQL, following properties has to be configured accordingly to " +
+                "create the connection." +
+                "\n" +
+                "***slot.name***: (default value = debezium) in postgreSQL only one connection can be created from " +
+                "           single slot, so to create multiple connection custom slot.name should be provided.\n " +
+                "***plugin.name***: (default value = decoderbufs ) Logical decoding output plugin name which the " +
+                "database is configured with. Other supported values are pgoutput, decoderbufs, wal2json.\n" +
+                "***table.name***: table name should be provided as <schema_name>.<table_name>. As an example," +
+                " public.customer \n" +
                 "\n\nSee parameter: mode for supported databases and change events.",
         parameters = {
                 @Parameter(name = CDCSourceConstants.DATABASE_CONNECTION_URL,
@@ -174,7 +200,7 @@ import static org.quartz.CronExpression.isValidExpression;
                         description = "Name of the wso2 datasource to connect to the database." +
                                 " When datasource name is provided, the URL, username and password are not needed. " +
                                 "A datasource based connection is given more priority over the URL based connection." +
-                                "\n This parameter is applicable only when the mode is set to 'polling', and it can" +
+                                "\n This parameter is applicable only when the mode is set to **polling**, and it can" +
                                 " be applied only when you use this extension with WSO2 Stream Processor.",
                         type = DataType.STRING,
                         defaultValue = "<Empty_String>",
@@ -213,7 +239,12 @@ import static org.quartz.CronExpression.isValidExpression;
                 @Parameter(
                         name = CDCSourceConstants.OPERATION,
                         description = "The change event operation you want to carry out. Possible values are" +
-                                " 'insert', 'update' or 'delete'. This parameter is not case sensitive. " +
+                                " 'insert', 'update', 'delete' or you can provide multiple operation as coma " +
+                                "separated values. This parameter is not case sensitive.  \n " +
+                                "When provided the multiple operations, the relevant operation for each event will " +
+                                "be return as a transport property **trp:operation** this can be access when mapping " +
+                                "the events. According to the operation, the required fields from the stream has to" +
+                                " be extracted. \n" +
                                 "**It is required to specify a value only when the mode is 'listening'.**\n",
                         type = DataType.STRING
                 ),
@@ -282,6 +313,14 @@ import static org.quartz.CronExpression.isValidExpression;
                         optional = true,
                         type = {DataType.STRING},
                         defaultValue = "None"
+                ),
+                @Parameter(
+                        name = "plugin.name",
+                        description = "This is used when the logical decoding output plugin needed to specify " +
+                                "to create the connection to the database. Mostly this will be required on PostgreSQL.",
+                        optional = true,
+                        type = {DataType.STRING},
+                        defaultValue = "decoderbufs"
                 )
         },
         examples = {
@@ -315,6 +354,19 @@ import static org.quartz.CronExpression.isValidExpression;
                                 " before_name = 'before_name')))" +
                                 "\ndefine stream inputStream (before_id string, before_name string);",
                         description = "In this example, the CDC source listens to the row deletions made in the " +
+                                "'students' table. This table belongs to the 'SimpleDB' database that can be accessed" +
+                                " via the given URL."
+                ),
+                @Example(
+                        syntax = "@source(type = 'cdc' , url = 'jdbc:mysql://localhost:3306/SimpleDB', " +
+                                "\nusername = 'cdcuser', password = 'pswd4cdc', " +
+                                "\ntable.name = 'students', operation = 'insert,update,delete', " +
+                                "\n@map(type='keyvalue', @attributes(before_id = 'before_id'," +
+                                " before_name = 'before_name', name = 'name', id = 'id'," +
+                                " operation= 'trp:operation')))" +
+                                "\ndefine stream inputStream (id string, name string, before_id string," +
+                                " before_name string, operation string);",
+                        description = "In this example, the CDC source listens to multiple operations of the " +
                                 "'students' table. This table belongs to the 'SimpleDB' database that can be accessed" +
                                 " via the given URL."
                 ),
@@ -405,8 +457,14 @@ public class CDCSource extends Source<CDCSource.CdcState> {
     public StateFactory<CdcState> init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
                                        String[] requestedTransportPropertyNames, ConfigReader configReader,
                                        SiddhiAppContext siddhiAppContext) {
+        String url;
+        String username;
+        String password;
+        Map<String, String> deploymentConfigMap = new HashMap();
+        deploymentConfigMap.putAll(configReader.getAllConfigs());
         //initialize mode
         this.cronConfiguration = new CronConfiguration();
+        configReader.getAllConfigs();
         mode = optionHolder.validateAndGetStaticValue(CDCSourceConstants.MODE, CDCSourceConstants.MODE_LISTENING);
         //initialize common mandatory parameters
         String tableName = optionHolder.validateAndGetOption(CDCSourceConstants.TABLE_NAME).getValue();
@@ -424,11 +482,24 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                 log.debug("Prometheus reporter is not running. Hence cdc metrics will not be initialise.");
             }
         }
+        if (deploymentConfigMap.containsKey(CDCSourceConstants.DATABASE_CONNECTION_URL)) {
+            url = deploymentConfigMap.get(CDCSourceConstants.DATABASE_CONNECTION_URL);
+        } else {
+            url = optionHolder.validateAndGetOption(CDCSourceConstants.DATABASE_CONNECTION_URL).getValue();
+        }
+        if (deploymentConfigMap.containsKey(CDCSourceConstants.USERNAME)) {
+            username = deploymentConfigMap.get(CDCSourceConstants.USERNAME);
+        } else {
+            username = optionHolder.validateAndGetOption(CDCSourceConstants.USERNAME).getValue();
+        }
+        if (deploymentConfigMap.containsKey(CDCSourceConstants.PASSWORD)) {
+            password = deploymentConfigMap.get(CDCSourceConstants.PASSWORD);
+        } else {
+            password = optionHolder.validateAndGetOption(CDCSourceConstants.PASSWORD).getValue();
+        }
         switch (mode) {
             case CDCSourceConstants.MODE_LISTENING:
-                String url = optionHolder.validateAndGetOption(CDCSourceConstants.DATABASE_CONNECTION_URL).getValue();
-                String username = optionHolder.validateAndGetOption(CDCSourceConstants.USERNAME).getValue();
-                String password = optionHolder.validateAndGetOption(CDCSourceConstants.PASSWORD).getValue();
+
                 String streamName = sourceEventListener.getStreamDefinition().getId();
 
                 //initialize mandatory parameters
@@ -528,10 +599,12 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                 } else {
                     String driverClassName;
                     try {
-                        driverClassName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.JDBC_DRIVER_NAME);
-                        url = optionHolder.validateAndGetOption(CDCSourceConstants.DATABASE_CONNECTION_URL).getValue();
-                        username = optionHolder.validateAndGetOption(CDCSourceConstants.USERNAME).getValue();
-                        password = optionHolder.validateAndGetOption(CDCSourceConstants.PASSWORD).getValue();
+                        if (deploymentConfigMap.containsKey(CDCSourceConstants.JDBC_DRIVER_NAME)) {
+                            driverClassName = deploymentConfigMap.get(CDCSourceConstants.JDBC_DRIVER_NAME);
+                        } else {
+                            driverClassName = optionHolder.validateAndGetStaticValue(CDCSourceConstants.
+                                    JDBC_DRIVER_NAME);
+                        }
                         if (isPrometheusReporterRunning) {
                             metrics = new PollingMetrics(siddhiAppName, url, tableName);
                         }
@@ -630,7 +703,9 @@ public class CDCSource extends Source<CDCSource.CdcState> {
             }
             cdcPoller.stop();
         } else if (mode.equals(CDCSourceConstants.MODE_LISTENING)) {
-            engine.stop();
+            if (engine != null) {
+                engine.stop();
+            }
         }
     }
 
@@ -696,7 +771,7 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                     " not be defined for listening mode");
         }
 
-        if (!(operation.equalsIgnoreCase(CDCSourceConstants.INSERT)
+        if (!operation.contains(",") && !(operation.equalsIgnoreCase(CDCSourceConstants.INSERT)
                 || operation.equalsIgnoreCase(CDCSourceConstants.UPDATE)
                 || operation.equalsIgnoreCase(CDCSourceConstants.DELETE))) {
             throw new SiddhiAppValidationException("Unsupported operation: '" + operation + "'." +
