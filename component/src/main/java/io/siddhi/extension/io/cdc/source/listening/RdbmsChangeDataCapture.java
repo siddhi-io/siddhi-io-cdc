@@ -68,6 +68,8 @@ public class RdbmsChangeDataCapture extends ChangeDataCapture {
                 case CDCSourceConstants.CONNECT_RECORD_INSERT_OPERATION:
                     if (operationList.contains(CDCSourceConstants.INSERT)) {
                         transportProperties.add(CDCSourceConstants.INSERT);
+                        transportProperties.add(record.getStruct(CDCSourceConstants.SOURCE_SCHEMA).get(CDCSourceConstants.EVENT_TIMESTAMP));
+                        transportProperties.add(record.get(CDCSourceConstants.EVENT_TIMESTAMP));
                         detailsMap.put(CDCSourceConstants.TRANSPORT_PROPERTIES, transportProperties);
                         rawDetails = (Struct) record.get(CDCSourceConstants.AFTER);
                         fields = rawDetails.schema().fields();
@@ -82,6 +84,8 @@ public class RdbmsChangeDataCapture extends ChangeDataCapture {
                 case CDCSourceConstants.CONNECT_RECORD_UPDATE_OPERATION:
                     if (operationList.contains(CDCSourceConstants.UPDATE)) {
                         transportProperties.add(CDCSourceConstants.UPDATE);
+                        transportProperties.add(record.getStruct(CDCSourceConstants.SOURCE_SCHEMA).get(CDCSourceConstants.EVENT_TIMESTAMP));
+                        transportProperties.add(record.get(CDCSourceConstants.EVENT_TIMESTAMP));
                         detailsMap.put(CDCSourceConstants.TRANSPORT_PROPERTIES, transportProperties);
                         rawDetails = (Struct) record.get(CDCSourceConstants.BEFORE);
                         fields = rawDetails.schema().fields();
@@ -103,6 +107,8 @@ public class RdbmsChangeDataCapture extends ChangeDataCapture {
                 case CDCSourceConstants.CONNECT_RECORD_DELETE_OPERATION:
                     if (operationList.contains(CDCSourceConstants.DELETE)) {
                         transportProperties.add(CDCSourceConstants.DELETE);
+                        transportProperties.add(record.getStruct(CDCSourceConstants.SOURCE_SCHEMA).get(CDCSourceConstants.EVENT_TIMESTAMP));
+                        transportProperties.add(record.get(CDCSourceConstants.EVENT_TIMESTAMP));
                         detailsMap.put(CDCSourceConstants.TRANSPORT_PROPERTIES, transportProperties);
                         rawDetails = (Struct) record.get(CDCSourceConstants.BEFORE);
                         fields = rawDetails.schema().fields();
@@ -129,6 +135,8 @@ public class RdbmsChangeDataCapture extends ChangeDataCapture {
             switch (op) {
                 case CDCSourceConstants.CONNECT_RECORD_INSERT_OPERATION:
                     transportProperties.add(CDCSourceConstants.INSERT);
+                    transportProperties.add(record.getStruct(CDCSourceConstants.SOURCE_SCHEMA).get(CDCSourceConstants.EVENT_TIMESTAMP));
+                    transportProperties.add(record.get(CDCSourceConstants.EVENT_TIMESTAMP));
                     detailsMap.put(CDCSourceConstants.TRANSPORT_PROPERTIES, transportProperties);
                     //append row details after insert.
                     rawDetails = (Struct) record.get(CDCSourceConstants.AFTER);
@@ -140,6 +148,8 @@ public class RdbmsChangeDataCapture extends ChangeDataCapture {
                     break;
                 case CDCSourceConstants.CONNECT_RECORD_DELETE_OPERATION:
                     transportProperties.add(CDCSourceConstants.DELETE);
+                    transportProperties.add(record.getStruct(CDCSourceConstants.SOURCE_SCHEMA).get(CDCSourceConstants.EVENT_TIMESTAMP));
+                    transportProperties.add(record.get(CDCSourceConstants.EVENT_TIMESTAMP));
                     detailsMap.put(CDCSourceConstants.TRANSPORT_PROPERTIES, transportProperties);
                     //append row details before delete.
                     rawDetails = (Struct) record.get(CDCSourceConstants.BEFORE);
@@ -152,6 +162,8 @@ public class RdbmsChangeDataCapture extends ChangeDataCapture {
                     break;
                 case CDCSourceConstants.CONNECT_RECORD_UPDATE_OPERATION:
                     transportProperties.add(CDCSourceConstants.UPDATE);
+                    transportProperties.add(record.getStruct(CDCSourceConstants.SOURCE_SCHEMA).get(CDCSourceConstants.EVENT_TIMESTAMP));
+                    transportProperties.add(record.get(CDCSourceConstants.EVENT_TIMESTAMP));
                     detailsMap.put(CDCSourceConstants.TRANSPORT_PROPERTIES, transportProperties);
                     //append row details before update.
                     rawDetails = (Struct) record.get(CDCSourceConstants.BEFORE);
