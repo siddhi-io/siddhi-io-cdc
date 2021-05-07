@@ -95,6 +95,10 @@ public class CDCSourceConstants {
     public static final String MONGO_OBJECT_NUMBER_LONG = "$numberLong";
     public static final String MONGO_OBJECT_NUMBER_DECIMAL = "$numberDecimal";
 
+    public static final String SOURCE_SCHEMA = "source";
+    public static final String EVENT_TIMESTAMP = "ts_ms";
+    public static final String EVENT_RECEIVED_TIMESTAMP = "ts_ns";
+
     // Constants for Cron Support
     public static final String CRON_EXPRESSION = "cron.expression";
     public static final String JOB_GROUP = "CDCPollingGroup";
