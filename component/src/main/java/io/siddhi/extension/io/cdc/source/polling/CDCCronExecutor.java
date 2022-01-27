@@ -21,7 +21,8 @@ package io.siddhi.extension.io.cdc.source.polling;
 import io.siddhi.extension.io.cdc.source.config.CronConfiguration;
 import io.siddhi.extension.io.cdc.source.polling.strategies.PollingStrategy;
 import io.siddhi.extension.io.cdc.util.CDCSourceConstants;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.Job;
 import org.quartz.JobBuilder;
@@ -41,7 +42,7 @@ import org.quartz.impl.StdSchedulerFactory;
  * expression then it will print the inserts and updates happened after App get started.
  */
 public class CDCCronExecutor implements Job {
-    private static final Logger log = Logger.getLogger(CDCCronExecutor.class);
+    private static final Logger log = LogManager.getLogger(CDCCronExecutor.class);
 
     public CDCCronExecutor() {
     }

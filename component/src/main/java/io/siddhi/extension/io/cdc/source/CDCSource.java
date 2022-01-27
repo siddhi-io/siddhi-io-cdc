@@ -48,7 +48,8 @@ import io.siddhi.extension.io.cdc.source.polling.CDCPoller;
 import io.siddhi.extension.io.cdc.util.CDCSourceConstants;
 import io.siddhi.extension.io.cdc.util.CDCSourceUtil;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -429,7 +430,7 @@ import static org.quartz.CronExpression.isValidExpression;
         }
 )
 public class CDCSource extends Source<CDCSource.CdcState> {
-    private static final Logger log = Logger.getLogger(CDCSource.class);
+    private static final Logger log = LogManager.getLogger(CDCSource.class);
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private int pollingInterval;
     private String mode;

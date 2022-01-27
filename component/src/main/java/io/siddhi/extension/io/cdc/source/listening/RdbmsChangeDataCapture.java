@@ -26,7 +26,8 @@ import org.apache.kafka.connect.connector.ConnectRecord;
 import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.DataException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ import java.util.Optional;
  * This class is for capturing change data for RDBMS using debezium embedded engine.
  **/
 public class RdbmsChangeDataCapture extends ChangeDataCapture {
-    private static final Logger log = Logger.getLogger(RdbmsChangeDataCapture.class);
+    private static final Logger log = LogManager.getLogger(RdbmsChangeDataCapture.class);
 
     public RdbmsChangeDataCapture(String operation, SourceEventListener sourceEventListener, ListeningMetrics metrics) {
         super(operation, sourceEventListener, metrics);
