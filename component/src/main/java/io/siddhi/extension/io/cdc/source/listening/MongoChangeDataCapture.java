@@ -24,7 +24,8 @@ import io.siddhi.extension.io.cdc.util.CDCSourceConstants;
 import org.apache.kafka.connect.connector.ConnectRecord;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.DataException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -38,7 +39,7 @@ import java.util.Map;
  * This class is for capturing change data for MongoDB using debezium embedded engine.
  **/
 public class MongoChangeDataCapture extends ChangeDataCapture {
-    private static final Logger log = Logger.getLogger(MongoChangeDataCapture.class);
+    private static final Logger log = LogManager.getLogger(MongoChangeDataCapture.class);
 
     public MongoChangeDataCapture(String operation, SourceEventListener sourceEventListener, ListeningMetrics metrics) {
         super(operation, sourceEventListener, metrics);

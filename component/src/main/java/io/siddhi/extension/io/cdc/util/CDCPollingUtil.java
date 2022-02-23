@@ -19,7 +19,8 @@
 package io.siddhi.extension.io.cdc.util;
 
 import io.siddhi.extension.io.cdc.source.polling.CDCPollingModeException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -32,7 +33,7 @@ import java.util.List;
  * This class contains Util methods for the CDCPoller.
  */
 public class CDCPollingUtil {
-    private static final Logger log = Logger.getLogger(CDCPollingUtil.class);
+    private static final Logger log = LogManager.getLogger(CDCPollingUtil.class);
 
     /**
      * Utility method which can be used to check if a given string instance is null or empty.

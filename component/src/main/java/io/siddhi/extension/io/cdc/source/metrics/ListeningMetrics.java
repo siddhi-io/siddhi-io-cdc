@@ -18,7 +18,8 @@
 
 package io.siddhi.extension.io.cdc.source.metrics;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.metrics.core.Counter;
 import org.wso2.carbon.metrics.core.Level;
 import org.wso2.carbon.si.metrics.core.internal.MetricsDataHolder;
@@ -31,7 +32,7 @@ import java.util.concurrent.ExecutorService;
  */
 public class ListeningMetrics extends Metrics {
 
-    private static final Logger log = Logger.getLogger(ListeningMetrics.class);
+    private static final Logger log = LogManager.getLogger(ListeningMetrics.class);
     private final String operationType;
     private boolean isLastReceivedTimeMetricsRegistered;
     private long lastReceivedTime;

@@ -31,7 +31,8 @@ import io.siddhi.extension.io.cdc.source.polling.CDCPollingModeException;
 import io.siddhi.extension.io.cdc.util.CDCPollingUtil;
 import io.siddhi.extension.io.cdc.util.CDCSourceConstants;
 import io.siddhi.extension.io.cdc.util.MyYamlConstructor;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
 
@@ -48,7 +49,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * Abstract definition of polling strategy to poll DB changes.
  */
 public abstract class PollingStrategy {
-    private static final Logger log = Logger.getLogger(PollingStrategy.class);
+    private static final Logger log = LogManager.getLogger(PollingStrategy.class);
     private static final String PLACE_HOLDER_TABLE_NAME = "{{TABLE_NAME}}";
     private static final String PLACE_HOLDER_COLUMN_LIST = "{{COLUMN_LIST}}";
     private static final String PLACE_HOLDER_CONDITION = "{{CONDITION}}";

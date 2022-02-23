@@ -29,7 +29,8 @@ import io.siddhi.extension.io.cdc.source.polling.strategies.PollingStrategy;
 import io.siddhi.extension.io.cdc.source.polling.strategies.WaitOnMissingRecordPollingStrategy;
 import io.siddhi.extension.io.cdc.util.CDCPollingUtil;
 import io.siddhi.extension.io.cdc.util.CDCSourceConstants;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
@@ -48,7 +49,7 @@ import static io.siddhi.extension.io.cdc.source.polling.CDCCronExecutor.schedule
  */
 public class CDCPoller implements Runnable {
 
-    private static final Logger log = Logger.getLogger(CDCPoller.class);
+    private static final Logger log = LogManager.getLogger(CDCPoller.class);
     private String url;
     private String tableName;
     private String username;
