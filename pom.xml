@@ -298,11 +298,11 @@
         </plugins>
     </build>
     <properties>
-        <siddhi.version>5.1.21-SNAPSHOT</siddhi.version>
+        <siddhi.version>5.1.21</siddhi.version>
         <siddhi.import.version.range>[5.1.0,6.0.0)</siddhi.import.version.range>
         <log4j.version>2.17.1</log4j.version>
         <carbon.transport.version>4.4.15</carbon.transport.version>
-        <siddhi-map-keyvalue.version>2.1.2-SNAPSHOT</siddhi-map-keyvalue.version>
+        <siddhi-map-keyvalue.version>2.1.2</siddhi-map-keyvalue.version>
         <jacoco.plugin.version>0.7.9</jacoco.plugin.version>
         <mysql-binlog-connector-java.version>0.13.0</mysql-binlog-connector-java.version>
         <debezium-connector-mysql.version>1.4.0.Final</debezium-connector-mysql.version>
@@ -314,7 +314,7 @@
         <version.oracle.driver>12.1.0.2</version.oracle.driver>
         <hikari.version>3.2.0</hikari.version>
         <org.testng.version>6.11</org.testng.version>
-        <siddhi-store-rdbms.version>7.0.13-SNAPSHOT</siddhi-store-rdbms.version>
+        <siddhi-store-rdbms.version>7.0.13</siddhi-store-rdbms.version>
         <siddhi-store-mongodb.version>2.1.1</siddhi-store-mongodb.version>
         <carbon.datasource.core.version>RELEASE</carbon.datasource.core.version>
         <mavan.findbugsplugin.exclude.file>../findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
@@ -334,7 +334,7 @@
         <kafka.connect.version>2.3.0</kafka.connect.version>
         <mongodb.connector.version>3.4.0</mongodb.connector.version>
         <json.version>20190722</json.version>
-        <carbon.analytics.version>3.0.57-SNAPSHOT</carbon.analytics.version>
+        <carbon.analytics.version>3.0.57</carbon.analytics.version>
         <org.yaml.snakeyaml.version.range>[1.2.0,2.0.0)</org.yaml.snakeyaml.version.range>
         <com.zaxxer.hikari.version.range>[1.0.0,4.0.0)</com.zaxxer.hikari.version.range>
         <org.snake.yaml.version>1.23</org.snake.yaml.version>
