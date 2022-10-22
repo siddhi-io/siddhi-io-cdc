@@ -189,7 +189,7 @@ public class RdbmsChangeDataCapture extends ChangeDataCapture {
                     }
                     break;
                 default:
-                    log.info("Provided value for \"op\" : " + op + " is not supported.");
+                    log.warn("Provided value for \"op\" : " + op + " is not supported.");
                     break;
             }
         }
