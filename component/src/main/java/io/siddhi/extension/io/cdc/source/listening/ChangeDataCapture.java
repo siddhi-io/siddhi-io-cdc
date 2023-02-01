@@ -30,7 +30,7 @@ import io.siddhi.extension.io.cdc.util.CDCSourceConstants;
 import org.apache.kafka.connect.connector.ConnectRecord;
 import org.apache.kafka.connect.data.Schema;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Condition;
@@ -154,8 +154,12 @@ public abstract class ChangeDataCapture {
     abstract Map<String, Object> createMap(ConnectRecord connectRecord, String operation);
 
 
-    public List<String> createOperationList(String operation) {
-        return Arrays.asList(operation.split(OPERATION_SEPARATOR));
+    public List<String> createOperationList(String operations) {
+        List<String> operationList = new ArrayList<>();
+        for (String operation:operations.split(OPERATION_SEPARATOR)) {
+            operationList.add(operation.trim());
+        }
+        return operationList;
     }
 
     public Object getDefaultValue(Schema schema) {
