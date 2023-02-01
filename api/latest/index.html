@@ -114,7 +114,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#api-docs-v2013" tabindex="1" class="md-skip">
+      <a href="#api-docs-v2014" tabindex="1" class="md-skip">
         Skip to content
       </a>
     
@@ -338,6 +338,18 @@
   
 </nav>
     
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../2.0.14/" title="2.0.14" class="md-nav__link">
+      2.0.14
+    </a>
   </li>
 
         
@@ -669,7 +681,7 @@
                   <a href="https://github.com/siddhi-io/siddhi-io-cdc/blob/master/api/latest.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="api-docs-v2013">API Docs - v2.0.13</h1>
+                <h1 id="api-docs-v2014">API Docs - v2.0.14</h1>
 <div class="admonition info">
 <p class="admonition-title">Tested Siddhi Core version: <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/">5.1.21</a></em></p>
 <p>It could also support other Siddhi Core minor versions.</p>
@@ -677,7 +689,7 @@
 <h2 id="source">Source</h2>
 <h3 id="cdc-source">cdc <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#source">(Source)</a></em></h3>
 <p><p></p>
-<p style="word-wrap: break-word;margin: 0;">The CDC source receives events when change events (i.e., INSERT, UPDATE, DELETE) are triggered for a database table. Events are received in the 'key-value' format.<br><br>There are two modes you could perform CDC: Listening mode and Polling mode.<br><br>In polling mode, the datasource is periodically polled for capturing the changes. The polling period can be configured.<br>In polling mode, you can only capture INSERT and UPDATE changes.<br><br>On listening mode, the Source will keep listening to the Change Log of the database and notify in case a change has taken place. Here, you are immediately notified about the change, compared to polling mode.<br><br>The key values of the map of a CDC change event are as follows.<br><br>For 'listening' mode: <br>&nbsp;&nbsp;&nbsp;&nbsp;For insert: Keys are specified as columns of the table.<br>&nbsp;&nbsp;&nbsp;&nbsp;For delete: Keys are followed by the specified table columns. This is achieved via 'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'.<br>&nbsp;&nbsp;&nbsp;&nbsp;For update: Keys are followed followed by the specified table columns. This is achieved via 'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'.<br><br>For 'polling' mode: Keys are specified as the columns of the table.In order to connect in to the database table for receive CDC events, url, username, password and driverClassName(in polling mode) can be provided in deployment.yaml file under the siddhi namespace as below,  </p><pre>
+<p style="word-wrap: break-word;margin: 0;">The CDC source receives events when change events (i.e., INSERT, UPDATE, DELETE) are triggered for a database table. Events are received in the 'key-value' format.<br><br>There are two modes you could perform CDC: Listening mode and Polling mode.<br><br>In polling mode, the datasource is periodically polled for capturing the changes. The polling period can be configured.<br>In polling mode, you can only capture INSERT and UPDATE changes.<br><br>On listening mode, the Source will keep listening to the Change Log of the database and notify in case a change has taken place. Here, you are immediately notified about the change, compared to polling mode.<br><br>The key values of the map of a CDC change event are as follows.<br><br>For 'listening' mode: <br>&nbsp;&nbsp;&nbsp;&nbsp;For insert: Keys are specified as columns of the table.<br>&nbsp;&nbsp;&nbsp;&nbsp;For delete: Keys are followed by the specified table columns. This is achieved via 'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'.<br>&nbsp;&nbsp;&nbsp;&nbsp;For update: Keys are followed followed by the specified table columns. This is achieved via 'before_'. e.g., specifying 'before_X' results in the key being added before the column named 'X'.<br><br>For 'polling' mode: Keys are specified as the columns of the table.In order to connect in to the database table for receive CDC events, url, username, password and driverClassName(in polling mode) can be provided in deployment.yaml file under the siddhi namespace as below,  </p><pre>yaml
   siddhi:
     extensions:
       -
@@ -688,11 +700,11 @@
             url: jdbc:sqlserver://localhost:1433;databaseName=CDC_DATA_STORE
             password: &lt;password&gt;
             username: &lt;&gt;
-            driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver  </pre><p style="word-wrap: break-word;margin: 0;"><br>#### Preparations required for working with Oracle Databases in listening mode<br><br>Using the extension in Windows, Mac OSX and AIX are pretty straight forward inorder to achieve the required behaviour please follow the steps given below<br><br>&nbsp;&nbsp;- Download the compatible version of oracle instantclient for the database version from <a href="https://www.oracle.com/database/technologies/instant-client/downloads.html">here</a> and extract<br>&nbsp;&nbsp;- Extract and set the environment variable <code>LD_LIBRARY_PATH</code> to the location of instantclient which was exstracted as shown below<br>&nbsp;&nbsp;</p><pre>
+            driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver  </pre><p style="word-wrap: break-word;margin: 0;"><br><br><strong><em>Preparations required for working with Oracle Databases in listening mode</em></strong><br><br>Using the extension in Windows, Mac OSX and AIX are pretty straight forward inorder to achieve the required behaviour please follow the steps given below<br><br>&nbsp;&nbsp;- Download the compatible version of oracle instantclient for the database version from <a href="https://www.oracle.com/database/technologies/instant-client/downloads.html">here</a> and extract<br>&nbsp;&nbsp;- Extract and set the environment variable <code>LD_LIBRARY_PATH</code> to the location of instantclient which was exstracted as shown below<br>&nbsp;&nbsp;</p><pre>
     export LD_LIBRARY_PATH=&lt;path to the instant client location&gt;
   </pre><p style="word-wrap: break-word;margin: 0;"><br>&nbsp;&nbsp;- Inside the instantclient folder which was download there are two jars <code>xstreams.jar</code> and <code>ojdbc&lt;version&gt;.jar</code> convert them to OSGi bundles using the tools which were provided in the <code>&lt;distribution&gt;/bin</code> for converting the <code>ojdbc.jar</code> use the tool <code>spi-provider.sh|bat</code> and for the conversion of <code>xstreams.jar</code> use the jni-provider.sh as shown below(Note: this way of converting Xstreams jar is applicable only for Linux environments for other OSs this step is not required and converting it through the <code>jartobundle.sh</code> tool is enough)<br>&nbsp;&nbsp;</p><pre>
     ./jni-provider.sh &lt;input-jar&gt; &lt;destination&gt; &lt;comma seperated native library names&gt;
-  </pre><p style="word-wrap: break-word;margin: 0;"><br>&nbsp;&nbsp;once ojdbc and xstreams jars are converted to OSGi copy the generated jars to the <code>&lt;distribution&gt;/lib</code>. Currently siddhi-io-cdc only supports the oracle database distributions 12 and above<br>#### Configurations for PostgreSQL<br>When using listening mode with PostgreSQL, following properties has to be configured accordingly to create the connection.<br><strong><em>slot.name</em></strong>: (default value = debezium) in postgreSQL only one connection can be created from            single slot, so to create multiple connection custom slot.name should be provided.<br>&nbsp;<strong><em>plugin.name</em></strong>: (default value = decoderbufs ) Logical decoding output plugin name which the database is configured with. Other supported values are pgoutput, decoderbufs, wal2json.<br><strong><em>table.name</em></strong>: table name should be provided as &lt;schema_name&gt;.&lt;table_name&gt;. As an example, public.customer <br><br><br>See parameter: mode for supported databases and change events.</p>
+  </pre><p style="word-wrap: break-word;margin: 0;"><br>&nbsp;&nbsp;once ojdbc and xstreams jars are converted to OSGi copy the generated jars to the <code>&lt;distribution&gt;/lib</code>. Currently siddhi-io-cdc only supports the oracle database distributions 12 and above<br><br><strong><em> Configurations for PostgreSQL</em></strong><br>When using listening mode with PostgreSQL, following properties has to be configured accordingly to create the connection.<br><br>&nbsp;&nbsp;&nbsp;&nbsp;<strong><em>slot.name</em></strong>: (default value = debezium) in postgreSQL only one connection can be created from single slot, so to create multiple connection custom slot.name should be provided.<br>&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;<strong><em>plugin.name</em></strong>: (default value = decoderbufs ) Logical decoding output plugin name which the database is configured with. Other supported values are pgoutput, decoderbufs, wal2json.<br><br>&nbsp;&nbsp;&nbsp;&nbsp;<strong><em>table.name</em></strong>: table name should be provided as &lt;schema_name&gt;.&lt;table_name&gt;. As an example, public.customer <br><br><br>See parameter: mode for supported databases and change events.</p>
 <p></p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
 <pre><code>@source(type=&quot;cdc&quot;, url=&quot;&lt;STRING&gt;&quot;, mode=&quot;&lt;STRING&gt;&quot;, jdbc.driver.name=&quot;&lt;STRING&gt;&quot;, username=&quot;&lt;STRING&gt;&quot;, password=&quot;&lt;STRING&gt;&quot;, pool.properties=&quot;&lt;STRING&gt;&quot;, datasource.name=&quot;&lt;STRING&gt;&quot;, table.name=&quot;&lt;STRING&gt;&quot;, polling.column=&quot;&lt;STRING&gt;&quot;, polling.interval=&quot;&lt;INT&gt;&quot;, operation=&quot;&lt;STRING&gt;&quot;, connector.properties=&quot;&lt;STRING&gt;&quot;, database.server.id=&quot;&lt;STRING&gt;&quot;, database.server.name=&quot;&lt;STRING&gt;&quot;, wait.on.missed.record=&quot;&lt;BOOL&gt;&quot;, missed.record.waiting.timeout=&quot;&lt;INT&gt;&quot;, polling.history.size=&quot;&lt;INT&gt;&quot;, cron.expression=&quot;&lt;STRING&gt;&quot;, plugin.name=&quot;&lt;STRING&gt;&quot;, @map(...)))
@@ -1020,13 +1032,13 @@ define stream insertSweetProductionStream (ID int, NAME string, WEIGHT int);
           </a>
         
         
-          <a href="../2.0.13/" title="2.0.13" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../2.0.14/" title="2.0.14" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                2.0.13
+                2.0.14
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
