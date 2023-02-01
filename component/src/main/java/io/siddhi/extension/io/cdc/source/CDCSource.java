@@ -98,7 +98,7 @@ import static org.quartz.CronExpression.isValidExpression;
                 "In order to connect in to the database table for receive CDC events, url, username, password and " +
                 "driverClassName(in polling mode) can be provided in deployment.yaml file under the siddhi namespace " +
                 "as below, " +
-                " ```\n" +
+                " ```yaml\n" +
                 "  siddhi:\n" +
                 "    extensions:\n" +
                 "      -\n" +
@@ -111,7 +111,7 @@ import static org.quartz.CronExpression.isValidExpression;
                 "            username: <>\n" +
                 "            driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver " +
                 " ```\n" +
-                "#### Preparations required for working with Oracle Databases in listening mode\n" +
+                "\n***Preparations required for working with Oracle Databases in listening mode***\n" +
                 "\n" +
                 "Using the extension in Windows, Mac OSX and AIX are pretty straight forward inorder to achieve the " +
                 "required behaviour please follow the steps given below\n" +
@@ -136,15 +136,15 @@ import static org.quartz.CronExpression.isValidExpression;
                 "`<distribution>/lib`. Currently siddhi-io-cdc only supports the oracle database distributions " +
                 "12 and above" +
                 "\n" +
-                "#### Configurations for PostgreSQL\n" +
+                "\n*** Configurations for PostgreSQL***\n" +
                 "When using listening mode with PostgreSQL, following properties has to be configured accordingly to " +
                 "create the connection." +
                 "\n" +
-                "***slot.name***: (default value = debezium) in postgreSQL only one connection can be created from " +
-                "           single slot, so to create multiple connection custom slot.name should be provided.\n " +
-                "***plugin.name***: (default value = decoderbufs ) Logical decoding output plugin name which the " +
+                "\n\t***slot.name***: (default value = debezium) in postgreSQL only one connection can be created " +
+                "from single slot, so to create multiple connection custom slot.name should be provided.\n " +
+                "\n\t***plugin.name***: (default value = decoderbufs ) Logical decoding output plugin name which the " +
                 "database is configured with. Other supported values are pgoutput, decoderbufs, wal2json.\n" +
-                "***table.name***: table name should be provided as <schema_name>.<table_name>. As an example," +
+                "\n\t***table.name***: table name should be provided as <schema_name>.<table_name>. As an example," +
                 " public.customer \n" +
                 "\n\nSee parameter: mode for supported databases and change events.",
         parameters = {
