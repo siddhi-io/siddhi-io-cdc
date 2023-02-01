@@ -156,7 +156,7 @@ public abstract class ChangeDataCapture {
 
     public List<String> createOperationList(String operations) {
         List<String> operationList = new ArrayList<>();
-        for (String operation:operations.split(OPERATION_SEPARATOR)) {
+        for (String operation : operations.split(OPERATION_SEPARATOR)) {
             operationList.add(operation.trim());
         }
         return operationList;
