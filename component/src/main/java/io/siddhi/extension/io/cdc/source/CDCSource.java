@@ -98,7 +98,7 @@ import static org.quartz.CronExpression.isValidExpression;
                 "In order to connect in to the database table for receive CDC events, url, username, password and " +
                 "driverClassName(in polling mode) can be provided in deployment.yaml file under the siddhi namespace " +
                 "as below, " +
-                " ```yaml\n" +
+                " ```\n" +
                 "  siddhi:\n" +
                 "    extensions:\n" +
                 "      -\n" +
