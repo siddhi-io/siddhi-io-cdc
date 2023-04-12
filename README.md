@@ -43,7 +43,7 @@ Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi-i
 ## Dependencies 
 JDBC connector jar should be added to the runtime. Download the JDBC connector jar based on the database type that is being used.
 
-For MySQL, use connector version 5.1.xx.
+To identify the required JDBC connector jar, please refer to this debezium release <a href="https://debezium.io/releases/1.9/">documentation</a>  
 
 In addition to that, there are some prerequisites that need to be met based on the CDC mode used. Please find them below.
 
