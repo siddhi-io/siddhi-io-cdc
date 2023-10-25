@@ -335,9 +335,9 @@
         <mongodb.connector.version>3.4.0</mongodb.connector.version>
         <json.version>20190722</json.version>
         <carbon.analytics.version>3.0.57</carbon.analytics.version>
-        <org.yaml.snakeyaml.version.range>[1.2.0,2.0.0)</org.yaml.snakeyaml.version.range>
+        <org.yaml.snakeyaml.version.range>[2.0.0,3.0.0)</org.yaml.snakeyaml.version.range>
         <com.zaxxer.hikari.version.range>[1.0.0,4.0.0)</com.zaxxer.hikari.version.range>
-        <org.snake.yaml.version>1.23</org.snake.yaml.version>
+        <org.snake.yaml.version>2.0</org.snake.yaml.version>
     </properties>
     <scm>
         <url>https://github.com/siddhi-io/siddhi-io-cdc.git</url>

@@ -20,6 +20,7 @@ package io.siddhi.extension.io.cdc.util;
 
 import io.siddhi.extension.io.cdc.source.config.Database;
 import io.siddhi.extension.io.cdc.source.config.QueryConfiguration;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.nodes.Node;
@@ -35,7 +36,7 @@ public class MyYamlConstructor extends Constructor {
     private Map<String, Class<?>> classMap = new HashMap<>();
 
     public MyYamlConstructor(Class<?> theRoot) {
-        super(theRoot);
+        super(theRoot, new LoaderOptions());
         classMap.put(QueryConfiguration.class.getName(), QueryConfiguration.class);
         classMap.put(Database.class.getName(), Database.class);
     }
