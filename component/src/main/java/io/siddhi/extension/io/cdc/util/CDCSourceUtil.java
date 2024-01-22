@@ -138,7 +138,7 @@ public class CDCSourceUtil {
                     break;
                 }
                 case "oracle": {
-                    String regex = "jdbc:oracle:(\\w*):\\/\\/([a-zA-Z0-9-_\\.]+):(\\d+)([\\/]?)([a-zA-Z0-9-_\\.]*)";
+                    String regex = "jdbc:oracle:(\\w*):@?\\/?\\/?([a-zA-Z0-9-_\\.]+):(\\d+)([\\/]?)([a-zA-Z0-9-_\\.]*)";
                     Pattern p = Pattern.compile(regex);
                     Matcher matcher = p.matcher(url);
 
