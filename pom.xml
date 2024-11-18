@@ -309,7 +309,7 @@
         <debezium-embedded.version>1.9.7.Final</debezium-embedded.version>
         <debezium-connector-oracle.version>1.9.7.Final</debezium-connector-oracle.version>
         <debezium-connector-postgres.version>1.9.7.Final</debezium-connector-postgres.version>
-        <debezium-connector-sqlserver.version>1.9.7.Final</debezium-connector-sqlserver.version>
+        <debezium-connector-sqlserver.version>2.3.0.Final</debezium-connector-sqlserver.version>
         <debezium-connector-mongodb.version>1.9.7.Final</debezium-connector-mongodb.version>
         <version.oracle.driver>12.1.0.2</version.oracle.driver>
         <hikari.version>3.2.0</hikari.version>
