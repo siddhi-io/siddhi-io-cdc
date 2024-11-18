@@ -305,7 +305,7 @@
         <siddhi-map-keyvalue.version>2.1.2</siddhi-map-keyvalue.version>
         <jacoco.plugin.version>0.7.9</jacoco.plugin.version>
         <mysql-binlog-connector-java.version>0.13.0</mysql-binlog-connector-java.version>
-        <debezium-connector-mysql.version>1.9.7.Final</debezium-connector-mysql.version>
+        <debezium-connector-mysql.version>2.3.0.Final</debezium-connector-mysql.version>
         <debezium-embedded.version>1.9.7.Final</debezium-embedded.version>
         <debezium-connector-oracle.version>1.9.7.Final</debezium-connector-oracle.version>
         <debezium-connector-postgres.version>1.9.7.Final</debezium-connector-postgres.version>
