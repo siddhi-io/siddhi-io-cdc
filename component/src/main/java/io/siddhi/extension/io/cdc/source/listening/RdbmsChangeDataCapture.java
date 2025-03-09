@@ -126,7 +126,7 @@ public class RdbmsChangeDataCapture extends ChangeDataCapture {
                     }
                     break;
                 default:
-                    log.info("Provided value for \"op\" : " + op + " is not supported.");
+                    log.info("Provided value for \"op\" : {} is not supported.", op);
                     break;
             }
         } else if (operation.equalsIgnoreCase(CDCSourceConstants.INSERT) &&
@@ -189,7 +189,7 @@ public class RdbmsChangeDataCapture extends ChangeDataCapture {
                     }
                     break;
                 default:
-                    log.warn("Provided value for \"op\" : " + op + " is not supported.");
+                    log.warn("Provided value for \"op\" : {} is not supported.", op);
                     break;
             }
         }

@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2</groupId>
         <artifactId>wso2</artifactId>
-        <version>5</version>
+        <version>5.3</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
@@ -295,6 +295,13 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <configuration>
+                    <excludeFilterFile>${maven.findbugsplugin.version.exclude}</excludeFilterFile>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <properties>
@@ -317,7 +324,7 @@
         <siddhi-store-rdbms.version>7.0.13</siddhi-store-rdbms.version>
         <siddhi-store-mongodb.version>2.1.1</siddhi-store-mongodb.version>
         <carbon.datasource.core.version>RELEASE</carbon.datasource.core.version>
-        <mavan.findbugsplugin.exclude.file>../findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
+        <maven.findbugsplugin.version.exclude>findbugs-exclude.xml</maven.findbugsplugin.version.exclude>
         <ojdbc6.version>12.1.0.1-atlassian-hosted</ojdbc6.version>
         <sqljdbc4.version>4.0</sqljdbc4.version>
         <postgresql.version>RELEASE</postgresql.version>

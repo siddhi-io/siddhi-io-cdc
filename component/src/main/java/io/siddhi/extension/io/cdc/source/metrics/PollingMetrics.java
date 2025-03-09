@@ -62,7 +62,7 @@ public class PollingMetrics extends Metrics {
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
-                        log.error(siddhiAppName + ": Error while updating the tables status.");
+                        log.error("{}: Error while updating the tables status.", siddhiAppName);
                     }
                 }
             });

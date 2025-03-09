@@ -93,11 +93,11 @@ public class CDCPoller implements Runnable {
         }
 
         if (waitOnMissedRecord) {
-            log.debug(WaitOnMissingRecordPollingStrategy.class + " is selected as the polling strategy.");
+            log.debug("{} is selected as the polling strategy.", WaitOnMissingRecordPollingStrategy.class);
             this.pollingStrategy = new WaitOnMissingRecordPollingStrategy(dataSource, configReader, sourceEventListener,
                     tableName, pollingColumn, pollingInterval, missedRecordWaitingTimeout, appName, pollingMetrics);
         } else {
-            log.debug(DefaultPollingStrategy.class + " is selected as the polling strategy.");
+            log.debug("{} is selected as the polling strategy.", DefaultPollingStrategy.class);
             this.pollingStrategy = new DefaultPollingStrategy(dataSource, configReader, sourceEventListener,
                     tableName, pollingColumn, pollingInterval, appName, pollingMetrics, cronConfiguration);
         }
@@ -132,16 +132,15 @@ public class CDCPoller implements Runnable {
                 this.dataSource = new HikariDataSource(config);
                 isLocalDataSource = true;
                 if (log.isDebugEnabled()) {
-                    log.debug("Database connection for '" + this.tableName + "' created through connection" +
-                            " parameters specified in the query.");
+                    log.debug("Database connection for '{}' created through connection parameters specified" +
+                                    " in the query.", this.tableName);
                 }
             } else {
                 //init using jndi resource name
                 this.dataSource = InitialContext.doLookup(jndiResource);
                 isLocalDataSource = false;
                 if (log.isDebugEnabled()) {
-                    log.debug("Lookup for resource '" + jndiResource + "' completed through " +
-                            "JNDI lookup.");
+                    log.debug("Lookup for resource '{}' completed through JNDI lookup.", jndiResource);
                 }
             }
         } else {
@@ -157,8 +156,8 @@ public class CDCPoller implements Runnable {
                     this.dataSource = (HikariDataSource) dataSourceService.getDataSource(datasourceName);
                     isLocalDataSource = false;
                     if (log.isDebugEnabled()) {
-                        log.debug("Lookup for datasource '" + datasourceName + "' completed through " +
-                                "DataSource Service lookup. Current mode: " + CDCSourceConstants.MODE_POLLING);
+                        log.debug("Lookup for datasource '{}' completed through DataSource Service lookup. " +
+                                "Current mode: {}", datasourceName, CDCSourceConstants.MODE_POLLING);
                     }
                 }
             } catch (DataSourceException e) {

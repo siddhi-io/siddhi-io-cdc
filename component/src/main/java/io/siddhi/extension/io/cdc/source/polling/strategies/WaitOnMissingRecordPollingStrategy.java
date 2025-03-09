@@ -125,19 +125,18 @@ public class WaitOnMissingRecordPollingStrategy extends PollingStrategy {
                                     waitingFrom + (waitTimeout * 1000L) : Long.MAX_VALUE;
                             isTimedout = waitEndTimestamp < System.currentTimeMillis();
                             if (!isTimedout) {
-                                log.debug("Missed record found at " + waitingFor + " in table " + tableName +
-                                        ". Hence pausing the process and " + "retry in " + pollingInterval +
-                                        " seconds.");
+                                log.debug("Missed record found at {} in table {}. Hence pausing the process and" +
+                                        " retry in {} seconds.", waitingFor, tableName, pollingInterval);
                                 break;
                             }
                         }
                         if (waitingFor > -1) {
                             if (isTimedout) {
-                                log.debug("Waiting for missed record " + waitingFor + " in table " + tableName +
-                                        " timed-out. Hence resuming the process.");
+                                log.debug("Waiting for missed record {} in table {} timed-out. Hence resuming the " +
+                                                "process.", waitingFor, tableName);
                             } else {
-                                log.debug("Received the missed record " + waitingFor + " in table " + tableName +
-                                        ". Hence resuming the process.");
+                                log.debug("Received the missed record {} in table {}. Hence resuming the process.",
+                                        waitingFor, tableName);
                             }
                             waitingFor = -1;
                             waitingFrom = -1;
@@ -156,7 +155,7 @@ public class WaitOnMissingRecordPollingStrategy extends PollingStrategy {
                         isError = true;
                         metrics.setCDCStatus(CDCStatus.ERROR);
                     }
-                    log.error(buildError("Error occurred while processing records in table %s.", tableName), e);
+                    log.error("{}", buildError("Error occurred while processing records in table %s.", tableName), e);
                 } finally {
                     CDCPollingUtil.cleanupConnection(resultSet, null, null);
                 }
@@ -172,7 +171,7 @@ public class WaitOnMissingRecordPollingStrategy extends PollingStrategy {
                     if (metrics != null) {
                         metrics.setCDCStatus(CDCStatus.ERROR);
                     }
-                    log.error(buildError("Error while polling the table %s.", tableName), e);
+                    log.error("{}", buildError("Error while polling the table %s.", tableName), e);
                 }
             }
         } catch (SQLException ex) {

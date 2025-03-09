@@ -61,7 +61,7 @@ public class CDCPollingUtil {
                 }
             } catch (SQLException e) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Error in closing ResultSet: " + e.getMessage(), e);
+                    log.debug("Error in closing ResultSet: {}", e.getMessage(), e);
                 }
             }
         }
@@ -73,7 +73,7 @@ public class CDCPollingUtil {
                 }
             } catch (SQLException e) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Error in closing PreparedStatement: " + e.getMessage(), e);
+                    log.debug("Error in closing PreparedStatement: {}", e.getMessage(), e);
                 }
             }
         }
@@ -85,7 +85,7 @@ public class CDCPollingUtil {
                 }
             } catch (SQLException e) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Error in closing Connection: " + e.getMessage(), e);
+                    log.debug("Error in closing Connection: {}", e.getMessage(), e);
                 }
             }
         }
