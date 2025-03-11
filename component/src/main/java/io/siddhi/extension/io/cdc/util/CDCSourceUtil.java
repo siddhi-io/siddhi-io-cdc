@@ -23,9 +23,9 @@ import io.siddhi.extension.io.cdc.source.listening.WrongConfigurationException;
 import io.siddhi.extension.io.cdc.source.metrics.ListeningMetrics;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -222,7 +222,7 @@ public class CDCSourceUtil {
             }
 
             if (serverID == CDCSourceConstants.DEFAULT_SERVER_ID) {
-                Random random = new Random();
+                SecureRandom random = new SecureRandom();
                 configMap.put(CDCSourceConstants.SERVER_ID, random.nextInt(1001) + 5400);
             } else {
                 configMap.put(CDCSourceConstants.SERVER_ID, serverID);

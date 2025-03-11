@@ -97,7 +97,7 @@ public class DefaultPollingStrategy extends PollingStrategy {
                         if (metrics != null) {
                             metrics.setCDCStatus(CDCStatus.ERROR);
                         }
-                        log.error(buildError("Error while polling the table %s.", tableName), e);
+                        log.error("{}", buildError("Error while polling the table %s.", tableName), e);
                     }
                 }
             }
@@ -160,7 +160,7 @@ public class DefaultPollingStrategy extends PollingStrategy {
                 isError = true;
                 metrics.setCDCStatus(CDCStatus.ERROR);
             }
-            log.error(buildError("Error occurred while processing records in table %s.", tableName), ex);
+            log.error("{}", buildError("Error occurred while processing records in table %s.", tableName), ex);
         } finally {
             CDCPollingUtil.cleanupConnection(resultSet, statement, null);
             return isError;

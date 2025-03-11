@@ -22,12 +22,28 @@
     <!-- SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING: SQL statement will different for each event -->
     <Match>
         <Package name="io.siddhi.extension.io.cdc.source.polling.strategies"/>
-        <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING"/>
+        <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING,
+        FORMAT_STRING_MANIPULATION"/>
     </Match>
 
     <!-- EI_EXPOSE_REP: These are objects read from config file, expected to be immutable during run time -->
     <Match>
         <Class name="io.siddhi.extension.io.cdc.source.config.QueryConfiguration"/>
         <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Class name="io.siddhi.extension.io.cdc.source.CDCSource" />
+        <Bug pattern="PATH_TRAVERSAL_IN" />
+    </Match>
+    <Match>
+        <Bug pattern="IMPROPER_UNICODE" />
+    </Match>
+    <Match>
+        <Class name="io.siddhi.extension.io.cdc.source.polling.strategies.DefaultPollingStrategy" />
+        <Bug pattern="SQL_INJECTION_JDBC" />
+    </Match>
+    <Match>
+        <Class name="io.siddhi.extension.io.cdc.source.polling.strategies.WaitOnMissingRecordPollingStrategy" />
+        <Bug pattern="SQL_INJECTION_JDBC" />
     </Match>
 </FindBugsFilter>

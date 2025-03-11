@@ -78,7 +78,7 @@ public class CDCCronExecutor implements Job {
             // Tell quartz to schedule the job using our trigger
             scheduler.scheduleJob(cron, trigger);
         } catch (SchedulerException e) {
-            log.error("An error occurred when scheduling job in siddhi app for cdc polling " + e, e);
+            log.error("An error occurred when scheduling job in siddhi app for cdc polling {}", e, e);
         }
     }
 

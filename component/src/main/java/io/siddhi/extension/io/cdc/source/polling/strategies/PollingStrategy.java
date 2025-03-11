@@ -171,7 +171,8 @@ public abstract class PollingStrategy {
                             if (metrics != null) {
                                 metrics.setCDCStatus(CDCStatus.ERROR);
                             }
-                            log.error(buildError("Failed to close the input stream for %s.", SELECT_QUERY_CONFIG_FILE));
+                            log.error("{}",
+                                    buildError("Failed to close the input stream for %s.", SELECT_QUERY_CONFIG_FILE));
                         }
                     }
                 }
