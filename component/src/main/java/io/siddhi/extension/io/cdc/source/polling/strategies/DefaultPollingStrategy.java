@@ -82,9 +82,22 @@ public class DefaultPollingStrategy extends PollingStrategy {
                             pauseLock.unlock();
                         }
                     }
+                    boolean isError;
                     long startedTime = System.currentTimeMillis();
                     eventsPerPollingInterval = 0;
-                    boolean isError = printEvent(connection);
+                    try {
+                        if (connection == null || !connection.isValid(5)) {
+                            CDCPollingUtil.cleanupConnection(null, null, connection);
+                                connection = getConnection();
+                        }
+                        isError = printEvent(connection);
+                    } catch (SQLException e) {
+                        isError = true;
+                        if (metrics != null) {
+                            metrics.setCDCStatus(CDCStatus.ERROR);
+                        }
+                        log.error("{}", buildError("Error while polling the table %s.", tableName), e);
+                    }
                     try {
                         if (metrics != null) {
                             metrics.setReceiveEventsPerPollingInterval(eventsPerPollingInterval);
@@ -100,6 +113,7 @@ public class DefaultPollingStrategy extends PollingStrategy {
                         log.error("{}", buildError("Error while polling the table %s.", tableName), e);
                     }
                 }
+
             }
         } finally {
             CDCPollingUtil.cleanupConnection(null, null, connection);
