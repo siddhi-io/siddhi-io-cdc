@@ -315,7 +315,7 @@
         <log4j.version>2.25.4</log4j.version>
         <carbon.transport.version>4.4.15</carbon.transport.version>
         <siddhi-map-keyvalue.version>2.1.2</siddhi-map-keyvalue.version>
-        <jacoco.plugin.version>0.7.9</jacoco.plugin.version>
+        <jacoco.plugin.version>0.8.12</jacoco.plugin.version>
         <mysql-binlog-connector-java.version>0.13.0</mysql-binlog-connector-java.version>
         <debezium-connector-mysql.version>2.7.3.Final</debezium-connector-mysql.version>
         <debezium-embedded.version>2.7.3.Final</debezium-embedded.version>
