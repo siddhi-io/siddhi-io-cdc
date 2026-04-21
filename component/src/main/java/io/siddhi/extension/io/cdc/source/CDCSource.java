@@ -18,6 +18,7 @@
 
 package io.siddhi.extension.io.cdc.source;
 
+import io.debezium.engine.ChangeEvent;
 import io.debezium.engine.DebeziumEngine;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
@@ -445,7 +446,7 @@ public class CDCSource extends Source<CDCSource.CdcState> {
     private String cronExpression = null;
     private CronConfiguration cronConfiguration;
     private boolean waitOnMissedRecord;
-    private DebeziumEngine<SourceRecord> engine;
+    private DebeziumEngine<ChangeEvent<SourceRecord, SourceRecord>> engine;
     private Metrics metrics;
     private String siddhiAppName;
     private ExecutorService siddhiAppContextExecutorService;

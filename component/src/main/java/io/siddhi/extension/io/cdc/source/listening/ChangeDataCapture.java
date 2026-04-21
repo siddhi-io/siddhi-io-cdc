@@ -19,7 +19,8 @@
 package io.siddhi.extension.io.cdc.source.listening;
 
 import io.debezium.config.Configuration;
-import io.debezium.embedded.EmbeddedEngine;
+import io.debezium.embedded.Connect;
+import io.debezium.engine.ChangeEvent;
 import io.debezium.engine.DebeziumEngine;
 import io.debezium.engine.spi.OffsetCommitPolicy;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
@@ -46,7 +47,7 @@ import static io.siddhi.extension.io.cdc.util.CDCSourceConstants.OPERATION_SEPAR
 public abstract class ChangeDataCapture {
     private final ListeningMetrics metrics;
     private String operation;
-    private Configuration config;
+    private Configuration config = Configuration.empty();
     private SourceEventListener sourceEventListener;
     private ReentrantLock lock = new ReentrantLock();
     private Condition condition = lock.newCondition();
@@ -76,16 +77,14 @@ public abstract class ChangeDataCapture {
      *
      * @return {@code engine}.
      */
-    @SuppressWarnings("unchecked")
-    public DebeziumEngine<SourceRecord> getEngine(DebeziumEngine.CompletionCallback completionCallback) {
+    public DebeziumEngine<ChangeEvent<SourceRecord, SourceRecord>> getEngine(
+            DebeziumEngine.CompletionCallback completionCallback) {
         // Create and return Engine with above set configuration ...
-        DebeziumEngine.Builder<SourceRecord> builder = (DebeziumEngine.Builder<SourceRecord>)
-                new EmbeddedEngine.EngineBuilder()
-                        .using(OffsetCommitPolicy.always())
-                        .using(completionCallback)
-                        .using(config.asProperties());
-        DebeziumEngine<SourceRecord> engine = builder
-                .notifying((SourceRecord record) -> handleEvent(record))
+        DebeziumEngine<ChangeEvent<SourceRecord, SourceRecord>> engine = DebeziumEngine.create(Connect.class)
+                .using(config.asProperties())
+                .using(OffsetCommitPolicy.always())
+                .using(completionCallback)
+                .notifying((ChangeEvent<SourceRecord, SourceRecord> event) -> handleEvent(event.value()))
                 .build();
         if (engine == null) {
             if (metrics != null) {
