@@ -20,7 +20,8 @@ package io.siddhi.extension.io.cdc.source.listening;
 
 import io.debezium.config.Configuration;
 import io.debezium.embedded.EmbeddedEngine;
-import io.debezium.embedded.spi.OffsetCommitPolicy;
+import io.debezium.engine.DebeziumEngine;
+import io.debezium.engine.spi.OffsetCommitPolicy;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.stream.input.source.SourceEventListener;
 import io.siddhi.core.stream.input.source.SourceMapper;
@@ -29,6 +30,7 @@ import io.siddhi.extension.io.cdc.source.metrics.ListeningMetrics;
 import io.siddhi.extension.io.cdc.util.CDCSourceConstants;
 import org.apache.kafka.connect.connector.ConnectRecord;
 import org.apache.kafka.connect.data.Schema;
+import org.apache.kafka.connect.source.SourceRecord;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,21 +76,24 @@ public abstract class ChangeDataCapture {
      *
      * @return {@code engine}.
      */
-    public EmbeddedEngine getEngine(EmbeddedEngine.CompletionCallback completionCallback) {
+    @SuppressWarnings("unchecked")
+    public DebeziumEngine<SourceRecord> getEngine(DebeziumEngine.CompletionCallback completionCallback) {
         // Create and return Engine with above set configuration ...
-        EmbeddedEngine.Builder builder = EmbeddedEngine.create()
-                .using(OffsetCommitPolicy.always())
-                .using(completionCallback)
-                .using(config);
-        if (builder == null) {
+        DebeziumEngine.Builder<SourceRecord> builder = (DebeziumEngine.Builder<SourceRecord>)
+                new EmbeddedEngine.EngineBuilder()
+                        .using(OffsetCommitPolicy.always())
+                        .using(completionCallback)
+                        .using(config.asProperties());
+        DebeziumEngine<SourceRecord> engine = builder
+                .notifying((SourceRecord record) -> handleEvent(record))
+                .build();
+        if (engine == null) {
             if (metrics != null) {
                 metrics.setCDCStatus(CDCStatus.ERROR);
             }
             throw new SiddhiAppRuntimeException("CDC Engine create failed. Check parameters.");
-        } else {
-            EmbeddedEngine engine = builder.notifying(this::handleEvent).build();
-            return engine;
         }
+        return engine;
     }
 
     public void pause() {

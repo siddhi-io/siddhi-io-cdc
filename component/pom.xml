@@ -594,6 +594,10 @@
                             *;resolution:=optional
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
+                        <!-- Explicitly set EE requirement to Java 1.8 (compiler target).
+                             bnd 3.0.0 cannot parse Java 11 bytecode major version 55 from
+                             embedded Debezium 2.x jars, producing a null filter otherwise. -->
+                        <Require-Capability>osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=1.8))"</Require-Capability>
                         <Include-Resource>
                             META-INF=target/classes/META-INF,
                             META-INF/services=${project.build.directory}/dependencies/connect-runtime/META-INF/services,
