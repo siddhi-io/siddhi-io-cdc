@@ -29,7 +29,7 @@
     </modules>
     <groupId>io.siddhi.extension.io.cdc</groupId>
     <artifactId>siddhi-io-cdc-parent</artifactId>
-    <version>2.0.18-SNAPSHOT</version>
+    <version>2.1.0-SNAPSHOT</version>
     <name>Siddhi I/O cdc</name>
     <dependencyManagement>
         <dependencies>
@@ -252,6 +252,11 @@
                 <version>${org.snake.yaml.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protobuf.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.wso2.carbon.analytics</groupId>
                 <artifactId>org.wso2.carbon.si.metrics.core</artifactId>
                 <version>${carbon.analytics.version}</version>
@@ -305,19 +310,19 @@
         </plugins>
     </build>
     <properties>
-        <siddhi.version>5.1.21</siddhi.version>
+        <siddhi.version>5.1.32</siddhi.version>
         <siddhi.import.version.range>[5.1.0,6.0.0)</siddhi.import.version.range>
-        <log4j.version>2.17.1</log4j.version>
+        <log4j.version>2.25.4</log4j.version>
         <carbon.transport.version>4.4.15</carbon.transport.version>
         <siddhi-map-keyvalue.version>2.1.2</siddhi-map-keyvalue.version>
-        <jacoco.plugin.version>0.7.9</jacoco.plugin.version>
+        <jacoco.plugin.version>0.8.12</jacoco.plugin.version>
         <mysql-binlog-connector-java.version>0.13.0</mysql-binlog-connector-java.version>
-        <debezium-connector-mysql.version>1.9.7.Final</debezium-connector-mysql.version>
-        <debezium-embedded.version>1.9.7.Final</debezium-embedded.version>
-        <debezium-connector-oracle.version>1.9.7.Final</debezium-connector-oracle.version>
-        <debezium-connector-postgres.version>1.9.7.Final</debezium-connector-postgres.version>
-        <debezium-connector-sqlserver.version>1.9.7.Final</debezium-connector-sqlserver.version>
-        <debezium-connector-mongodb.version>1.9.7.Final</debezium-connector-mongodb.version>
+        <debezium-connector-mysql.version>2.7.3.Final</debezium-connector-mysql.version>
+        <debezium-embedded.version>2.7.3.Final</debezium-embedded.version>
+        <debezium-connector-oracle.version>2.7.3.Final</debezium-connector-oracle.version>
+        <debezium-connector-postgres.version>2.7.3.Final</debezium-connector-postgres.version>
+        <debezium-connector-sqlserver.version>2.7.3.Final</debezium-connector-sqlserver.version>
+        <debezium-connector-mongodb.version>2.7.3.Final</debezium-connector-mongodb.version>
         <version.oracle.driver>12.1.0.2</version.oracle.driver>
         <hikari.version>3.2.0</hikari.version>
         <org.testng.version>6.11</org.testng.version>
@@ -338,13 +343,14 @@
         <siddhi-cdc-postgres.port>5433</siddhi-cdc-postgres.port>
         <docker.container.siddhi-cdc-postgres.ip>0.0.0.0</docker.container.siddhi-cdc-postgres.ip>
         <oracle.jdbc.Driver.version>12.2.0.1</oracle.jdbc.Driver.version>
-        <kafka.connect.version>2.3.0</kafka.connect.version>
+        <kafka.connect.version>3.7.1</kafka.connect.version>
         <mongodb.connector.version>3.4.0</mongodb.connector.version>
         <json.version>20190722</json.version>
         <carbon.analytics.version>3.0.57</carbon.analytics.version>
         <org.yaml.snakeyaml.version.range>[2.0.0,3.0.0)</org.yaml.snakeyaml.version.range>
         <com.zaxxer.hikari.version.range>[1.0.0,4.0.0)</com.zaxxer.hikari.version.range>
         <org.snake.yaml.version>2.2</org.snake.yaml.version>
+        <protobuf.version>3.25.5</protobuf.version>
     </properties>
     <scm>
         <url>https://github.com/siddhi-io/siddhi-io-cdc.git</url>

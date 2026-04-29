@@ -27,7 +27,9 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This class saves and loads the change data offsets in in-memory.
@@ -74,6 +76,11 @@ public class InMemoryOffsetBackingStore extends MemoryOffsetBackingStore {
     public void stop() {
         super.stop();
         log.debug("Stopped InMemoryOffsetBackingStore");
+    }
+
+    @Override
+    public Set<Map<String, Object>> connectorPartitions(String connectorName) {
+        return new HashSet<>();
     }
 
     /**

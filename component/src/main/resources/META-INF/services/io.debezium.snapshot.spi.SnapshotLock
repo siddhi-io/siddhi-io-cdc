@@ -1,0 +1,11 @@
+io.debezium.snapshot.lock.NoLockingSupport
+io.debezium.connector.postgresql.snapshot.lock.NoSnapshotLock
+io.debezium.connector.postgresql.snapshot.lock.SharedSnapshotLock
+io.debezium.connector.mysql.snapshot.lock.ExtendedSnapshotLock
+io.debezium.connector.mysql.snapshot.lock.MinimalSnapshotLock
+io.debezium.connector.mysql.snapshot.lock.MinimalPerconaSnapshotLock
+io.debezium.connector.mysql.snapshot.lock.NoneSnapshotLock
+io.debezium.connector.sqlserver.snapshot.lock.NoSnapshotLock
+io.debezium.connector.sqlserver.snapshot.lock.ExclusiveSnapshotLock
+io.debezium.connector.oracle.snapshot.lock.NoSnapshotLock
+io.debezium.connector.oracle.snapshot.lock.SharedSnapshotLock

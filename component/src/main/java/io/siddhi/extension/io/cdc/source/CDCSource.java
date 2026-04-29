@@ -18,7 +18,8 @@
 
 package io.siddhi.extension.io.cdc.source;
 
-import io.debezium.embedded.EmbeddedEngine;
+import io.debezium.engine.ChangeEvent;
+import io.debezium.engine.DebeziumEngine;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
@@ -48,6 +49,7 @@ import io.siddhi.extension.io.cdc.source.polling.CDCPoller;
 import io.siddhi.extension.io.cdc.util.CDCSourceConstants;
 import io.siddhi.extension.io.cdc.util.CDCSourceUtil;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
+import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.quartz.JobKey;
@@ -444,7 +446,7 @@ public class CDCSource extends Source<CDCSource.CdcState> {
     private String cronExpression = null;
     private CronConfiguration cronConfiguration;
     private boolean waitOnMissedRecord;
-    private EmbeddedEngine engine;
+    private DebeziumEngine<ChangeEvent<SourceRecord, SourceRecord>> engine;
     private Metrics metrics;
     private String siddhiAppName;
     private ExecutorService siddhiAppContextExecutorService;
@@ -646,7 +648,7 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                 cdcSourceObjectKeeper.addCdcObject(this);
 
                 //create completion callback to handle the exceptions from debezium engine.
-                EmbeddedEngine.CompletionCallback completionCallback = (success, message, error) -> {
+                DebeziumEngine.CompletionCallback completionCallback = (success, message, error) -> {
                     if (!success) {
                         connectionCallback.onError(new ConnectionUnavailableException(
                                 "Connection to the database lost.", error));
@@ -656,7 +658,17 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                     }
                 };
                 engine = changeDataCapture.getEngine(completionCallback);
-                executorService.execute(engine);
+                final DebeziumEngine<ChangeEvent<SourceRecord, SourceRecord>> engineToRun = engine;
+                final ClassLoader bundleClassLoader = CDCSource.class.getClassLoader();
+                executorService.execute(() -> {
+                    ClassLoader originalCL = Thread.currentThread().getContextClassLoader();
+                    Thread.currentThread().setContextClassLoader(bundleClassLoader);
+                    try {
+                        engineToRun.run();
+                    } finally {
+                        Thread.currentThread().setContextClassLoader(originalCL);
+                    }
+                });
                 break;
             case CDCSourceConstants.MODE_POLLING:
                 //create a completion callback to handle exceptions from CDCPoller
@@ -705,7 +717,11 @@ public class CDCSource extends Source<CDCSource.CdcState> {
             cdcPoller.stop();
         } else if (mode.equals(CDCSourceConstants.MODE_LISTENING)) {
             if (engine != null) {
-                engine.stop();
+                try {
+                    engine.close();
+                } catch (java.io.IOException e) {
+                    log.error("Error closing the CDC engine.", e);
+                }
             }
         }
     }

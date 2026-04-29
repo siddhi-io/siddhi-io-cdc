@@ -1,0 +1,4 @@
+io.debezium.connector.postgresql.snapshot.query.SelectAllSnapshotQuery
+io.debezium.connector.mysql.snapshot.query.SelectAllSnapshotQuery
+io.debezium.connector.sqlserver.snapshot.query.SelectAllSnapshotQuery
+io.debezium.connector.oracle.snapshot.query.SelectAllSnapshotQuery

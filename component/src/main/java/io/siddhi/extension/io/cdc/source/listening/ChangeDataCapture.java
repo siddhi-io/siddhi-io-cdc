@@ -19,8 +19,10 @@
 package io.siddhi.extension.io.cdc.source.listening;
 
 import io.debezium.config.Configuration;
-import io.debezium.embedded.EmbeddedEngine;
-import io.debezium.embedded.spi.OffsetCommitPolicy;
+import io.debezium.embedded.Connect;
+import io.debezium.engine.ChangeEvent;
+import io.debezium.engine.DebeziumEngine;
+import io.debezium.engine.spi.OffsetCommitPolicy;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.stream.input.source.SourceEventListener;
 import io.siddhi.core.stream.input.source.SourceMapper;
@@ -29,6 +31,7 @@ import io.siddhi.extension.io.cdc.source.metrics.ListeningMetrics;
 import io.siddhi.extension.io.cdc.util.CDCSourceConstants;
 import org.apache.kafka.connect.connector.ConnectRecord;
 import org.apache.kafka.connect.data.Schema;
+import org.apache.kafka.connect.source.SourceRecord;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +47,7 @@ import static io.siddhi.extension.io.cdc.util.CDCSourceConstants.OPERATION_SEPAR
 public abstract class ChangeDataCapture {
     private final ListeningMetrics metrics;
     private String operation;
-    private Configuration config;
+    private Configuration config = Configuration.empty();
     private SourceEventListener sourceEventListener;
     private ReentrantLock lock = new ReentrantLock();
     private Condition condition = lock.newCondition();
@@ -74,21 +77,22 @@ public abstract class ChangeDataCapture {
      *
      * @return {@code engine}.
      */
-    public EmbeddedEngine getEngine(EmbeddedEngine.CompletionCallback completionCallback) {
+    public DebeziumEngine<ChangeEvent<SourceRecord, SourceRecord>> getEngine(
+            DebeziumEngine.CompletionCallback completionCallback) {
         // Create and return Engine with above set configuration ...
-        EmbeddedEngine.Builder builder = EmbeddedEngine.create()
+        DebeziumEngine<ChangeEvent<SourceRecord, SourceRecord>> engine = DebeziumEngine.create(Connect.class)
+                .using(config.asProperties())
                 .using(OffsetCommitPolicy.always())
                 .using(completionCallback)
-                .using(config);
-        if (builder == null) {
+                .notifying((ChangeEvent<SourceRecord, SourceRecord> event) -> handleEvent(event.value()))
+                .build();
+        if (engine == null) {
             if (metrics != null) {
                 metrics.setCDCStatus(CDCStatus.ERROR);
             }
             throw new SiddhiAppRuntimeException("CDC Engine create failed. Check parameters.");
-        } else {
-            EmbeddedEngine engine = builder.notifying(this::handleEvent).build();
-            return engine;
         }
+        return engine;
     }
 
     public void pause() {

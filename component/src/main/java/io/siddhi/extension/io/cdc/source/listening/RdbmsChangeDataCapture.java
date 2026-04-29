@@ -203,7 +203,11 @@ public class RdbmsChangeDataCapture extends ChangeDataCapture {
             if (bigDecimal == null) {
                 return null;
             }
-            return bigDecimal.longValue();
+            BigDecimal normalized = bigDecimal.stripTrailingZeros();
+            if (normalized.scale() <= 0) {
+                return bigDecimal.longValue();
+            }
+            return bigDecimal.doubleValue();
         }
         if (v instanceof Short) {
             return ((Short) v).intValue();
