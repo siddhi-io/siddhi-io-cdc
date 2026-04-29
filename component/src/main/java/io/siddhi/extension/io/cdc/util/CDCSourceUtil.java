@@ -227,9 +227,9 @@ public class CDCSourceUtil {
 
             if (serverID == CDCSourceConstants.DEFAULT_SERVER_ID) {
                 SecureRandom random = new SecureRandom();
-                configMap.put(CDCSourceConstants.SERVER_ID, random.nextInt(1001) + 5400);
+                configMap.put(CDCSourceConstants.DATABASE_SERVER_ID, random.nextInt(1001) + 5400);
             } else {
-                configMap.put(CDCSourceConstants.SERVER_ID, serverID);
+                configMap.put(CDCSourceConstants.DATABASE_SERVER_ID, serverID);
             }
 
             //set the database server name if specified, otherwise set <host>_<port> as default
