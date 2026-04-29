@@ -82,22 +82,18 @@ public class DefaultPollingStrategy extends PollingStrategy {
                             pauseLock.unlock();
                         }
                     }
-                    boolean isError;
-                    long startedTime = System.currentTimeMillis();
-                    eventsPerPollingInterval = 0;
                     try {
                         if (connection == null || !connection.isValid(5)) {
+                            log.warn("Invalid connection, reconnecting...");
                             CDCPollingUtil.cleanupConnection(null, null, connection);
-                                connection = getConnection();
-                        }
-                        isError = printEvent(connection);
+                            connection = getConnection();
+                        }                        
                     } catch (SQLException e) {
-                        isError = true;
-                        if (metrics != null) {
-                            metrics.setCDCStatus(CDCStatus.ERROR);
-                        }
-                        log.error("{}", buildError("Error while polling the table %s.", tableName), e);
+                        log.error("{}", buildError("Error while reconnectong datasource"), e);
                     }
+                    long startedTime = System.currentTimeMillis();
+                    eventsPerPollingInterval = 0;
+                    boolean isError = printEvent(connection);
                     try {
                         if (metrics != null) {
                             metrics.setReceiveEventsPerPollingInterval(eventsPerPollingInterval);
