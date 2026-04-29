@@ -27,9 +27,9 @@ public class CDCSourceConstants {
     public static final String DATABASE_CONNECTION_URL = "url";
     public static final String POOL_PROPERTIES = "pool.properties";
     public static final String OPERATION = "operation";
-    public static final String DATABASE_HISTORY_FILEBASE_HISTORY = "io.debezium.relational.history.FileDatabaseHistory";
-    public static final String DATABASE_HISTORY_FILE_NAME = "database.history.file.filename";
-    public static final String DATABASE_SERVER_NAME = "database.server.name";
+    public static final String DATABASE_HISTORY_FILEBASE_HISTORY = "io.debezium.storage.file.history.FileSchemaHistory";
+    public static final String DATABASE_HISTORY_FILE_NAME = "schema.history.internal.file.filename";
+    public static final String DATABASE_SERVER_NAME = "topic.prefix";
     public static final String DATABASE_SERVER_ID = "database.server.id";
     public static final String SERVER_ID = "server.id";
     public static final String TABLE_NAME = "table.name";
@@ -49,7 +49,7 @@ public class CDCSourceConstants {
     public static final String DATABASE_PASSWORD = "database.password";
     public static final String OFFSET_STORAGE = "offset.storage";
     public static final String CDC_SOURCE_OBJECT = "cdc.source.object";
-    public static final String DATABASE_HISTORY = "database.history";
+    public static final String DATABASE_HISTORY = "schema.history.internal";
     public static final String MYSQL_CONNECTOR_CLASS = "io.debezium.connector.mysql.MySqlConnector";
     public static final String POSTGRESQL_CONNECTOR_CLASS = "io.debezium.connector.postgresql.PostgresConnector";
     public static final String ORACLE_CONNECTOR_CLASS = "io.debezium.connector.oracle.OracleConnector";
@@ -86,6 +86,8 @@ public class CDCSourceConstants {
     public static final String MONGODB_PASSWORD = "mongodb.password";
     public static final String MONGODB_HOSTS = "mongodb.hosts";
     public static final String MONGODB_NAME = "mongodb.name";
+    public static final String MONGODB_CONNECTION_STRING = "mongodb.connection.string";
+    public static final String SQLSERVER_DATABASE_NAMES = "database.names";
     public static final String MONGODB_COLLECTION_INCLUDE_LIST = "collection.include.list";
     public static final String MONGO_COLLECTION_OBJECT_ID = "$oid";
     public static final String MONGO_COLLECTION_ID = "id";

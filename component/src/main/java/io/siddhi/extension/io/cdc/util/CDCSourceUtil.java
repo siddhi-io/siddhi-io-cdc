@@ -128,7 +128,7 @@ public class CDCSourceUtil {
                     configMap.put(CDCSourceConstants.DATABASE_HOSTNAME, host);
                     configMap.put(CDCSourceConstants.DATABASE_PORT, port);
                     configMap.put(CDCSourceConstants.TABLE_TABLE_INCLUDE_LIST, tableName);
-                    configMap.put(CDCSourceConstants.DATABASE_DBNAME, database);
+                    configMap.put(CDCSourceConstants.SQLSERVER_DATABASE_NAMES, database);
 
                     //Add other SQLServer specific details to configMap.
                     configMap.put(CDCSourceConstants.CONNECTOR_CLASS, CDCSourceConstants.SQLSERVER_CONNECTOR_CLASS);
@@ -187,10 +187,14 @@ public class CDCSourceUtil {
                                 "<database_name>");
                     }
                     configMap.put(CDCSourceConstants.CONNECTOR_CLASS, CDCSourceConstants.MONGODB_CONNECTOR_CLASS);
-                    //hostname and port pairs of the MongoDB servers in the replica set.
-                    configMap.put(CDCSourceConstants.MONGODB_HOSTS, host + ":" + port);
-                    //unique name that identifies the connector and/or MongoDB replica set or sharded cluster
-                    configMap.put(CDCSourceConstants.MONGODB_NAME, replicaSetName);
+                    String actualHost = (replicaSetName != null && !replicaSetName.isEmpty())
+                            ? host.substring(host.indexOf('/') + 1)
+                            : host;
+                    String connectionString = "mongodb://" + actualHost + ":" + port + "/";
+                    if (replicaSetName != null && !replicaSetName.isEmpty()) {
+                        connectionString += "?replicaSet=" + replicaSetName;
+                    }
+                    configMap.put(CDCSourceConstants.MONGODB_CONNECTION_STRING, connectionString);
                     //fully-qualified namespaces for MongoDB collections to be monitored
                     configMap.put(CDCSourceConstants.MONGODB_COLLECTION_INCLUDE_LIST, database + "." + tableName);
                     if (metrics != null) {
