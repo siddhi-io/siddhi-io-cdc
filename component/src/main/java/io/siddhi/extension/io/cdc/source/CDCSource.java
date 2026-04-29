@@ -658,7 +658,17 @@ public class CDCSource extends Source<CDCSource.CdcState> {
                     }
                 };
                 engine = changeDataCapture.getEngine(completionCallback);
-                executorService.execute(engine);
+                final DebeziumEngine<ChangeEvent<SourceRecord, SourceRecord>> engineToRun = engine;
+                final ClassLoader bundleClassLoader = CDCSource.class.getClassLoader();
+                executorService.execute(() -> {
+                    ClassLoader originalCL = Thread.currentThread().getContextClassLoader();
+                    Thread.currentThread().setContextClassLoader(bundleClassLoader);
+                    try {
+                        engineToRun.run();
+                    } finally {
+                        Thread.currentThread().setContextClassLoader(originalCL);
+                    }
+                });
                 break;
             case CDCSourceConstants.MODE_POLLING:
                 //create a completion callback to handle exceptions from CDCPoller
