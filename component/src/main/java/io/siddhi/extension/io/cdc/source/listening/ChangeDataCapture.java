@@ -62,6 +62,8 @@ public abstract class ChangeDataCapture {
 
     /**
      * Initialize this.config according to user specified parameters.
+     *
+     * @param configMap map of configuration key-value pairs supplied by the user
      */
     public void setConfig(Map<String, Object> configMap) {
 
@@ -75,6 +77,7 @@ public abstract class ChangeDataCapture {
     /**
      * Create a new Debezium embedded engine with the configuration {@code config} and,
      *
+     * @param completionCallback callback invoked when the engine stops
      * @return {@code engine}.
      */
     public DebeziumEngine<ChangeEvent<SourceRecord, SourceRecord>> getEngine(

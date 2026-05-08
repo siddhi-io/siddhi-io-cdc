@@ -280,6 +280,8 @@ public class CDCSourceUtil {
     /**
      * Get the WSO2 Stream Processor's local path from System Variables.
      * if carbon.home is not set, return the current project path. (for test cases and for use as a java library)
+     *
+     * @return the carbon home path, or the current working directory if carbon.home is not set
      */
     public static String getCarbonHome() {
         String path = System.getProperty(CDCSourceConstants.CARBON_HOME);
