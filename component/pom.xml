@@ -629,6 +629,76 @@
                     <detectJavaApiLink>false</detectJavaApiLink>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <artifactSet>
+                                <includes>
+                                    <include>io.debezium:*</include>
+                                    <include>org.apache.kafka:connect-api</include>
+                                    <include>org.apache.kafka:connect-json</include>
+                                    <include>org.apache.kafka:connect-runtime</include>
+                                    <include>org.apache.kafka:kafka-clients</include>
+                                    <include>com.github.shyiko:mysql-binlog-connector-java</include>
+                                    <include>org.antlr:antlr4-runtime</include>
+                                    <include>org.json:json</include>
+                                    <include>com.fasterxml.jackson.core:jackson-core</include>
+                                    <include>com.fasterxml.jackson.core:jackson-databind</include>
+                                    <include>com.fasterxml.jackson.core:jackson-annotations</include>
+                                    <include>com.fasterxml.jackson.datatype:jackson-datatype-jdk8</include>
+                                    <include>com.fasterxml.jackson.datatype:jackson-datatype-jsr310</include>
+                                    <include>com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider</include>
+                                    <include>com.fasterxml.jackson.jaxrs:jackson-jaxrs-base</include>
+                                    <include>com.fasterxml.jackson.module:jackson-module-jaxb-annotations</include>
+                                    <include>com.mysql:mysql-connector-j</include>
+                                </includes>
+                            </artifactSet>
+                            <relocations>
+                                <relocation>
+                                    <pattern>com.fasterxml.jackson</pattern>
+                                    <shadedPattern>io.siddhi.cdc.shaded.jackson</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.mysql</pattern>
+                                    <shadedPattern>io.siddhi.cdc.shaded.mysql</shadedPattern>
+                                </relocation>
+                            </relocations>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>org.apache.kafka:connect-runtime</artifact>
+                                    <includes>
+                                        <include>META-INF/services/**</include>
+                                    </includes>
+                                </filter>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                        <exclude>META-INF/versions/**</exclude>
+                                        <exclude>org/slf4j/impl/**</exclude>
+                                        <exclude>**/StaticLoggerBinder.class</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>
