@@ -285,7 +285,9 @@ public class CDCSourceUtil {
      */
     public static String getCarbonHome() {
         String path = System.getProperty(CDCSourceConstants.CARBON_HOME);
-
+        if (path == null) {
+            path = System.getenv(CDCSourceConstants.CARBON_HOME_ENV);
+        }
         if (path == null) {
             path = System.getProperty(CDCSourceConstants.USER_DIRECTORY);
         }

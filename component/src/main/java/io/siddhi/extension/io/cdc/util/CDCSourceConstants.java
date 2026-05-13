@@ -66,6 +66,7 @@ public class CDCSourceConstants {
     public static final String BEFORE = "before";
     public static final String AFTER = "after";
     public static final String CARBON_HOME = "carbon.home";
+    public static final String CARBON_HOME_ENV = "CARBON_HOME";
     public static final String USER_DIRECTORY = "user.dir";
     public static final String MODE = "mode";
     public static final String MODE_LISTENING = "listening";
