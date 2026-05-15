@@ -699,6 +699,37 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>inject-osgi-manifest</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <!-- The shade plugin strips META-INF/MANIFEST.MF from all
+                                     inputs including the project's own OSGi bundle. Extract
+                                     the bundle manifest and reinject it into the shaded JAR. -->
+                                <unzip src="${project.build.directory}/original-${project.build.finalName}.jar"
+                                       dest="${project.build.directory}/osgi-manifest-staging">
+                                    <patternset>
+                                        <include name="META-INF/MANIFEST.MF"/>
+                                    </patternset>
+                                </unzip>
+                                <zip destfile="${project.build.directory}/${project.build.finalName}.jar"
+                                     update="true">
+                                    <zipfileset dir="${project.build.directory}/osgi-manifest-staging"
+                                                includes="META-INF/MANIFEST.MF"/>
+                                </zip>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>
