@@ -84,8 +84,7 @@ public class DefaultPollingStrategy extends PollingStrategy {
                         }
                     }
 
-                    // Проверка и переподключение
-                    connection = ensureValidConnection(connection);
+                    connection = ensureValidConnection(connection); // Check the connection and reconnect if necessary
                     log.debug("ensureValidConnection returned: {}", connection == null ? "null" : "valid");
 
                     if (connection != null) {
@@ -101,7 +100,7 @@ public class DefaultPollingStrategy extends PollingStrategy {
                     } else {
                             log.warn("Skipping poll: no valid DB connection");
                             if (metrics != null) {
-                                    metrics.setCDCStatus(CDCStatus.ERROR); // ← тоже стоит фиксировать
+                                    metrics.setCDCStatus(CDCStatus.ERROR);
                             }
                     }
 
@@ -109,7 +108,7 @@ public class DefaultPollingStrategy extends PollingStrategy {
                             Thread.sleep((long) pollingInterval * 1000);
                     } catch (InterruptedException e) {
                             if (metrics != null) {
-                                    metrics.setCDCStatus(CDCStatus.ERROR); // ← это я потерял
+                                    metrics.setCDCStatus(CDCStatus.ERROR);
                             }
                             Thread.currentThread().interrupt();
                             break;
