@@ -128,7 +128,7 @@ public class CDCSourceUtil {
                     configMap.put(CDCSourceConstants.DATABASE_HOSTNAME, host);
                     configMap.put(CDCSourceConstants.DATABASE_PORT, port);
                     configMap.put(CDCSourceConstants.TABLE_TABLE_INCLUDE_LIST, tableName);
-                    configMap.put(CDCSourceConstants.DATABASE_DBNAME, database);
+                    configMap.put(CDCSourceConstants.SQLSERVER_DATABASE_NAMES, database);
 
                     //Add other SQLServer specific details to configMap.
                     configMap.put(CDCSourceConstants.CONNECTOR_CLASS, CDCSourceConstants.SQLSERVER_CONNECTOR_CLASS);
@@ -187,10 +187,14 @@ public class CDCSourceUtil {
                                 "<database_name>");
                     }
                     configMap.put(CDCSourceConstants.CONNECTOR_CLASS, CDCSourceConstants.MONGODB_CONNECTOR_CLASS);
-                    //hostname and port pairs of the MongoDB servers in the replica set.
-                    configMap.put(CDCSourceConstants.MONGODB_HOSTS, host + ":" + port);
-                    //unique name that identifies the connector and/or MongoDB replica set or sharded cluster
-                    configMap.put(CDCSourceConstants.MONGODB_NAME, replicaSetName);
+                    String actualHost = (replicaSetName != null && !replicaSetName.isEmpty())
+                            ? host.substring(host.indexOf('/') + 1)
+                            : host;
+                    String connectionString = "mongodb://" + actualHost + ":" + port + "/";
+                    if (replicaSetName != null && !replicaSetName.isEmpty()) {
+                        connectionString += "?replicaSet=" + replicaSetName;
+                    }
+                    configMap.put(CDCSourceConstants.MONGODB_CONNECTION_STRING, connectionString);
                     //fully-qualified namespaces for MongoDB collections to be monitored
                     configMap.put(CDCSourceConstants.MONGODB_COLLECTION_INCLUDE_LIST, database + "." + tableName);
                     if (metrics != null) {
@@ -223,9 +227,9 @@ public class CDCSourceUtil {
 
             if (serverID == CDCSourceConstants.DEFAULT_SERVER_ID) {
                 SecureRandom random = new SecureRandom();
-                configMap.put(CDCSourceConstants.SERVER_ID, random.nextInt(1001) + 5400);
+                configMap.put(CDCSourceConstants.DATABASE_SERVER_ID, random.nextInt(1001) + 5400);
             } else {
-                configMap.put(CDCSourceConstants.SERVER_ID, serverID);
+                configMap.put(CDCSourceConstants.DATABASE_SERVER_ID, serverID);
             }
 
             //set the database server name if specified, otherwise set <host>_<port> as default
@@ -276,10 +280,14 @@ public class CDCSourceUtil {
     /**
      * Get the WSO2 Stream Processor's local path from System Variables.
      * if carbon.home is not set, return the current project path. (for test cases and for use as a java library)
+     *
+     * @return the carbon home path, or the current working directory if carbon.home is not set
      */
     public static String getCarbonHome() {
         String path = System.getProperty(CDCSourceConstants.CARBON_HOME);
-
+        if (path == null) {
+            path = System.getenv(CDCSourceConstants.CARBON_HOME_ENV);
+        }
         if (path == null) {
             path = System.getProperty(CDCSourceConstants.USER_DIRECTORY);
         }

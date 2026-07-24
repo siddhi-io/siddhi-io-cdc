@@ -49,6 +49,9 @@ public class CDCCronExecutor implements Job {
 
     /**
      * To initialize the cron job to execute at given cron expression
+     *
+     * @param pollingStrategy    the polling strategy to execute on each cron trigger
+     * @param cronConfiguration  the cron configuration containing the expression and scheduler
      */
     public static void scheduleJob(PollingStrategy pollingStrategy, CronConfiguration cronConfiguration) {
         try {

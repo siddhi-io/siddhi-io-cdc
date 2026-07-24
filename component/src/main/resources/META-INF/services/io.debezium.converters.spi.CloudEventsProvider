@@ -1,0 +1,5 @@
+io.debezium.connector.postgresql.converters.PostgresCloudEventsProvider
+io.debezium.connector.mysql.converters.MySqlCloudEventsProvider
+io.debezium.connector.sqlserver.converters.SqlServerCloudEventsProvider
+io.debezium.connector.oracle.converters.OracleCloudEventsProvider
+io.debezium.connector.mongodb.converters.MongoDbCloudEventsProvider
