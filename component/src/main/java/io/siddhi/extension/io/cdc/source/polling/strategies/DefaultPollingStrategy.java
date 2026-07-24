@@ -63,46 +63,84 @@ public class DefaultPollingStrategy extends PollingStrategy {
 
     @Override
     public void poll() {
-        Connection connection = getConnection();
+        Connection connection = null;
         try {
+            connection = getConnection();
             lastReadPollingColumnValue = getLastReadPollingColumnValue(connection);
+
             if (cronConfiguration.getCronExpression() != null) {
                 printEvent(connection);
             } else {
                 while (true) {
+                    log.debug("Poll iteration start, connection={}", connection == null ? "null" : "alive");
                     if (paused) {
                         pauseLock.lock();
                         try {
-                            while (paused) {
-                                pauseLockCondition.await();
-                            }
+                            while (paused) pauseLockCondition.await();
                         } catch (InterruptedException ie) {
                             Thread.currentThread().interrupt();
                         } finally {
                             pauseLock.unlock();
                         }
                     }
-                    long startedTime = System.currentTimeMillis();
-                    eventsPerPollingInterval = 0;
-                    boolean isError = printEvent(connection);
+
+                    connection = ensureValidConnection(connection); // Check the connection and reconnect if necessary
+                    log.debug("ensureValidConnection returned: {}", connection == null ? "null" : "valid");
+
+                    if (connection != null) {
+                            long startedTime = System.currentTimeMillis();
+                            eventsPerPollingInterval = 0;
+                            boolean isError = printEvent(connection);
+                            if (metrics != null) {
+                                    metrics.setReceiveEventsPerPollingInterval(eventsPerPollingInterval);
+                                    CDCStatus cdcStatus = isError ? CDCStatus.ERROR : CDCStatus.SUCCESS;
+                                    metrics.pollingDetailsMetric(eventsPerPollingInterval, startedTime,
+                                                    System.currentTimeMillis() - startedTime, cdcStatus);
+                            }
+                    } else {
+                            log.warn("Skipping poll: no valid DB connection");
+                            if (metrics != null) {
+                                    metrics.setCDCStatus(CDCStatus.ERROR);
+                            }
+                    }
+
                     try {
-                        if (metrics != null) {
-                            metrics.setReceiveEventsPerPollingInterval(eventsPerPollingInterval);
-                            CDCStatus cdcStatus = isError ? CDCStatus.ERROR : CDCStatus.SUCCESS;
-                            metrics.pollingDetailsMetric(eventsPerPollingInterval, startedTime,
-                                    System.currentTimeMillis() - startedTime, cdcStatus);
-                        }
-                        Thread.sleep((long) pollingInterval * 1000);
+                            Thread.sleep((long) pollingInterval * 1000);
                     } catch (InterruptedException e) {
-                        if (metrics != null) {
-                            metrics.setCDCStatus(CDCStatus.ERROR);
-                        }
-                        log.error("{}", buildError("Error while polling the table %s.", tableName), e);
+                            if (metrics != null) {
+                                    metrics.setCDCStatus(CDCStatus.ERROR);
+                            }
+                            Thread.currentThread().interrupt();
+                            break;
                     }
                 }
             }
         } finally {
             CDCPollingUtil.cleanupConnection(null, null, connection);
+        }
+    }
+
+    private Connection ensureValidConnection(Connection current) {
+        try {
+            if (current != null && current.isValid(5)) {
+                return current;
+            }
+            log.warn("Connection invalid, reconnecting...");
+            CDCPollingUtil.cleanupConnection(null, null, current);
+            Connection fresh = getConnection();
+            if (fresh != null && fresh.isValid(5)) {
+                return fresh;
+            }
+            log.warn("Reconnection failed: new connection is also invalid");
+            CDCPollingUtil.cleanupConnection(null, null, fresh);
+            return null;
+        } catch (SQLException e) {
+            log.error("Error checking/restoring DB connection", e);
+            CDCPollingUtil.cleanupConnection(null, null, current);
+            return null;
+        } catch (Exception e) {  // ← добавить это
+            log.error("Unexpected error while reconnecting, will retry", e);
+            return null;
         }
     }
 
