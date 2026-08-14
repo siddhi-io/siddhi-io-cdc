@@ -28,6 +28,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,13 +49,15 @@ public class MongoChangeDataCapture extends ChangeDataCapture {
     Map<String, Object> createMap(ConnectRecord connectRecord, String operation) {
         //Map to return
         Map<String, Object> detailsMap = new HashMap<>();
-        List<Object> transportProperties = new ArrayList();
         Struct record = (Struct) connectRecord.value();
         //get the change data object's operation.
         String op;
         try {
             op = (String) record.get(CDCSourceConstants.CONNECT_RECORD_OPERATION);
         } catch (NullPointerException | DataException ex) {
+            return detailsMap;
+        }
+        if (op == null) {
             return detailsMap;
         }
         //match the change data's operation with user specifying operation and proceed.
@@ -66,37 +69,33 @@ public class MongoChangeDataCapture extends ChangeDataCapture {
                 op.equals(CDCSourceConstants.CONNECT_RECORD_UPDATE_OPERATION)) {
             switch (op) {
                 case CDCSourceConstants.CONNECT_RECORD_INSERT_OPERATION:
-                    detailsMap.put(CDCSourceConstants.TRANSPORT_PROPERTIES,
-                            transportProperties.add(CDCSourceConstants.INSERT));
-                    //append row details after insert.
-                    String insertString = (String) record.get(CDCSourceConstants.AFTER);
-                    JSONObject jsonObj = new JSONObject(insertString);
-                    detailsMap = getMongoDetailMap(jsonObj);
+                    //append document details after insert.
+                    String insertedDocument = getStringField(record, CDCSourceConstants.AFTER);
+                    if (insertedDocument != null) {
+                        detailsMap = getMongoDetailMap(new JSONObject(insertedDocument));
+                    }
+                    addTransportProperties(detailsMap, CDCSourceConstants.INSERT);
                     break;
                 case CDCSourceConstants.CONNECT_RECORD_DELETE_OPERATION:
-                    detailsMap.put(CDCSourceConstants.TRANSPORT_PROPERTIES,
-                            transportProperties.add(CDCSourceConstants.DELETE));
-                    //append row details before delete.
-                    String deleteDocumentId = (String) ((Struct) connectRecord.key())
-                            .get(CDCSourceConstants.MONGO_COLLECTION_ID);
-                    JSONObject jsonObjId = new JSONObject(deleteDocumentId);
-                    detailsMap.put(CDCSourceConstants.MONGO_COLLECTION_ID,
-                            jsonObjId.get(CDCSourceConstants.MONGO_COLLECTION_OBJECT_ID));
-
+                    //only the document id is available for a delete.
+                    detailsMap.put(CDCSourceConstants.MONGO_COLLECTION_ID, getDocumentId(connectRecord));
+                    addTransportProperties(detailsMap, CDCSourceConstants.DELETE);
                     break;
                 case CDCSourceConstants.CONNECT_RECORD_UPDATE_OPERATION:
-                    detailsMap.put(CDCSourceConstants.TRANSPORT_PROPERTIES,
-                            transportProperties.add(CDCSourceConstants.UPDATE));
-                    //append row details before update.
-                    String updateDocument = (String) record.get(CDCSourceConstants.MONGO_PATCH);
-                    JSONObject jsonObj1 = new JSONObject(updateDocument);
-                    JSONObject setJsonObj = (JSONObject) jsonObj1.get(CDCSourceConstants.MONGO_SET);
-                    detailsMap = getMongoDetailMap(setJsonObj);
-                    String updateDocumentId = (String) ((Struct) connectRecord.key())
-                            .get(CDCSourceConstants.MONGO_COLLECTION_ID);
-                    JSONObject jsonObjId1 = new JSONObject(updateDocumentId);
-                    detailsMap.put(CDCSourceConstants.MONGO_COLLECTION_ID,
-                            jsonObjId1.get(CDCSourceConstants.MONGO_COLLECTION_OBJECT_ID));
+                    /*
+                     * Debezium reports the changed fields of an update through updateDescription.updatedFields. A
+                     * replace, and a capture mode that omits the update description, carry the full document in
+                     * "after" instead; fall back to it so that those events are not dropped.
+                     */
+                    String updatedFields = getUpdatedFields(record);
+                    if (updatedFields == null) {
+                        updatedFields = getStringField(record, CDCSourceConstants.AFTER);
+                    }
+                    if (updatedFields != null) {
+                        detailsMap = getMongoDetailMap(new JSONObject(updatedFields));
+                    }
+                    detailsMap.put(CDCSourceConstants.MONGO_COLLECTION_ID, getDocumentId(connectRecord));
+                    addTransportProperties(detailsMap, CDCSourceConstants.UPDATE);
                     break;
                 default:
                     log.info("Provided value for \"op\" : {} is not supported.", op);
@@ -104,6 +103,72 @@ public class MongoChangeDataCapture extends ChangeDataCapture {
             }
         }
         return detailsMap;
+    }
+
+    /**
+     * {@code ChangeDataCapture.handleEvent} expects this entry to be a {@link List}, so it has to be populated after
+     * any reassignment of the details map.
+     */
+    private void addTransportProperties(Map<String, Object> detailsMap, String operation) {
+        List<Object> transportProperties = new ArrayList<>();
+        transportProperties.add(operation);
+        detailsMap.put(CDCSourceConstants.TRANSPORT_PROPERTIES, transportProperties);
+    }
+
+    /**
+     * Reads the fields changed by an update from {@code updateDescription.updatedFields}.
+     *
+     * @return the changed fields as extended JSON, or null when the change event carries no update description.
+     */
+    private String getUpdatedFields(Struct record) {
+        Struct updateDescription;
+        try {
+            updateDescription = record.getStruct(CDCSourceConstants.MONGO_UPDATE_DESCRIPTION);
+        } catch (DataException ex) {
+            log.debug("Change event has no {} field.", CDCSourceConstants.MONGO_UPDATE_DESCRIPTION);
+            return null;
+        }
+        if (updateDescription == null) {
+            return null;
+        }
+        return getStringField(updateDescription, CDCSourceConstants.MONGO_UPDATED_FIELDS);
+    }
+
+    /**
+     * Resolves the document id from the change event key. An ObjectId is serialised as {@code {"$oid": "..."}} while
+     * other id types are serialised as bare JSON scalars.
+     */
+    private Object getDocumentId(ConnectRecord connectRecord) {
+        Struct key = (Struct) connectRecord.key();
+        if (key == null) {
+            return null;
+        }
+        String documentId = getStringField(key, CDCSourceConstants.MONGO_COLLECTION_ID);
+        if (documentId == null) {
+            return null;
+        }
+        try {
+            Object parsedId = new JSONTokener(documentId).nextValue();
+            if (parsedId instanceof JSONObject) {
+                JSONObject idObject = (JSONObject) parsedId;
+                if (idObject.has(CDCSourceConstants.MONGO_COLLECTION_OBJECT_ID)) {
+                    return idObject.get(CDCSourceConstants.MONGO_COLLECTION_OBJECT_ID);
+                }
+                return idObject.toString();
+            }
+            return parsedId;
+        } catch (JSONException ex) {
+            return documentId;
+        }
+    }
+
+    private String getStringField(Struct struct, String fieldName) {
+        try {
+            return struct.getString(fieldName);
+        } catch (DataException ex) {
+            log.debug("Change event has no {} field.", fieldName);
+            return null;
+        }
     }
 
     private Map<String, Object> getMongoDetailMap(JSONObject jsonObj) {

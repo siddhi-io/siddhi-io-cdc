@@ -93,8 +93,8 @@ public class CDCSourceConstants {
     public static final String MONGO_COLLECTION_OBJECT_ID = "$oid";
     public static final String MONGO_COLLECTION_ID = "id";
     public static final String MONGO_COLLECTION_INSERT_ID = "_id";
-    public static final String MONGO_PATCH = "patch";
-    public static final String MONGO_SET = "$set";
+    public static final String MONGO_UPDATE_DESCRIPTION = "updateDescription";
+    public static final String MONGO_UPDATED_FIELDS = "updatedFields";
     public static final String MONGO_OBJECT_NUMBER_LONG = "$numberLong";
     public static final String MONGO_OBJECT_NUMBER_DECIMAL = "$numberDecimal";
 
