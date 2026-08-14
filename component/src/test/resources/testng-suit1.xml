@@ -20,12 +20,14 @@
 
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<!--This test suit is used to validate CDCSource and test H2 CDC in polling mode-->
+<!--This test suit is used to validate CDCSource, test H2 CDC in polling mode and unit test the change data
+    translation of the listening mode, which needs no database-->
 <suite name="Siddhi-Io-Cdc-Test-Suite1">
     <test name="Siddhi-io-cdc-tests-1" enabled="true" parallel="false">
         <classes>
             <class name="io.siddhi.extension.io.cdc.source.TestCaseOfCDCSourceValidation"/>
             <class name="io.siddhi.extension.io.cdc.source.TestCaseOfCDCPollingMode"/>
+            <class name="io.siddhi.extension.io.cdc.source.listening.MongoChangeDataCaptureTest"/>
         </classes>
     </test>
 </suite>
