@@ -303,6 +303,7 @@
             <plugin>
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>${spotbugs.maven.plugin.version}</version>
                 <configuration>
                     <excludeFilterFile>${maven.findbugsplugin.version.exclude}</excludeFilterFile>
                 </configuration>
@@ -316,6 +317,7 @@
         <carbon.transport.version>4.4.15</carbon.transport.version>
         <siddhi-map-keyvalue.version>2.1.2</siddhi-map-keyvalue.version>
         <jacoco.plugin.version>0.8.12</jacoco.plugin.version>
+        <spotbugs.maven.plugin.version>4.9.3.1</spotbugs.maven.plugin.version>
         <mysql-binlog-connector-java.version>0.13.0</mysql-binlog-connector-java.version>
         <debezium-connector-mysql.version>2.7.3.Final</debezium-connector-mysql.version>
         <debezium-embedded.version>2.7.3.Final</debezium-embedded.version>

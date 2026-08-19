@@ -50,11 +50,14 @@ public class MongoChangeDataCapture extends ChangeDataCapture {
         //Map to return
         Map<String, Object> detailsMap = new HashMap<>();
         Struct record = (Struct) connectRecord.value();
+        if (record == null) {
+            return detailsMap;
+        }
         //get the change data object's operation.
         String op;
         try {
             op = (String) record.get(CDCSourceConstants.CONNECT_RECORD_OPERATION);
-        } catch (NullPointerException | DataException ex) {
+        } catch (DataException ex) {
             return detailsMap;
         }
         if (op == null) {

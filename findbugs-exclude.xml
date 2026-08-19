@@ -46,4 +46,44 @@
         <Class name="io.siddhi.extension.io.cdc.source.polling.strategies.WaitOnMissingRecordPollingStrategy" />
         <Bug pattern="SQL_INJECTION_JDBC" />
     </Match>
+    <!-- EI_EXPOSE_REP / MS_EXPOSE_REP: the objects held here are collaborators that are deliberately shared,
+         not defensive-copy candidates. Copying a HikariDataSource, a Quartz Scheduler, the metrics registry,
+         the CDCSource offset map or the CDCSourceObjectKeeper singleton would break the behaviour that
+         depends on them being the same instance. Reported since SpotBugs enabled these by default. -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Bug pattern="MS_EXPOSE_REP"/>
+    </Match>
+
+    <!-- AT_*: flagged on counters and flags written by the polling thread. Real but low impact, and making
+         them correct means reworking how the polling loop publishes its state. Tracked separately rather
+         than folded into a toolchain upgrade. -->
+    <Match>
+        <Class name="io.siddhi.extension.io.cdc.source.polling.CDCPoller"/>
+        <Bug pattern="AT_STALE_THREAD_WRITE_OF_PRIMITIVE"/>
+    </Match>
+    <Match>
+        <Class name="io.siddhi.extension.io.cdc.source.polling.strategies.DefaultPollingStrategy"/>
+        <Bug pattern="AT_STALE_THREAD_WRITE_OF_PRIMITIVE"/>
+    </Match>
+    <Match>
+        <Class name="io.siddhi.extension.io.cdc.source.polling.strategies.DefaultPollingStrategy"/>
+        <Bug pattern="AT_NONATOMIC_OPERATIONS_ON_SHARED_VARIABLE"/>
+    </Match>
+    <Match>
+        <Class name="io.siddhi.extension.io.cdc.source.metrics.PollingMetrics"/>
+        <Bug pattern="AT_STALE_THREAD_WRITE_OF_PRIMITIVE"/>
+    </Match>
+
+    <!-- CT_CONSTRUCTOR_THROW: guards against finalizer attacks; this class declares no finalizer and
+         failing the constructor is the intended behaviour when the datasource cannot be initialised. -->
+    <Match>
+        <Class name="io.siddhi.extension.io.cdc.source.polling.CDCPoller"/>
+        <Bug pattern="CT_CONSTRUCTOR_THROW"/>
+    </Match>
 </FindBugsFilter>

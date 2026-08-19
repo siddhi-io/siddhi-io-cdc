@@ -33,6 +33,8 @@ import java.util.regex.Pattern;
  * This class contains Util methods for the CDCSource.
  */
 public class CDCSourceUtil {
+    private static final SecureRandom RANDOM = new SecureRandom();
+
     public static Map<String, Object> getConfigMap(String username, String password, String url, String tableName,
                                                    String historyFileDirectory, String siddhiAppName,
                                                    String siddhiStreamName, int serverID, String serverName,
@@ -226,8 +228,7 @@ public class CDCSourceUtil {
             }
 
             if (serverID == CDCSourceConstants.DEFAULT_SERVER_ID) {
-                SecureRandom random = new SecureRandom();
-                configMap.put(CDCSourceConstants.DATABASE_SERVER_ID, random.nextInt(1001) + 5400);
+                configMap.put(CDCSourceConstants.DATABASE_SERVER_ID, RANDOM.nextInt(1001) + 5400);
             } else {
                 configMap.put(CDCSourceConstants.DATABASE_SERVER_ID, serverID);
             }
