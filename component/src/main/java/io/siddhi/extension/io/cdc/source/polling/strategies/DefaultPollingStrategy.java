@@ -139,7 +139,9 @@ public class DefaultPollingStrategy extends PollingStrategy {
         PreparedStatement statement = null;
         boolean isError = false;
         try {
-            selectQuery = getSelectQuery("*", "WHERE " + pollingColumn + " > ?");
+            // Order by the polling column so that lastReadPollingColumnValue only ever moves forward. Without
+            // it, out of order rows leave the offset on a lower value and the rows above it are emitted again.
+            selectQuery = getSelectQuery("*", "WHERE " + pollingColumn + " > ? ORDER BY " + pollingColumn);
             statement = connection.prepareStatement(selectQuery);
             statement.setString(1, lastReadPollingColumnValue);
             resultSet = statement.executeQuery();

@@ -27,6 +27,11 @@
         <classes>
             <class name="io.siddhi.extension.io.cdc.source.TestCaseOfCDCSourceValidation"/>
             <class name="io.siddhi.extension.io.cdc.source.TestCaseOfCDCPollingMode"/>
+            <class name="io.siddhi.extension.io.cdc.util.CDCSourceUtilTest"/>
+            <class name="io.siddhi.extension.io.cdc.util.CDCPollingUtilTest"/>
+            <class name="io.siddhi.extension.io.cdc.util.QueryConfigurationTest"/>
+            <class name="io.siddhi.extension.io.cdc.util.DebeziumConfigContractTest"/>
+            <class name="io.siddhi.extension.io.cdc.source.listening.RdbmsChangeDataCaptureTest"/>
             <class name="io.siddhi.extension.io.cdc.source.listening.MongoChangeDataCaptureTest"/>
         </classes>
     </test>
