@@ -61,7 +61,6 @@ public class CDCPoller implements Runnable {
     private String poolPropertyString;
     private String jndiResource;
     private boolean isLocalDataSource = false;
-    private String appName;
     private String streamName;
 
     private PollingStrategy pollingStrategy;
@@ -81,7 +80,6 @@ public class CDCPoller implements Runnable {
         this.poolPropertyString = poolPropertyString;
         this.datasourceName = datasourceName;
         this.jndiResource = jndiResource;
-        this.appName = appName;
         this.streamName = sourceEventListener.getStreamDefinition().getId();
         this.cronConfiguration = cronConfiguration;
 

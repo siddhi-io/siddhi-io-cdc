@@ -51,11 +51,14 @@ public class RdbmsChangeDataCapture extends ChangeDataCapture {
         Map<String, Object> detailsMap = new HashMap<>();
         List<Object> transportProperties = new ArrayList();
         Struct record = (Struct) connectRecord.value();
+        if (record == null) {
+            return detailsMap;
+        }
         //get the change data object's operation.
         String op;
         try {
             op = (String) record.get(CDCSourceConstants.CONNECT_RECORD_OPERATION);
-        } catch (NullPointerException | DataException ex) {
+        } catch (DataException ex) {
             return detailsMap;
         }
         //match the change data's operation with user specifying operation and proceed.
