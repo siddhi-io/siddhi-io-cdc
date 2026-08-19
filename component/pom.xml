@@ -82,6 +82,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>io.siddhi.extension.map.keyvalue</groupId>
             <artifactId>siddhi-map-keyvalue</artifactId>
             <scope>test</scope>
@@ -632,7 +637,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.1</version>
+                <version>3.6.2</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -656,9 +661,6 @@
                                     <include>com.fasterxml.jackson.core:jackson-annotations</include>
                                     <include>com.fasterxml.jackson.datatype:jackson-datatype-jdk8</include>
                                     <include>com.fasterxml.jackson.datatype:jackson-datatype-jsr310</include>
-                                    <include>com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider</include>
-                                    <include>com.fasterxml.jackson.jaxrs:jackson-jaxrs-base</include>
-                                    <include>com.fasterxml.jackson.module:jackson-module-jaxb-annotations</include>
                                     <include>com.mysql:mysql-connector-j</include>
                                 </includes>
                             </artifactSet>

@@ -211,6 +211,12 @@
                 <version>${org.testng.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-slf4j-impl</artifactId>
+                <version>${log4j.version}</version>
+                <scope>test</scope>
+            </dependency>
 
             <!--     Kafka client dependencies       -->
             <dependency>
@@ -246,6 +252,20 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            <!-- Managed only to align the version. connect-file arrives transitively through
+                 debezium-embedded, which pins it to a 3.x release; without this the classpath ends up
+                 with a mixed Kafka Connect 4.x / 3.x set. -->
+            <dependency>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>connect-file</artifactId>
+                <version>${kafka.connect.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>log4j</groupId>
+                        <artifactId>log4j</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
             <dependency>
                 <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>
@@ -264,6 +284,13 @@
                     <exclusion>
                         <groupId>log4j</groupId>
                         <artifactId>log4j</artifactId>
+                    </exclusion>
+                    <!-- Binds SLF4J to log4j 1.x. Its implementation (reload4j) used to reach this build
+                         transitively through Kafka Connect 3.x and is absent from 4.x, leaving the binding
+                         pointing at classes that no longer exist. -->
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -345,7 +372,7 @@
         <siddhi-cdc-postgres.port>5433</siddhi-cdc-postgres.port>
         <docker.container.siddhi-cdc-postgres.ip>0.0.0.0</docker.container.siddhi-cdc-postgres.ip>
         <oracle.jdbc.Driver.version>12.2.0.1</oracle.jdbc.Driver.version>
-        <kafka.connect.version>3.7.1</kafka.connect.version>
+        <kafka.connect.version>4.3.1</kafka.connect.version>
         <mongodb.connector.version>3.4.0</mongodb.connector.version>
         <json.version>20190722</json.version>
         <carbon.analytics.version>3.0.57</carbon.analytics.version>
