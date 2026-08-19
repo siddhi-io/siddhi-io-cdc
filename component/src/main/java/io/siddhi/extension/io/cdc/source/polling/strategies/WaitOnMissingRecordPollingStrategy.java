@@ -87,7 +87,10 @@ public class WaitOnMissingRecordPollingStrategy extends PollingStrategy {
                 }
             }
 
-            selectQuery = getSelectQuery("*", "WHERE " + pollingColumn + " > ?");
+            // Order by the polling column: the gap detection below compares each row against the previous one,
+            // so it is only correct on an ascending stream. Without it, a row physically stored before a lower
+            // valued one drags lastReadPollingColumnValue backwards and the higher row is emitted twice.
+            selectQuery = getSelectQuery("*", "WHERE " + pollingColumn + " > ? ORDER BY " + pollingColumn);
             statement = connection.prepareStatement(selectQuery);
 
             while (true) {

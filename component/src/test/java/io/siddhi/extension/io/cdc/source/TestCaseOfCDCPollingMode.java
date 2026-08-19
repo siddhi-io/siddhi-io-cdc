@@ -36,7 +36,11 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -349,10 +353,12 @@ public class TestCaseOfCDCPollingMode {
                 rdbmsStoreDefinition + rdbmsQuery);
         siddhiAppRuntime.addCallback("query2", rdbmsQueryCallback);
 
+        List<Object> receivedIds = Collections.synchronizedList(new ArrayList<>());
         StreamCallback outputStreamCallback = new StreamCallback() {
             @Override
             public void receive(Event[] events) {
                 for (Event event : events) {
+                    receivedIds.add(event.getData(0));
                     eventCount.getAndIncrement();
                     log.info(eventCount + ". " + event);
                 }
@@ -380,7 +386,12 @@ public class TestCaseOfCDCPollingMode {
 
         SiddhiTestHelper.waitForEvents(waitTime, 4, eventCount, timeout);
 
-        // Assert received event count.
+        // Let a few more polling intervals elapse. Asserting immediately races the next poll, which would hide a
+        // record being emitted twice.
+        Thread.sleep(pollingInterval * 3000L);
+
+        // Assert the records arrive exactly once each, in ascending order of the polling column.
+        Assert.assertEquals(receivedIds, Arrays.asList(1, 2, 3, 4));
         Assert.assertEquals(eventCount.get(), 4);
 
         siddhiAppRuntime.shutdown();
