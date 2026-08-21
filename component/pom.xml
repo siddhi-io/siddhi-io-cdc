@@ -87,13 +87,15 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.siddhi.extension.map.keyvalue</groupId>
-            <artifactId>siddhi-map-keyvalue</artifactId>
+            <groupId>io.debezium</groupId>
+            <artifactId>debezium-embedded</artifactId>
+            <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.shyiko</groupId>
-            <artifactId>mysql-binlog-connector-java</artifactId>
+            <groupId>io.siddhi.extension.map.keyvalue</groupId>
+            <artifactId>siddhi-map-keyvalue</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.siddhi.extension.store.rdbms</groupId>
@@ -653,14 +655,18 @@
                                     <include>org.apache.kafka:connect-json</include>
                                     <include>org.apache.kafka:connect-runtime</include>
                                     <include>org.apache.kafka:kafka-clients</include>
-                                    <include>com.github.shyiko:mysql-binlog-connector-java</include>
+                                    <include>org.apache.maven:maven-artifact</include>
+                                    <include>org.codehaus.plexus:plexus-utils</include>
                                     <include>org.antlr:antlr4-runtime</include>
                                     <include>org.json:json</include>
+                                    <include>com.datadoghq:sketches-java</include>
+                                    <include>com.github.luben:zstd-jni</include>
                                     <include>com.fasterxml.jackson.core:jackson-core</include>
                                     <include>com.fasterxml.jackson.core:jackson-databind</include>
                                     <include>com.fasterxml.jackson.core:jackson-annotations</include>
                                     <include>com.fasterxml.jackson.datatype:jackson-datatype-jdk8</include>
                                     <include>com.fasterxml.jackson.datatype:jackson-datatype-jsr310</include>
+                                    <include>com.fasterxml.jackson.module:jackson-module-blackbird</include>
                                     <include>com.mysql:mysql-connector-j</include>
                                 </includes>
                             </artifactSet>
@@ -686,11 +692,15 @@
                                 </filter>
                                 <filter>
                                     <artifact>*:*</artifact>
+                                    <!-- META-INF/MANIFEST.MF is deliberately NOT excluded here. This filter
+                                         matches the project artifact too, so excluding it discards the OSGi
+                                         manifest maven-bundle-plugin generates, and the result is rejected as
+                                         an invalid bundle. Shade keeps the main artifact's manifest and drops
+                                         dependency manifests on its own. -->
                                     <excludes>
                                         <exclude>META-INF/*.SF</exclude>
                                         <exclude>META-INF/*.DSA</exclude>
                                         <exclude>META-INF/*.RSA</exclude>
-                                        <exclude>META-INF/MANIFEST.MF</exclude>
                                         <exclude>META-INF/versions/**</exclude>
                                         <exclude>org/slf4j/impl/**</exclude>
                                         <exclude>**/StaticLoggerBinder.class</exclude>

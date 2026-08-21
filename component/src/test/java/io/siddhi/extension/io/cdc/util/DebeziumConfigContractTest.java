@@ -26,10 +26,12 @@ import io.debezium.connector.postgresql.PostgresConnectorConfig;
 import io.debezium.connector.sqlserver.SqlServerConnectorConfig;
 import io.debezium.data.Envelope;
 import io.debezium.embedded.EmbeddedEngineConfig;
+import io.debezium.embedded.async.AsyncEngineConfig;
 import io.debezium.relational.HistorizedRelationalDatabaseConnectorConfig;
 import io.debezium.relational.RelationalDatabaseConnectorConfig;
 import io.debezium.storage.file.history.FileSchemaHistory;
 import io.siddhi.extension.io.cdc.source.listening.WrongConfigurationException;
+import org.apache.kafka.connect.runtime.WorkerConfig;
 import org.apache.kafka.connect.source.SourceConnector;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -68,7 +70,10 @@ public class DebeziumConfigContractTest {
             CDCSourceConstants.OFFSET_STORAGE,
             CDCSourceConstants.DATABASE_HISTORY,
             CDCSourceConstants.DATABASE_HISTORY_FILE_NAME,
-            CDCSourceConstants.CDC_SOURCE_OBJECT));
+            CDCSourceConstants.CDC_SOURCE_OBJECT,
+            CDCSourceConstants.BOOTSTRAP_SERVERS,
+            CDCSourceConstants.RECORD_PROCESSING_ORDER,
+            CDCSourceConstants.RECORD_PROCESSING_THREADS));
 
     @Test
     public void connectorLevelKeysMatchDebeziumConstants() {
@@ -102,6 +107,23 @@ public class DebeziumConfigContractTest {
                 HistorizedRelationalDatabaseConnectorConfig.SCHEMA_HISTORY.name());
         Assert.assertEquals(CDCSourceConstants.DATABASE_HISTORY_FILE_NAME, FileSchemaHistory.FILE_PATH.name());
         Assert.assertEquals(CDCSourceConstants.DATABASE_HISTORY_FILEBASE_HISTORY, FileSchemaHistory.class.getName());
+        Assert.assertEquals(CDCSourceConstants.BOOTSTRAP_SERVERS, WorkerConfig.BOOTSTRAP_SERVERS_CONFIG);
+        Assert.assertEquals(CDCSourceConstants.RECORD_PROCESSING_ORDER,
+                AsyncEngineConfig.RECORD_PROCESSING_ORDER.name());
+        Assert.assertEquals(CDCSourceConstants.RECORD_PROCESSING_THREADS,
+                AsyncEngineConfig.RECORD_PROCESSING_THREADS.name());
+    }
+
+    /**
+     * The async engine is the only engine from Debezium 3.x on, and {@code handleEvent} depends on being called
+     * serially and in order. ORDERED is Debezium's own default, so what we emit is a pin rather than a change; this
+     * asserts that is still true, because a change of that default would silently make delivery concurrent.
+     */
+    @Test
+    public void orderedIsStillTheRecordProcessingDefault() {
+        Assert.assertEquals(AsyncEngineConfig.RECORD_PROCESSING_ORDER.defaultValueAsString(),
+                CDCSourceConstants.RECORD_PROCESSING_ORDER_ORDERED,
+                "Debezium changed the default record processing order, so pinning it is now a behaviour change");
     }
 
     @Test
