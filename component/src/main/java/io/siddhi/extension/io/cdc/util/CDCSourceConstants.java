@@ -48,6 +48,12 @@ public class CDCSourceConstants {
     public static final String DATABASE_USER = "database.user";
     public static final String DATABASE_PASSWORD = "database.password";
     public static final String OFFSET_STORAGE = "offset.storage";
+    public static final String BOOTSTRAP_SERVERS = "bootstrap.servers";
+    public static final String BOOTSTRAP_SERVERS_PLACEHOLDER = "localhost:9092";
+    public static final String RECORD_PROCESSING_ORDER = "record.processing.order";
+    public static final String RECORD_PROCESSING_ORDER_ORDERED = "ORDERED";
+    public static final String RECORD_PROCESSING_THREADS = "record.processing.threads";
+    public static final String RECORD_PROCESSING_THREADS_SINGLE = "1";
     public static final String CDC_SOURCE_OBJECT = "cdc.source.object";
     public static final String DATABASE_HISTORY = "schema.history.internal";
     public static final String MYSQL_CONNECTOR_CLASS = "io.debezium.connector.mysql.MySqlConnector";
