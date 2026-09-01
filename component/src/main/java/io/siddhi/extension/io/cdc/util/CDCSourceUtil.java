@@ -243,6 +243,19 @@ public class CDCSourceUtil {
             configMap.put(CDCSourceConstants.OFFSET_STORAGE, InMemoryOffsetBackingStore.class.getName());
             configMap.put(CDCSourceConstants.CDC_SOURCE_OBJECT, cdcSourceHashCode);
 
+            // Kafka Connect 4.x removed the default for bootstrap.servers, so WorkerConfig fails to
+            // build without it. The embedded engine never talks to a broker, which makes the value
+            // inert, but it has to be present.
+            configMap.put(CDCSourceConstants.BOOTSTRAP_SERVERS, CDCSourceConstants.BOOTSTRAP_SERVERS_PLACEHOLDER);
+
+            // Debezium 3.x delivers records through the async engine. These are its defaults, pinned
+            // explicitly because handleEvent is not thread safe and relies on being called serially
+            // and in order.
+            configMap.put(CDCSourceConstants.RECORD_PROCESSING_ORDER,
+                    CDCSourceConstants.RECORD_PROCESSING_ORDER_ORDERED);
+            configMap.put(CDCSourceConstants.RECORD_PROCESSING_THREADS,
+                    CDCSourceConstants.RECORD_PROCESSING_THREADS_SINGLE);
+
             //set history file path.
             configMap.put(CDCSourceConstants.DATABASE_HISTORY, CDCSourceConstants.DATABASE_HISTORY_FILEBASE_HISTORY);
             configMap.put(CDCSourceConstants.DATABASE_HISTORY_FILE_NAME,

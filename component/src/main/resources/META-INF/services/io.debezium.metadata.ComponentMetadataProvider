@@ -1,0 +1,7 @@
+io.debezium.transforms.metadata.TransformsMetadataProvider
+io.debezium.converters.metadata.ConverterMetadataProvider
+io.debezium.connector.mongodb.metadata.MongoDbMetadataProvider
+io.debezium.connector.mysql.metadata.MySqlMetadataProvider
+io.debezium.connector.oracle.metadata.OracleMetadataProvider
+io.debezium.connector.postgresql.metadata.PostgresMetadataProvider
+io.debezium.connector.sqlserver.metadata.SqlServerMetadataProvider

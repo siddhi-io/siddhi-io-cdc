@@ -59,6 +59,10 @@ public class CDCSourceUtilTest {
         expected.put(CDCSourceConstants.DATABASE_SERVER_NAME, expectedTopicPrefix);
         expected.put(CDCSourceConstants.OFFSET_STORAGE, InMemoryOffsetBackingStore.class.getName());
         expected.put(CDCSourceConstants.CDC_SOURCE_OBJECT, SOURCE_HASH_CODE);
+        expected.put(CDCSourceConstants.BOOTSTRAP_SERVERS, CDCSourceConstants.BOOTSTRAP_SERVERS_PLACEHOLDER);
+        expected.put(CDCSourceConstants.RECORD_PROCESSING_ORDER, CDCSourceConstants.RECORD_PROCESSING_ORDER_ORDERED);
+        expected.put(CDCSourceConstants.RECORD_PROCESSING_THREADS,
+                CDCSourceConstants.RECORD_PROCESSING_THREADS_SINGLE);
         expected.put(CDCSourceConstants.DATABASE_HISTORY, CDCSourceConstants.DATABASE_HISTORY_FILEBASE_HISTORY);
         expected.put(CDCSourceConstants.DATABASE_HISTORY_FILE_NAME, HISTORY_FILE_DIRECTORY + STREAM_NAME + ".dat");
         expected.put(CDCSourceConstants.CONNECTOR_NAME, SIDDHI_APP_NAME + STREAM_NAME);

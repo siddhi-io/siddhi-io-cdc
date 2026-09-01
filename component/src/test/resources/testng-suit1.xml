@@ -33,6 +33,7 @@
             <class name="io.siddhi.extension.io.cdc.util.DebeziumConfigContractTest"/>
             <class name="io.siddhi.extension.io.cdc.source.listening.RdbmsChangeDataCaptureTest"/>
             <class name="io.siddhi.extension.io.cdc.source.listening.MongoChangeDataCaptureTest"/>
+            <class name="io.siddhi.extension.io.cdc.source.listening.DebeziumEngineCompatibilityTest"/>
         </classes>
     </test>
 </suite>

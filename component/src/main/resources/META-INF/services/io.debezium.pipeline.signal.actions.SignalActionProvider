@@ -1,1 +1,3 @@
 io.debezium.pipeline.signal.actions.StandardActionProvider
+io.debezium.connector.mysql.signal.MySqlSignalActionProvider
+io.debezium.connector.oracle.spi.OracleActionProvider

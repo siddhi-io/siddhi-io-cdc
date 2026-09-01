@@ -9,3 +9,5 @@ io.debezium.connector.sqlserver.snapshot.lock.NoSnapshotLock
 io.debezium.connector.sqlserver.snapshot.lock.ExclusiveSnapshotLock
 io.debezium.connector.oracle.snapshot.lock.NoSnapshotLock
 io.debezium.connector.oracle.snapshot.lock.SharedSnapshotLock
+io.debezium.connector.binlog.snapshot.lock.MinimalAtLeastOnceSnapshotLock
+io.debezium.connector.mysql.snapshot.lock.MinimalPerconaNoTableLocksSnapshotLock
