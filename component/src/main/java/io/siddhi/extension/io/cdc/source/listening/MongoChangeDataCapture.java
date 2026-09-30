@@ -161,6 +161,12 @@ public class MongoChangeDataCapture extends ChangeDataCapture {
                 }
                 return idObject.toString();
             }
+            if (parsedId instanceof BigDecimal) {
+                return ((BigDecimal) parsedId).doubleValue();
+            }
+            if (parsedId instanceof BigInteger) {
+                return parsedId.toString();
+            }
             return parsedId;
         } catch (JSONException ex) {
             return documentId;

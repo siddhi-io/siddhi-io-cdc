@@ -253,6 +253,19 @@ public class MongoChangeDataCaptureTest {
     }
 
     @Test
+    public void deleteEventKeepsDecimalKeysAsDouble() {
+        Struct key = new Struct(KEY_SCHEMA);
+        key.put(CDCSourceConstants.MONGO_COLLECTION_ID, "2.5");
+        SourceRecord sourceRecord = new SourceRecord(Collections.emptyMap(), Collections.emptyMap(), TOPIC,
+                KEY_SCHEMA, key, VALUE_SCHEMA, value(CDCSourceConstants.CONNECT_RECORD_DELETE_OPERATION));
+
+        Map<String, Object> detailsMap = capture(CDCSourceConstants.DELETE)
+                .createMap(sourceRecord, CDCSourceConstants.DELETE);
+
+        Assert.assertEquals(detailsMap.get(CDCSourceConstants.MONGO_COLLECTION_ID), 2.5);
+    }
+
+    @Test
     public void eventsNotMatchingTheConfiguredOperationAreIgnored() {
         Struct value = value(CDCSourceConstants.CONNECT_RECORD_UPDATE_OPERATION);
         value.put(MongoDbFieldName.UPDATE_DESCRIPTION, updateDescription("{\"amount\": 500.0}"));
