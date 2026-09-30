@@ -120,6 +120,31 @@ public class MongoChangeDataCaptureTest {
         Assert.assertEquals(detailsMap.get(CDCSourceConstants.MONGO_COLLECTION_ID), OBJECT_ID);
     }
 
+    @Test
+    public void insertEventKeepsDecimalFieldsAsDouble() {
+        Struct value = value(CDCSourceConstants.CONNECT_RECORD_INSERT_OPERATION);
+        value.put(Envelope.FieldName.AFTER,
+                "{\"_id\": {\"$oid\": \"" + OBJECT_ID + "\"}, \"price\": 2.5, \"weight\": 0.125}");
+
+        Map<String, Object> detailsMap = capture(CDCSourceConstants.INSERT)
+                .createMap(record(value), CDCSourceConstants.INSERT);
+
+        Assert.assertEquals(detailsMap.get("price"), 2.5);
+        Assert.assertEquals(detailsMap.get("weight"), 0.125);
+    }
+
+    @Test
+    public void insertEventKeepsOversizedIntegersAsString() {
+        Struct value = value(CDCSourceConstants.CONNECT_RECORD_INSERT_OPERATION);
+        value.put(Envelope.FieldName.AFTER,
+                "{\"_id\": {\"$oid\": \"" + OBJECT_ID + "\"}, \"huge\": 123456789012345678901234}");
+
+        Map<String, Object> detailsMap = capture(CDCSourceConstants.INSERT)
+                .createMap(record(value), CDCSourceConstants.INSERT);
+
+        Assert.assertEquals(detailsMap.get("huge"), "123456789012345678901234");
+    }
+
     /**
      * Debezium 2.x reports updates through {@code updateDescription.updatedFields} rather than the 1.x {@code patch}
      * document. Only the changed fields are emitted, preserving the pre-upgrade contract.

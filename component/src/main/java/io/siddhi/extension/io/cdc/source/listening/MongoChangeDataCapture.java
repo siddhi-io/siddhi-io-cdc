@@ -30,6 +30,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -187,6 +189,10 @@ public class MongoChangeDataCapture extends ChangeDataCapture {
                 detailsMap.put(key, jsonObj.getDouble(key));
             } else if (jsonObj.get(key) instanceof Double) {
                 detailsMap.put(key, jsonObj.getDouble(key));
+            } else if (jsonObj.get(key) instanceof BigDecimal) {
+                detailsMap.put(key, ((BigDecimal) jsonObj.get(key)).doubleValue());
+            } else if (jsonObj.get(key) instanceof BigInteger) {
+                detailsMap.put(key, jsonObj.get(key).toString());
             } else if (jsonObj.get(key) instanceof String) {
                 detailsMap.put(key, jsonObj.getString(key));
             } else if (jsonObj.get(key) instanceof JSONObject) {
