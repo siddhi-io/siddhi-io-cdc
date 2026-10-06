@@ -679,6 +679,10 @@
                                     <pattern>com.mysql</pattern>
                                     <shadedPattern>io.siddhi.cdc.shaded.mysql</shadedPattern>
                                 </relocation>
+                                <relocation>
+                                    <pattern>org.apache.kafka</pattern>
+                                    <shadedPattern>io.siddhi.cdc.shaded.kafka</shadedPattern>
+                                </relocation>
                             </relocations>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
