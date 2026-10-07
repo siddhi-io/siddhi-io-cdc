@@ -717,10 +717,15 @@ public class CDCSource extends Source<CDCSource.CdcState> {
             cdcPoller.stop();
         } else if (mode.equals(CDCSourceConstants.MODE_LISTENING)) {
             if (engine != null) {
+                DebeziumEngine<ChangeEvent<SourceRecord, SourceRecord>> engineToClose = engine;
+                engine = null;
                 try {
-                    engine.close();
+                    engineToClose.close();
                 } catch (java.io.IOException e) {
                     log.error("Error closing the CDC engine.", e);
+                } catch (IllegalStateException e) {
+                    log.warn("Could not close the CDC engine of Siddhi app '{}': {}", siddhiAppName,
+                            e.getMessage());
                 }
             }
         }
